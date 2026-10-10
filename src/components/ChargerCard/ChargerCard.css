@@ -40,6 +40,17 @@
   color: var(--color-text-3);
   margin-top: 2px;
 }
+.cc-address {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--color-text-4);
+  margin-top: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
 /* Port bar */
 .cc-ports { display: flex; flex-direction: column; gap: 7px; }
@@ -80,8 +91,18 @@
 .cc-bottom {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 10px;
+  margin-top: 2px;
 }
+
+.cc-bottom-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
 .speed-badge {
   font-size: 11px;
   font-weight: 500;
@@ -94,6 +115,15 @@
 .speed-fast { border-color: #6366F1; color: var(--color-primary); background: var(--color-primary-pale); }
 .speed-mid  { border-color: #D97706; color: var(--color-busy);    background: var(--color-busy-bg); }
 
+.cc-tariff {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-2);
+  background: var(--color-surface-2);
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
 .cc-wait {
   display: flex;
   align-items: center;
@@ -104,12 +134,37 @@
 }
 .cc-wait-off { color: var(--color-offline); }
 
-.cc-arrow {
+.cc-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   margin-left: auto;
-  color: var(--color-text-4);
-  transition: color var(--fast), transform var(--fast);
 }
-.charger-card:hover .cc-arrow {
-  color: var(--color-primary);
-  transform: translateX(2px);
+
+.cc-action-report-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-2);
+  color: var(--color-text-3);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.cc-action-report-btn:hover {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #dc2626;
+}
+
+.cc-reserve-btn {
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }

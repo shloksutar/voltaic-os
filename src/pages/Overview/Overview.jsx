@@ -1,53 +1,94 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { Zap, Activity, CheckCircle, AlertCircle, WifiOff, TrendingUp, Globe, Lock, ArrowRight } from 'lucide-react';
+import {
+  Zap,
+  Activity,
+  CheckCircle,
+  WifiOff,
+  TrendingUp,
+  Globe,
+  Lock,
+  ArrowRight,
+  ShieldCheck,
+} from 'lucide-react';
 import { getNetworkStats, CHARGERS } from '../../data/chargers';
+import { stationsApi } from '../../api/client';
 import StatCard from '../../components/StatCard/StatCard';
+import ReservationModal from '../../components/ReservationModal/ReservationModal';
 import './Overview.css';
 
 const FEATURES = [
   {
     icon: Activity,
     title: 'Real-Time Telemetry',
-    desc: 'Sub-second hardware status streaming via OCPI integration across all connected Charge Point Operators.',
+    desc: 'Sub-second hardware status streaming via OCPI 2.2.1 across all connected Charge Point Operators.',
   },
   {
-    icon: TrendingUp,
-    title: 'Predictive Queue ML',
-    desc: 'Machine learning models trained on historical usage and live GPS trajectories forecast arrival queues 2 hours ahead.',
+    icon: Lock,
+    title: 'Guaranteed Slot Reservation',
+    desc: 'Reserve charging ports and connectors directly in advance. Real-time hold with digital QR passes.',
   },
   {
     icon: Globe,
     title: 'Multi-Operator Bridge',
-    desc: 'A unified aggregation layer syncing 50+ CPO APIs into a single normalized data schema in real time.',
+    desc: 'Unified aggregation layer normalizing Tata Power, ChargeZone, Statiq, Ather Grid, BPCL, and HPCL into one schema.',
   },
   {
-    icon: Lock,
-    title: 'Slot Reservation',
-    desc: 'Reserve charging ports directly through the app before your trip. Guaranteed hardware availability on arrival.',
+    icon: TrendingUp,
+    title: 'Predictive Queue Modeling',
+    desc: 'Historical demand models and live arrival trajectories forecast queues and wait times hours in advance.',
   },
 ];
 
 const HOW_IT_WORKS = [
-  { step: '01', title: 'Connect CPOs', desc: 'Hardware operators connect via OCPI REST endpoints, WebSocket streams, or our universal SDK.' },
-  { step: '02', title: 'Aggregate & Normalize', desc: 'Our cloud layer ingests and normalizes all telemetry — availability, power, health — into a unified schema.' },
-  { step: '03', title: 'Predict & Alert', desc: 'ML models compute queue forecasts. ICE parking violations trigger automated camera alerts.' },
-  { step: '04', title: 'Driver-Facing API', desc: 'Drivers query live status, get turn-by-turn routing to available ports, and reserve slots via the app.' },
+  {
+    step: '01',
+    title: 'Connect CPOs',
+    desc: 'Hardware operators connect via OCPI REST endpoints and real-time WebSocket telemetry streams.',
+  },
+  {
+    step: '02',
+    title: 'Aggregate & Normalize',
+    desc: 'Our backend layer normalizes telemetry — bays, power kW, health, pricing — into a unified real-time database.',
+  },
+  {
+    step: '03',
+    title: 'Reserve & Dispatch',
+    desc: 'Drivers reserve charging bays in advance with Google, Email, or Phone auth, securing guaranteed charging slots.',
+  },
+  {
+    step: '04',
+    title: 'Deterministic Charging',
+    desc: 'Arrive at the charging hub, verify via digital pass or camera, and begin high-speed charging without queues.',
+  },
 ];
 
 export default function Overview() {
-  const [stats, setStats] = useState(getNetworkStats());
+  const [stations, setStations] = useState(CHARGERS);
+  const [stats, setStats] = useState(getNetworkStats(CHARGERS));
   const [lastUpdate, setLastUpdate] = useState(new Date());
+  const [selectedForReservation, setSelectedForReservation] = useState(null);
 
-  useEffect(() => {
-    const id = setInterval(() => {
-      setStats(getNetworkStats());
-      setLastUpdate(new Date());
-    }, 5000);
-    return () => clearInterval(id);
+  const syncData = useCallback(async () => {
+    try {
+      const res = await stationsApi.getAll();
+      if (res?.stations) {
+        setStations(res.stations);
+        setStats(getNetworkStats(res.stations));
+        setLastUpdate(new Date());
+      }
+    } catch {
+      // Fallback
+    }
   }, []);
 
-  const recentChargers = CHARGERS.slice(0, 5);
+  useEffect(() => {
+    syncData();
+    const id = setInterval(syncData, 10000);
+    return () => clearInterval(id);
+  }, [syncData]);
+
+  const recentChargers = stations.slice(0, 5);
 
   return (
     <div className="overview page-enter">
@@ -55,7 +96,7 @@ export default function Overview() {
       <section className="overview-hero">
         <div className="hero-eyebrow">
           <span className="dot dot-available dot-pulse" />
-          Live Network · {stats.stations} stations online
+          Live Network · {stats.stations} Verified Hubs Synced
         </div>
         <h1 className="hero-title font-display">
           EV Charging Infrastructure,<br />
@@ -63,34 +104,61 @@ export default function Overview() {
         </h1>
         <p className="hero-desc">
           VoltaicOS bridges fragmented Charge Point Operators into a single real-time intelligence layer —
-          eliminating range anxiety with deterministic journey planning.
+          eliminating range anxiety with instant slot reservations and deterministic journey planning.
         </p>
         <div className="hero-cta">
           <Link to="/map" className="btn btn-primary">
             Open Live Map <ArrowRight size={15} />
           </Link>
           <Link to="/chargers" className="btn btn-ghost">
-            Browse Chargers
+            Browse All Chargers
           </Link>
         </div>
         <div className="hero-update">
-          Last sync: {lastUpdate.toLocaleTimeString()}
+          Last telemetry sync: {lastUpdate.toLocaleTimeString()}
         </div>
       </section>
 
       {/* Stats */}
       <section className="overview-stats">
-        <StatCard icon={Zap}         label="Total Ports"       value={stats.total}     sub="Across all operators"       accent="primary"   trend={4} />
-        <StatCard icon={CheckCircle} label="Available Now"     value={stats.available} sub={`${Math.round((stats.available/stats.total)*100)}% of capacity`} accent="available" trend={12} />
-        <StatCard icon={Activity}    label="In Use"            value={stats.busy}      sub="Active sessions"            accent="busy"      />
-        <StatCard icon={WifiOff}     label="Offline / Maint."  value={stats.offline}   sub="Under maintenance"          accent="offline"   trend={-5} />
+        <StatCard
+          icon={Zap}
+          label="Total Ports"
+          value={stats.total}
+          sub="Across all connected operators"
+          accent="primary"
+          trend={4}
+        />
+        <StatCard
+          icon={CheckCircle}
+          label="Available Now"
+          value={stats.available}
+          sub={`${Math.round((stats.available / (stats.total || 1)) * 100)}% of capacity`}
+          accent="available"
+          trend={12}
+        />
+        <StatCard
+          icon={Activity}
+          label="In Use / Reserved"
+          value={stats.busy}
+          sub="Active charging sessions"
+          accent="busy"
+        />
+        <StatCard
+          icon={WifiOff}
+          label="Offline / Maint."
+          value={stats.offline}
+          sub="Under maintenance"
+          accent="offline"
+          trend={-5}
+        />
       </section>
 
       {/* Features */}
       <section className="overview-section">
         <div className="section-header">
           <h2 className="section-title font-display">Platform Capabilities</h2>
-          <p className="section-sub">Built for scale across every city, every operator, every vehicle class.</p>
+          <p className="section-sub">Built for scale across every metro, operator, and EV model.</p>
         </div>
         <div className="features-grid">
           {FEATURES.map((f) => (
@@ -109,7 +177,7 @@ export default function Overview() {
       <section className="overview-section">
         <div className="section-header">
           <h2 className="section-title font-display">How It Works</h2>
-          <p className="section-sub">Four steps from fragmented hardware to deterministic routing.</p>
+          <p className="section-sub">Four steps from fragmented hardware to guaranteed charging slots.</p>
         </div>
         <div className="steps-grid">
           {HOW_IT_WORKS.map((s, i) => (
@@ -126,62 +194,57 @@ export default function Overview() {
       {/* Recent activity */}
       <section className="overview-section">
         <div className="section-header">
-          <h2 className="section-title font-display">Recent Station Activity</h2>
-          <Link to="/chargers" className="section-link">View all <ArrowRight size={13} /></Link>
+          <h2 className="section-title font-display">Real-Time Hub Telemetry</h2>
+          <Link to="/chargers" className="section-link">
+            View all {stations.length} stations <ArrowRight size={13} />
+          </Link>
         </div>
         <div className="recent-list card">
           {recentChargers.map((c, i) => (
-            <div key={c.id} className={`recent-row ${i < recentChargers.length - 1 ? 'recent-row-border' : ''}`}>
+            <div
+              key={c.id}
+              className={`recent-row ${i < recentChargers.length - 1 ? 'recent-row-border' : ''}`}
+            >
               <div className="recent-info">
                 <div className="recent-name">{c.name}</div>
-                <div className="recent-city">{c.city} · {c.operator}</div>
+                <div className="recent-city">
+                  {c.city} · {c.operator} {c.tariffPerKwh ? `· ₹${c.tariffPerKwh}/kWh` : ''}
+                </div>
               </div>
               <div className="recent-ports">
-                <span className="rp-avail">{c.available} avail</span>
+                <span className="rp-avail">{c.available} available</span>
                 <span className="rp-sep">·</span>
-                <span className="rp-busy">{c.busy} busy</span>
+                <span className="rp-busy">{c.busy} in use</span>
               </div>
-              <span className={`badge badge-${c.status}`}>
-                <span className={`dot dot-${c.status}`} />
-                {c.status === 'available' ? 'Available' : c.status === 'busy' ? 'Busy' : 'Offline'}
-              </span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span className={`badge badge-${c.status}`}>
+                  <span className={`dot dot-${c.status}`} />
+                  {c.status === 'available' ? 'Available' : c.status === 'busy' ? 'Busy' : 'Offline'}
+                </span>
+                {c.available > 0 && c.status !== 'offline' && (
+                  <button
+                    className="btn btn-primary btn-sm"
+                    style={{ fontSize: '11px', padding: '4px 10px' }}
+                    onClick={() => setSelectedForReservation(c)}
+                  >
+                    <Zap size={11} /> Reserve
+                  </button>
+                )}
+              </div>
             </div>
           ))}
         </div>
       </section>
 
-      {/* Pricing */}
-      <section className="overview-section" id="pricing">
-        <div className="section-header">
-          <h2 className="section-title font-display">Pricing</h2>
-          <p className="section-sub">Transparent plans for operators, fleets, and enterprise networks.</p>
-        </div>
-        <div className="pricing-grid">
-          {[
-            { name: 'Starter', price: '₹0', period: 'Free forever', desc: 'For individual EV drivers. Access live map, charger status, and basic routing.', features: ['Live charger status', 'Map navigation', '5 station bookmarks', 'Basic notifications'], cta: 'Get Started', highlight: false },
-            { name: 'Fleet',   price: '₹2,499', period: '/month', desc: 'For fleet managers overseeing multiple EVs. Real-time queue predictions and slot reservation.', features: ['Everything in Starter', 'Queue predictions (2h horizon)', 'Slot reservation', 'Fleet dashboard', 'API access (5k calls/day)'], cta: 'Start Free Trial', highlight: true },
-            { name: 'Enterprise', price: 'Custom', period: 'Contact us', desc: 'For CPOs and municipalities. Full OCPI integration, white-label SDK, and SLA guarantees.', features: ['Everything in Fleet', 'OCPI integration', 'Unlimited API calls', 'White-label SDK', 'ICE detection alerts', 'Dedicated SLA'], cta: 'Contact Sales', highlight: false },
-          ].map((plan) => (
-            <div key={plan.name} className={`pricing-card card ${plan.highlight ? 'pricing-card--highlight' : ''}`}>
-              {plan.highlight && <div className="pricing-popular">Most Popular</div>}
-              <div className="pricing-name">{plan.name}</div>
-              <div className="pricing-price">
-                {plan.price}
-                <span className="pricing-period">{plan.period}</span>
-              </div>
-              <p className="pricing-desc">{plan.desc}</p>
-              <ul className="pricing-features">
-                {plan.features.map(f => (
-                  <li key={f}><CheckCircle size={14} className="pf-check" />{f}</li>
-                ))}
-              </ul>
-              <button className={`btn ${plan.highlight ? 'btn-primary' : 'btn-ghost'} pricing-btn`}>
-                {plan.cta}
-              </button>
-            </div>
-          ))}
-        </div>
-      </section>
+      {/* Reservation Modal */}
+      {selectedForReservation && (
+        <ReservationModal
+          station={selectedForReservation}
+          isOpen={!!selectedForReservation}
+          onClose={() => setSelectedForReservation(null)}
+          onBookingComplete={() => syncData()}
+        />
+      )}
 
       {/* Footer */}
       <footer className="overview-footer">

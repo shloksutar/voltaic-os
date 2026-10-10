@@ -1,0 +1,1431 @@
+{
+  "stations": [
+    {
+      "id": "MUM-EZ-01",
+      "name": "Tata Power EZ Charge — Jio World Convention Centre",
+      "city": "Mumbai",
+      "address": "G Block BKC, Bandra Kurla Complex, Bandra East, Mumbai, Maharashtra 400098",
+      "lat": 19.0633,
+      "lng": 72.8687,
+      "operator": "Tata Power EV",
+      "ports": 8,
+      "available": 5,
+      "busy": 3,
+      "offline": 0,
+      "speed": 150,
+      "status": "available",
+      "waitMin": 0,
+      "tariffPerKwh": 19.5,
+      "reservationFee": 50,
+      "connectors": [
+        {
+          "bay": 1,
+          "type": "CCS2 (150 kW DC Fast)",
+          "status": "available"
+        },
+        {
+          "bay": 2,
+          "type": "CCS2 (150 kW DC Fast)",
+          "status": "busy"
+        },
+        {
+          "bay": 3,
+          "type": "CCS2 (60 kW DC Fast)",
+          "status": "available"
+        },
+        {
+          "bay": 4,
+          "type": "CCS2 (60 kW DC Fast)",
+          "status": "busy"
+        },
+        {
+          "bay": 5,
+          "type": "Type 2 AC (22 kW)",
+          "status": "available"
+        },
+        {
+          "bay": 6,
+          "type": "Type 2 AC (22 kW)",
+          "status": "available"
+        },
+        {
+          "bay": 7,
+          "type": "Bharat DC001 (15 kW)",
+          "status": "available"
+        },
+        {
+          "bay": 8,
+          "type": "Type 2 AC (22 kW)",
+          "status": "busy"
+        }
+      ],
+      "amenities": [
+        "24/7 Security",
+        "Jio World Food Court",
+        "Covered Parking",
+        "Restrooms",
+        "Free Wi-Fi"
+      ],
+      "hours": "24 Hours Open"
+    },
+    {
+      "id": "MUM-CZ-02",
+      "name": "ChargeZone Supercharging Hub — Phoenix Marketcity",
+      "city": "Mumbai",
+      "address": "LBS Marg, Kurla West, Mumbai, Maharashtra 400070",
+      "lat": 19.0864,
+      "lng": 72.889,
+      "operator": "ChargeZone",
+      "ports": 6,
+      "available": 2,
+      "busy": 4,
+      "offline": 0,
+      "speed": 120,
+      "status": "busy",
+      "waitMin": 15,
+      "tariffPerKwh": 21,
+      "reservationFee": 40,
+      "connectors": [
+        {
+          "bay": 1,
+          "type": "CCS2 (120 kW Dual)",
+          "status": "busy"
+        },
+        {
+          "bay": 2,
+          "type": "CCS2 (120 kW Dual)",
+          "status": "busy"
+        },
+        {
+          "bay": 3,
+          "type": "CCS2 (60 kW)",
+          "status": "available"
+        },
+        {
+          "bay": 4,
+          "type": "CCS2 (60 kW)",
+          "status": "busy"
+        },
+        {
+          "bay": 5,
+          "type": "Type 2 AC (22 kW)",
+          "status": "available"
+        },
+        {
+          "bay": 6,
+          "type": "Type 2 AC (22 kW)",
+          "status": "busy"
+        }
+      ],
+      "amenities": [
+        "Mall Parking Basement P2",
+        "Food Court",
+        "Cinema",
+        "Wheelchair Access"
+      ],
+      "hours": "10:00 AM - 11:00 PM"
+    },
+    {
+      "id": "MUM-JIO-03",
+      "name": "Jio-bp pulse Fast Charging — Airport T2 Hub",
+      "city": "Mumbai",
+      "address": "Terminal 2 Multi-Level Car Park, Chhatrapati Shivaji Maharaj International Airport, Sahar, Mumbai 400099",
+      "lat": 19.0968,
+      "lng": 72.8745,
+      "operator": "BPCL EV",
+      "ports": 10,
+      "available": 7,
+      "busy": 3,
+      "offline": 0,
+      "speed": 240,
+      "status": "available",
+      "waitMin": 0,
+      "tariffPerKwh": 22.5,
+      "reservationFee": 60,
+      "connectors": [
+        {
+          "bay": 1,
+          "type": "CCS2 Ultra (240 kW)",
+          "status": "available"
+        },
+        {
+          "bay": 2,
+          "type": "CCS2 Ultra (240 kW)",
+          "status": "available"
+        },
+        {
+          "bay": 3,
+          "type": "CCS2 (120 kW)",
+          "status": "available"
+        },
+        {
+          "bay": 4,
+          "type": "CCS2 (120 kW)",
+          "status": "busy"
+        },
+        {
+          "bay": 5,
+          "type": "CCS2 (60 kW)",
+          "status": "available"
+        },
+        {
+          "bay": 6,
+          "type": "CCS2 (60 kW)",
+          "status": "available"
+        },
+        {
+          "bay": 7,
+          "type": "Type 2 AC (22 kW)",
+          "status": "available"
+        },
+        {
+          "bay": 8,
+          "type": "Type 2 AC (22 kW)",
+          "status": "busy"
+        },
+        {
+          "bay": 9,
+          "type": "CHAdeMO (50 kW)",
+          "status": "available"
+        },
+        {
+          "bay": 10,
+          "type": "Type 2 AC (22 kW)",
+          "status": "busy"
+        }
+      ],
+      "amenities": [
+        "Valet Assistance",
+        "Airport Lounge",
+        "24/7 Security",
+        "Coffee Shop"
+      ],
+      "hours": "24 Hours Open"
+    },
+    {
+      "id": "MUM-ST-04",
+      "name": "Statiq EV Station — R City Mall",
+      "city": "Mumbai",
+      "address": "Amrut Nagar, LBS Marg, Ghatkopar West, Mumbai, Maharashtra 400086",
+      "lat": 19.0997,
+      "lng": 72.9168,
+      "operator": "Statiq",
+      "ports": 6,
+      "available": 3,
+      "busy": 3,
+      "offline": 0,
+      "speed": 60,
+      "status": "available",
+      "waitMin": 0,
+      "tariffPerKwh": 18,
+      "reservationFee": 30,
+      "connectors": [
+        {
+          "bay": 1,
+          "type": "CCS2 (60 kW)",
+          "status": "available"
+        },
+        {
+          "bay": 2,
+          "type": "CCS2 (60 kW)",
+          "status": "busy"
+        },
+        {
+          "bay": 3,
+          "type": "CCS2 (60 kW)",
+          "status": "available"
+        },
+        {
+          "bay": 4,
+          "type": "CCS2 (60 kW)",
+          "status": "busy"
+        },
+        {
+          "bay": 5,
+          "type": "Type 2 AC (22 kW)",
+          "status": "available"
+        },
+        {
+          "bay": 6,
+          "type": "Type 2 AC (22 kW)",
+          "status": "busy"
+        }
+      ],
+      "amenities": [
+        "Mall Parking Level -1",
+        "Restrooms",
+        "Shopping",
+        "Dining"
+      ],
+      "hours": "10:00 AM - 11:00 PM"
+    },
+    {
+      "id": "MUM-ATH-05",
+      "name": "Ather Grid Fast Point — Infiniti Mall",
+      "city": "Mumbai",
+      "address": "New Link Road, Mindspace, Malad West, Mumbai, Maharashtra 400064",
+      "lat": 19.1834,
+      "lng": 72.8344,
+      "operator": "Ather Grid",
+      "ports": 4,
+      "available": 0,
+      "busy": 1,
+      "offline": 3,
+      "speed": 7,
+      "status": "offline",
+      "waitMin": -1,
+      "tariffPerKwh": 15,
+      "reservationFee": 20,
+      "connectors": [
+        {
+          "bay": 1,
+          "type": "Ather Grid Dot (7.4 kW)",
+          "status": "busy"
+        },
+        {
+          "bay": 2,
+          "type": "Ather Grid Dot (7.4 kW)",
+          "status": "offline"
+        },
+        {
+          "bay": 3,
+          "type": "Type 2 AC (7.4 kW)",
+          "status": "offline"
+        },
+        {
+          "bay": 4,
+          "type": "Type 2 AC (7.4 kW)",
+          "status": "offline"
+        }
+      ],
+      "amenities": [
+        "Covered Two-Wheeler Bay",
+        "Mall Food Court"
+      ],
+      "hours": "10:30 AM - 10:30 PM"
+    },
+    {
+      "id": "DEL-ST-01",
+      "name": "Statiq Supercharging Hub — Connaught Place Outer Circle",
+      "city": "Delhi",
+      "address": "Block P, Outer Circle, Connaught Place, New Delhi, Delhi 110001",
+      "lat": 28.6315,
+      "lng": 77.2167,
+      "operator": "Statiq",
+      "ports": 12,
+      "available": 8,
+      "busy": 4,
+      "offline": 0,
+      "speed": 150,
+      "status": "available",
+      "waitMin": 0,
+      "tariffPerKwh": 19,
+      "reservationFee": 50,
+      "connectors": [
+        {
+          "bay": 1,
+          "type": "CCS2 (150 kW DC Fast)",
+          "status": "available"
+        },
+        {
+          "bay": 2,
+          "type": "CCS2 (150 kW DC Fast)",
+          "status": "available"
+        },
+        {
+          "bay": 3,
+          "type": "CCS2 (120 kW)",
+          "status": "available"
+        },
+        {
+          "bay": 4,
+          "type": "CCS2 (120 kW)",
+          "status": "busy"
+        },
+        {
+          "bay": 5,
+          "type": "CCS2 (60 kW)",
+          "status": "available"
+        },
+        {
+          "bay": 6,
+          "type": "CCS2 (60 kW)",
+          "status": "busy"
+        },
+        {
+          "bay": 7,
+          "type": "Type 2 AC (22 kW)",
+          "status": "available"
+        },
+        {
+          "bay": 8,
+          "type": "Type 2 AC (22 kW)",
+          "status": "available"
+        },
+        {
+          "bay": 9,
+          "type": "Type 2 AC (22 kW)",
+          "status": "available"
+        },
+        {
+          "bay": 10,
+          "type": "Type 2 AC (22 kW)",
+          "status": "busy"
+        },
+        {
+          "bay": 11,
+          "type": "Bharat DC001 (15 kW)",
+          "status": "available"
+        },
+        {
+          "bay": 12,
+          "type": "Bharat DC001 (15 kW)",
+          "status": "busy"
+        }
+      ],
+      "amenities": [
+        "NDMC Dedicated EV Bays",
+        "Metro Connectivity (Barakhamba)",
+        "Cafes & ATM"
+      ],
+      "hours": "24 Hours Open"
+    },
+    {
+      "id": "DEL-TP-02",
+      "name": "Tata Power EV Hub — Aerocity Worldmark 1",
+      "city": "Delhi",
+      "address": "Asset Area 8, Hospitality District, Delhi Aerocity, Indira Gandhi International Airport, New Delhi 110037",
+      "lat": 28.5492,
+      "lng": 77.1215,
+      "operator": "Tata Power EV",
+      "ports": 10,
+      "available": 3,
+      "busy": 7,
+      "offline": 0,
+      "speed": 120,
+      "status": "busy",
+      "waitMin": 18,
+      "tariffPerKwh": 20.5,
+      "reservationFee": 45,
+      "connectors": [
+        {
+          "bay": 1,
+          "type": "CCS2 (120 kW)",
+          "status": "busy"
+        },
+        {
+          "bay": 2,
+          "type": "CCS2 (120 kW)",
+          "status": "busy"
+        },
+        {
+          "bay": 3,
+          "type": "CCS2 (60 kW)",
+          "status": "available"
+        },
+        {
+          "bay": 4,
+          "type": "CCS2 (60 kW)",
+          "status": "busy"
+        },
+        {
+          "bay": 5,
+          "type": "CCS2 (60 kW)",
+          "status": "available"
+        },
+        {
+          "bay": 6,
+          "type": "CCS2 (60 kW)",
+          "status": "busy"
+        },
+        {
+          "bay": 7,
+          "type": "Type 2 AC (22 kW)",
+          "status": "busy"
+        },
+        {
+          "bay": 8,
+          "type": "Type 2 AC (22 kW)",
+          "status": "available"
+        },
+        {
+          "bay": 9,
+          "type": "Type 2 AC (22 kW)",
+          "status": "busy"
+        },
+        {
+          "bay": 10,
+          "type": "Type 2 AC (22 kW)",
+          "status": "busy"
+        }
+      ],
+      "amenities": [
+        "Worldmark Food Capital",
+        "Basement Valet",
+        "24/7 CCTV",
+        "Lounge"
+      ],
+      "hours": "24 Hours Open"
+    },
+    {
+      "id": "DEL-EV-03",
+      "name": "EVCS India — Select Citywalk Mall",
+      "city": "Delhi",
+      "address": "A-3, District Centre, Saket, New Delhi, Delhi 110017",
+      "lat": 28.5284,
+      "lng": 77.2195,
+      "operator": "EVCS India",
+      "ports": 8,
+      "available": 4,
+      "busy": 3,
+      "offline": 1,
+      "speed": 60,
+      "status": "available",
+      "waitMin": 0,
+      "tariffPerKwh": 18.5,
+      "reservationFee": 35,
+      "connectors": [
+        {
+          "bay": 1,
+          "type": "CCS2 (60 kW)",
+          "status": "available"
+        },
+        {
+          "bay": 2,
+          "type": "CCS2 (60 kW)",
+          "status": "busy"
+        },
+        {
+          "bay": 3,
+          "type": "CCS2 (60 kW)",
+          "status": "available"
+        },
+        {
+          "bay": 4,
+          "type": "CCS2 (60 kW)",
+          "status": "busy"
+        },
+        {
+          "bay": 5,
+          "type": "Type 2 AC (22 kW)",
+          "status": "available"
+        },
+        {
+          "bay": 6,
+          "type": "Type 2 AC (22 kW)",
+          "status": "available"
+        },
+        {
+          "bay": 7,
+          "type": "Type 2 AC (22 kW)",
+          "status": "busy"
+        },
+        {
+          "bay": 8,
+          "type": "Type 2 AC (22 kW)",
+          "status": "offline"
+        }
+      ],
+      "amenities": [
+        "P1 Level Charging Zone",
+        "Cinema",
+        "Starbucks",
+        "Valet"
+      ],
+      "hours": "10:00 AM - 11:30 PM"
+    },
+    {
+      "id": "DEL-HP-04",
+      "name": "HPCL EV Power Hub — IGI Airport T3 Cargo",
+      "city": "Delhi",
+      "address": "Near Cargo Gate 6, Indira Gandhi International Airport T3, New Delhi 110037",
+      "lat": 28.5562,
+      "lng": 77.0999,
+      "operator": "HPCL EV",
+      "ports": 14,
+      "available": 9,
+      "busy": 5,
+      "offline": 0,
+      "speed": 240,
+      "status": "available",
+      "waitMin": 0,
+      "tariffPerKwh": 22,
+      "reservationFee": 50,
+      "connectors": [
+        {
+          "bay": 1,
+          "type": "CCS2 Ultra (240 kW)",
+          "status": "available"
+        },
+        {
+          "bay": 2,
+          "type": "CCS2 Ultra (240 kW)",
+          "status": "available"
+        },
+        {
+          "bay": 3,
+          "type": "CCS2 (150 kW)",
+          "status": "available"
+        },
+        {
+          "bay": 4,
+          "type": "CCS2 (150 kW)",
+          "status": "busy"
+        },
+        {
+          "bay": 5,
+          "type": "CCS2 (60 kW)",
+          "status": "available"
+        },
+        {
+          "bay": 6,
+          "type": "CCS2 (60 kW)",
+          "status": "busy"
+        },
+        {
+          "bay": 7,
+          "type": "CCS2 (60 kW)",
+          "status": "available"
+        },
+        {
+          "bay": 8,
+          "type": "CCS2 (60 kW)",
+          "status": "busy"
+        },
+        {
+          "bay": 9,
+          "type": "Type 2 AC (22 kW)",
+          "status": "available"
+        },
+        {
+          "bay": 10,
+          "type": "Type 2 AC (22 kW)",
+          "status": "available"
+        },
+        {
+          "bay": 11,
+          "type": "Type 2 AC (22 kW)",
+          "status": "available"
+        },
+        {
+          "bay": 12,
+          "type": "Type 2 AC (22 kW)",
+          "status": "busy"
+        },
+        {
+          "bay": 13,
+          "type": "Bharat DC001 (15 kW)",
+          "status": "available"
+        },
+        {
+          "bay": 14,
+          "type": "Bharat DC001 (15 kW)",
+          "status": "busy"
+        }
+      ],
+      "amenities": [
+        "Commercial Fleet Priority",
+        "Driver Rest Area",
+        "Convenience Store",
+        "Air Pump"
+      ],
+      "hours": "24 Hours Open"
+    },
+    {
+      "id": "BLR-ZN-01",
+      "name": "Zeon Charging Superhub — Forum South Bangalore",
+      "city": "Bengaluru",
+      "address": "Kanakapura Road, Konanakunte, Bengaluru, Karnataka 560062",
+      "lat": 12.8885,
+      "lng": 77.5684,
+      "operator": "ChargeZone",
+      "ports": 8,
+      "available": 6,
+      "busy": 2,
+      "offline": 0,
+      "speed": 120,
+      "status": "available",
+      "waitMin": 0,
+      "tariffPerKwh": 20,
+      "reservationFee": 40,
+      "connectors": [
+        {
+          "bay": 1,
+          "type": "CCS2 (120 kW Dual)",
+          "status": "available"
+        },
+        {
+          "bay": 2,
+          "type": "CCS2 (120 kW Dual)",
+          "status": "busy"
+        },
+        {
+          "bay": 3,
+          "type": "CCS2 (60 kW)",
+          "status": "available"
+        },
+        {
+          "bay": 4,
+          "type": "CCS2 (60 kW)",
+          "status": "available"
+        },
+        {
+          "bay": 5,
+          "type": "CCS2 (60 kW)",
+          "status": "busy"
+        },
+        {
+          "bay": 6,
+          "type": "Type 2 AC (22 kW)",
+          "status": "available"
+        },
+        {
+          "bay": 7,
+          "type": "Type 2 AC (22 kW)",
+          "status": "available"
+        },
+        {
+          "bay": 8,
+          "type": "Type 2 AC (22 kW)",
+          "status": "available"
+        }
+      ],
+      "amenities": [
+        "Metro Station Link",
+        "Mall Dining",
+        "Security",
+        "Restrooms"
+      ],
+      "hours": "24 Hours Open"
+    },
+    {
+      "id": "BLR-TP-02",
+      "name": "Tata Power EZ Charge — ITPL Main Gate Whitefield",
+      "city": "Bengaluru",
+      "address": "International Tech Park Bangalore, Pattandur Agrahara, Whitefield, Bengaluru 560066",
+      "lat": 12.9856,
+      "lng": 77.7347,
+      "operator": "Tata Power EV",
+      "ports": 10,
+      "available": 2,
+      "busy": 8,
+      "offline": 0,
+      "speed": 150,
+      "status": "busy",
+      "waitMin": 22,
+      "tariffPerKwh": 19.5,
+      "reservationFee": 50,
+      "connectors": [
+        {
+          "bay": 1,
+          "type": "CCS2 (150 kW)",
+          "status": "busy"
+        },
+        {
+          "bay": 2,
+          "type": "CCS2 (150 kW)",
+          "status": "busy"
+        },
+        {
+          "bay": 3,
+          "type": "CCS2 (60 kW)",
+          "status": "busy"
+        },
+        {
+          "bay": 4,
+          "type": "CCS2 (60 kW)",
+          "status": "busy"
+        },
+        {
+          "bay": 5,
+          "type": "CCS2 (60 kW)",
+          "status": "busy"
+        },
+        {
+          "bay": 6,
+          "type": "CCS2 (60 kW)",
+          "status": "busy"
+        },
+        {
+          "bay": 7,
+          "type": "Type 2 AC (22 kW)",
+          "status": "available"
+        },
+        {
+          "bay": 8,
+          "type": "Type 2 AC (22 kW)",
+          "status": "busy"
+        },
+        {
+          "bay": 9,
+          "type": "Type 2 AC (22 kW)",
+          "status": "available"
+        },
+        {
+          "bay": 10,
+          "type": "Type 2 AC (22 kW)",
+          "status": "busy"
+        }
+      ],
+      "amenities": [
+        "Tech Park Visitors Parking",
+        "Cafeteria",
+        "Wi-Fi",
+        "24/7 Security"
+      ],
+      "hours": "24 Hours Open"
+    },
+    {
+      "id": "BLR-ATH-03",
+      "name": "Ather Grid Fast Point — 100ft Road Indiranagar",
+      "city": "Bengaluru",
+      "address": "777/A, 100 Feet Road, HAL 2nd Stage, Indiranagar, Bengaluru, Karnataka 560038",
+      "lat": 12.9719,
+      "lng": 77.6412,
+      "operator": "Ather Grid",
+      "ports": 6,
+      "available": 5,
+      "busy": 1,
+      "offline": 0,
+      "speed": 22,
+      "status": "available",
+      "waitMin": 0,
+      "tariffPerKwh": 16,
+      "reservationFee": 25,
+      "connectors": [
+        {
+          "bay": 1,
+          "type": "Ather Grid Fast Point (22 kW)",
+          "status": "available"
+        },
+        {
+          "bay": 2,
+          "type": "Ather Grid Fast Point (22 kW)",
+          "status": "busy"
+        },
+        {
+          "bay": 3,
+          "type": "Type 2 AC (22 kW)",
+          "status": "available"
+        },
+        {
+          "bay": 4,
+          "type": "Type 2 AC (22 kW)",
+          "status": "available"
+        },
+        {
+          "bay": 5,
+          "type": "Type 2 AC (7.4 kW)",
+          "status": "available"
+        },
+        {
+          "bay": 6,
+          "type": "Type 2 AC (7.4 kW)",
+          "status": "available"
+        }
+      ],
+      "amenities": [
+        "Kerbside High Street",
+        "Coffee Shops",
+        "Boutique Stores"
+      ],
+      "hours": "24 Hours Open"
+    },
+    {
+      "id": "BLR-BP-04",
+      "name": "BPCL e-Drive — Electronic City Phase 1",
+      "city": "Bengaluru",
+      "address": "Hosur Main Road, Electronic City Phase 1, Bengaluru, Karnataka 560100",
+      "lat": 12.8452,
+      "lng": 77.6602,
+      "operator": "BPCL EV",
+      "ports": 8,
+      "available": 6,
+      "busy": 2,
+      "offline": 0,
+      "speed": 60,
+      "status": "available",
+      "waitMin": 0,
+      "tariffPerKwh": 18,
+      "reservationFee": 30,
+      "connectors": [
+        {
+          "bay": 1,
+          "type": "CCS2 (60 kW)",
+          "status": "available"
+        },
+        {
+          "bay": 2,
+          "type": "CCS2 (60 kW)",
+          "status": "available"
+        },
+        {
+          "bay": 3,
+          "type": "CCS2 (60 kW)",
+          "status": "busy"
+        },
+        {
+          "bay": 4,
+          "type": "CCS2 (60 kW)",
+          "status": "available"
+        },
+        {
+          "bay": 5,
+          "type": "Type 2 AC (22 kW)",
+          "status": "available"
+        },
+        {
+          "bay": 6,
+          "type": "Type 2 AC (22 kW)",
+          "status": "busy"
+        },
+        {
+          "bay": 7,
+          "type": "Bharat DC001 (15 kW)",
+          "status": "available"
+        },
+        {
+          "bay": 8,
+          "type": "Bharat DC001 (15 kW)",
+          "status": "available"
+        }
+      ],
+      "amenities": [
+        "Highway In & Out",
+        "BPCL Ghar In&Out Store",
+        "Tyre Pressure Check"
+      ],
+      "hours": "24 Hours Open"
+    },
+    {
+      "id": "HYD-TP-01",
+      "name": "Tata Power EZ Charge — Cyber Towers Hitec City",
+      "city": "Hyderabad",
+      "address": "Hitec City Main Road, Madhapur, Hyderabad, Telangana 500081",
+      "lat": 17.4504,
+      "lng": 78.3808,
+      "operator": "Tata Power EV",
+      "ports": 10,
+      "available": 7,
+      "busy": 3,
+      "offline": 0,
+      "speed": 150,
+      "status": "available",
+      "waitMin": 0,
+      "tariffPerKwh": 19.5,
+      "reservationFee": 50,
+      "connectors": [
+        {
+          "bay": 1,
+          "type": "CCS2 (150 kW)",
+          "status": "available"
+        },
+        {
+          "bay": 2,
+          "type": "CCS2 (150 kW)",
+          "status": "available"
+        },
+        {
+          "bay": 3,
+          "type": "CCS2 (60 kW)",
+          "status": "available"
+        },
+        {
+          "bay": 4,
+          "type": "CCS2 (60 kW)",
+          "status": "busy"
+        },
+        {
+          "bay": 5,
+          "type": "CCS2 (60 kW)",
+          "status": "available"
+        },
+        {
+          "bay": 6,
+          "type": "CCS2 (60 kW)",
+          "status": "busy"
+        },
+        {
+          "bay": 7,
+          "type": "Type 2 AC (22 kW)",
+          "status": "available"
+        },
+        {
+          "bay": 8,
+          "type": "Type 2 AC (22 kW)",
+          "status": "available"
+        },
+        {
+          "bay": 9,
+          "type": "Type 2 AC (22 kW)",
+          "status": "available"
+        },
+        {
+          "bay": 10,
+          "type": "Type 2 AC (22 kW)",
+          "status": "busy"
+        }
+      ],
+      "amenities": [
+        "Cyber Gateway Metro Link",
+        "IT Corridor Access",
+        "Food Outlets",
+        "ATM"
+      ],
+      "hours": "24 Hours Open"
+    },
+    {
+      "id": "HYD-CZ-02",
+      "name": "ChargeZone Fast Hub — Inorbit Mall Raidurg",
+      "city": "Hyderabad",
+      "address": "Inorbit Mall Road, Mindspace, APIIC Software Layout, Madhapur, Hyderabad 500081",
+      "lat": 17.4343,
+      "lng": 78.3867,
+      "operator": "ChargeZone",
+      "ports": 6,
+      "available": 1,
+      "busy": 5,
+      "offline": 0,
+      "speed": 60,
+      "status": "busy",
+      "waitMin": 25,
+      "tariffPerKwh": 20,
+      "reservationFee": 40,
+      "connectors": [
+        {
+          "bay": 1,
+          "type": "CCS2 (60 kW)",
+          "status": "busy"
+        },
+        {
+          "bay": 2,
+          "type": "CCS2 (60 kW)",
+          "status": "busy"
+        },
+        {
+          "bay": 3,
+          "type": "CCS2 (60 kW)",
+          "status": "busy"
+        },
+        {
+          "bay": 4,
+          "type": "CCS2 (60 kW)",
+          "status": "busy"
+        },
+        {
+          "bay": 5,
+          "type": "Type 2 AC (22 kW)",
+          "status": "available"
+        },
+        {
+          "bay": 6,
+          "type": "Type 2 AC (22 kW)",
+          "status": "busy"
+        }
+      ],
+      "amenities": [
+        "Lake View Food Court",
+        "Basement Parking",
+        "Cinemas"
+      ],
+      "hours": "10:00 AM - 11:00 PM"
+    },
+    {
+      "id": "PUN-TP-01",
+      "name": "Tata Power EZ Charge — Quadron Business Park Hinjawadi",
+      "city": "Pune",
+      "address": "Plot No. 28, Rajiv Gandhi Infotech Park, Hinjawadi Phase 2, Pune, Maharashtra 411057",
+      "lat": 18.5913,
+      "lng": 73.7389,
+      "operator": "Tata Power EV",
+      "ports": 12,
+      "available": 9,
+      "busy": 3,
+      "offline": 0,
+      "speed": 120,
+      "status": "available",
+      "waitMin": 0,
+      "tariffPerKwh": 19,
+      "reservationFee": 45,
+      "connectors": [
+        {
+          "bay": 1,
+          "type": "CCS2 (120 kW Dual)",
+          "status": "available"
+        },
+        {
+          "bay": 2,
+          "type": "CCS2 (120 kW Dual)",
+          "status": "available"
+        },
+        {
+          "bay": 3,
+          "type": "CCS2 (60 kW)",
+          "status": "available"
+        },
+        {
+          "bay": 4,
+          "type": "CCS2 (60 kW)",
+          "status": "busy"
+        },
+        {
+          "bay": 5,
+          "type": "CCS2 (60 kW)",
+          "status": "available"
+        },
+        {
+          "bay": 6,
+          "type": "CCS2 (60 kW)",
+          "status": "busy"
+        },
+        {
+          "bay": 7,
+          "type": "Type 2 AC (22 kW)",
+          "status": "available"
+        },
+        {
+          "bay": 8,
+          "type": "Type 2 AC (22 kW)",
+          "status": "available"
+        },
+        {
+          "bay": 9,
+          "type": "Type 2 AC (22 kW)",
+          "status": "available"
+        },
+        {
+          "bay": 10,
+          "type": "Type 2 AC (22 kW)",
+          "status": "available"
+        },
+        {
+          "bay": 11,
+          "type": "Type 2 AC (22 kW)",
+          "status": "available"
+        },
+        {
+          "bay": 12,
+          "type": "Type 2 AC (22 kW)",
+          "status": "busy"
+        }
+      ],
+      "amenities": [
+        "Business Park Campus",
+        "Security Checkpoint",
+        "Food Plaza"
+      ],
+      "hours": "24 Hours Open"
+    },
+    {
+      "id": "PUN-ST-02",
+      "name": "Statiq Hub — Phoenix Marketcity Viman Nagar",
+      "city": "Pune",
+      "address": "S. No. 207, Viman Nagar Road, Clover Park, Viman Nagar, Pune, Maharashtra 411014",
+      "lat": 18.5621,
+      "lng": 73.9168,
+      "operator": "Statiq",
+      "ports": 6,
+      "available": 2,
+      "busy": 4,
+      "offline": 0,
+      "speed": 60,
+      "status": "busy",
+      "waitMin": 12,
+      "tariffPerKwh": 18.5,
+      "reservationFee": 35,
+      "connectors": [
+        {
+          "bay": 1,
+          "type": "CCS2 (60 kW)",
+          "status": "busy"
+        },
+        {
+          "bay": 2,
+          "type": "CCS2 (60 kW)",
+          "status": "busy"
+        },
+        {
+          "bay": 3,
+          "type": "CCS2 (60 kW)",
+          "status": "available"
+        },
+        {
+          "bay": 4,
+          "type": "CCS2 (60 kW)",
+          "status": "busy"
+        },
+        {
+          "bay": 5,
+          "type": "Type 2 AC (22 kW)",
+          "status": "available"
+        },
+        {
+          "bay": 6,
+          "type": "Type 2 AC (22 kW)",
+          "status": "busy"
+        }
+      ],
+      "amenities": [
+        "Airport Road Access",
+        "Mall P1 Basement",
+        "Cafes"
+      ],
+      "hours": "10:00 AM - 11:00 PM"
+    },
+    {
+      "id": "CHE-ZN-01",
+      "name": "Zeon Charging Hub — Phoenix Marketcity Velachery",
+      "city": "Chennai",
+      "address": "142, Velachery Road, Indira Gandhi Nagar, Velachery, Chennai, Tamil Nadu 600042",
+      "lat": 12.9918,
+      "lng": 80.2173,
+      "operator": "EVCS India",
+      "ports": 8,
+      "available": 5,
+      "busy": 3,
+      "offline": 0,
+      "speed": 120,
+      "status": "available",
+      "waitMin": 0,
+      "tariffPerKwh": 20,
+      "reservationFee": 45,
+      "connectors": [
+        {
+          "bay": 1,
+          "type": "CCS2 (120 kW Dual)",
+          "status": "available"
+        },
+        {
+          "bay": 2,
+          "type": "CCS2 (120 kW Dual)",
+          "status": "busy"
+        },
+        {
+          "bay": 3,
+          "type": "CCS2 (60 kW)",
+          "status": "available"
+        },
+        {
+          "bay": 4,
+          "type": "CCS2 (60 kW)",
+          "status": "busy"
+        },
+        {
+          "bay": 5,
+          "type": "Type 2 AC (22 kW)",
+          "status": "available"
+        },
+        {
+          "bay": 6,
+          "type": "Type 2 AC (22 kW)",
+          "status": "available"
+        },
+        {
+          "bay": 7,
+          "type": "Type 2 AC (22 kW)",
+          "status": "available"
+        },
+        {
+          "bay": 8,
+          "type": "Type 2 AC (22 kW)",
+          "status": "busy"
+        }
+      ],
+      "amenities": [
+        "Underground Charging Bays",
+        "Shopping",
+        "Restrooms",
+        "Security"
+      ],
+      "hours": "10:00 AM - 11:00 PM"
+    },
+    {
+      "id": "CHE-HP-02",
+      "name": "HPCL EV Power Station — OMR Thoraipakkam",
+      "city": "Chennai",
+      "address": "Rajiv Gandhi Salai (OMR), Anand Nagar, Thoraipakkam, Chennai, Tamil Nadu 600097",
+      "lat": 12.9416,
+      "lng": 80.2355,
+      "operator": "HPCL EV",
+      "ports": 8,
+      "available": 6,
+      "busy": 2,
+      "offline": 0,
+      "speed": 100,
+      "status": "available",
+      "waitMin": 0,
+      "tariffPerKwh": 18,
+      "reservationFee": 30,
+      "connectors": [
+        {
+          "bay": 1,
+          "type": "CCS2 (100 kW)",
+          "status": "available"
+        },
+        {
+          "bay": 2,
+          "type": "CCS2 (100 kW)",
+          "status": "available"
+        },
+        {
+          "bay": 3,
+          "type": "CCS2 (50 kW)",
+          "status": "available"
+        },
+        {
+          "bay": 4,
+          "type": "CCS2 (50 kW)",
+          "status": "busy"
+        },
+        {
+          "bay": 5,
+          "type": "Type 2 AC (22 kW)",
+          "status": "available"
+        },
+        {
+          "bay": 6,
+          "type": "Type 2 AC (22 kW)",
+          "status": "busy"
+        },
+        {
+          "bay": 7,
+          "type": "Bharat DC001 (15 kW)",
+          "status": "available"
+        },
+        {
+          "bay": 8,
+          "type": "Bharat DC001 (15 kW)",
+          "status": "available"
+        }
+      ],
+      "amenities": [
+        "OMR Express Highway Frontage",
+        "24/7 Canopy",
+        "Convenience Store"
+      ],
+      "hours": "24 Hours Open"
+    }
+  ],
+  "users": [
+    {
+      "id": "usr_demo_01",
+      "name": "Demo Driver",
+      "email": "driver@voltaicos.io",
+      "phone": "+91 98765 43210",
+      "authProvider": "email",
+      "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80",
+      "vehicleModel": "Tata Nexon EV Max",
+      "licensePlate": "MH 02 EK 9912",
+      "createdAt": "2026-10-10T16:00:41.196Z"
+    }
+  ],
+  "bookings": [
+    {
+      "id": "VOLT-9839",
+      "status": "cancelled",
+      "qrCodeData": "VOLT-9839-DEL-ST-01-BAY1",
+      "createdAt": "2026-10-10T16:01:43.197Z",
+      "stationId": "DEL-ST-01",
+      "stationName": "Statiq Supercharging Hub — Connaught Place Outer Circle",
+      "city": "Delhi",
+      "address": "Block P, Outer Circle, Connaught Place, New Delhi, Delhi 110001",
+      "bayNumber": 1,
+      "portType": "CCS2 DC Fast",
+      "date": "2026-10-10",
+      "startTime": "09:31 pm",
+      "durationMinutes": 30,
+      "estimatedKwh": 53,
+      "tariffPerKwh": 19,
+      "reservationFee": 50,
+      "estimatedCost": 1057,
+      "vehicleNumber": "DL 01 AB 9999",
+      "vehicleModel": "MG ZS EV",
+      "userId": "test_user",
+      "userName": "Test Driver",
+      "userEmail": "",
+      "userPhone": "",
+      "cancelledAt": "2026-10-10T16:02:16.500Z"
+    },
+    {
+      "id": "VOLT-8921",
+      "userId": "usr_demo_01",
+      "userName": "Demo Driver",
+      "userEmail": "driver@voltaicos.io",
+      "userPhone": "+91 98765 43210",
+      "stationId": "MUM-EZ-01",
+      "stationName": "Tata Power EZ Charge — Jio World Convention Centre",
+      "city": "Mumbai",
+      "bayNumber": 2,
+      "portType": "CCS2 (150 kW DC Fast)",
+      "date": "2026-10-10",
+      "startTime": "16:00",
+      "durationMinutes": 45,
+      "vehicleNumber": "MH 02 EK 9912",
+      "vehicleModel": "Tata Nexon EV Max",
+      "tariffPerKwh": 19.5,
+      "reservationFee": 50,
+      "estimatedCost": 650,
+      "status": "active",
+      "qrCodeData": "VOLT-8921-MUM-EZ-01-BAY2",
+      "createdAt": "2026-10-10T15:00:41.196Z"
+    }
+  ],
+  "alerts": [
+    {
+      "id": "alt_1791648136500_79lf",
+      "time": "Just now",
+      "resolved": false,
+      "timestamp": 1791648136500,
+      "type": "reservation",
+      "severity": "low",
+      "station": "Statiq Supercharging Hub — Connaught Place Outer Circle",
+      "city": "Delhi",
+      "msg": "Reservation VOLT-9839 cancelled. Port has been returned to available pool."
+    },
+    {
+      "id": "alt_1791648103197_n77z",
+      "time": "Just now",
+      "resolved": false,
+      "timestamp": 1791648103197,
+      "type": "reservation",
+      "severity": "low",
+      "station": "Statiq Supercharging Hub — Connaught Place Outer Circle",
+      "city": "Delhi",
+      "msg": "Slot reserved by Test Driver (DL 01 AB 9999). Bay #1 reserved for 30 mins."
+    },
+    {
+      "id": "alt_001",
+      "type": "reservation",
+      "severity": "low",
+      "station": "Tata Power EZ Charge — Jio World Convention Centre",
+      "city": "Mumbai",
+      "msg": "Active slot reservation confirmed for Bay #2 (CCS2 150 kW). Vehicle MH 02 EK 9912.",
+      "time": "Just now",
+      "resolved": false,
+      "timestamp": 1791648041196
+    },
+    {
+      "id": "alt_002",
+      "type": "offline",
+      "severity": "high",
+      "station": "Ather Grid Fast Point — Infiniti Mall",
+      "city": "Mumbai",
+      "msg": "3 ports offline due to upstream grid phase fluctuation. Maintenance ticket #8843 dispatched.",
+      "time": "18 mins ago",
+      "resolved": false,
+      "timestamp": 1791646961196
+    },
+    {
+      "id": "alt_003",
+      "type": "queue",
+      "severity": "medium",
+      "station": "Tata Power EV Hub — Aerocity Worldmark 1",
+      "city": "Delhi",
+      "msg": "High demand surge detected. 7 of 10 bays active. Average wait time ~18 mins.",
+      "time": "35 mins ago",
+      "resolved": false,
+      "timestamp": 1791645941196
+    }
+  ],
+  "otps": {}
+}

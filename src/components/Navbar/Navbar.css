@@ -19,7 +19,7 @@
   display: flex;
   align-items: center;
   gap: 9px;
-  min-width: 200px;
+  min-width: 180px;
 }
 .brand-icon {
   width: 34px; height: 34px;
@@ -77,10 +77,37 @@
 .navbar-actions {
   display: flex;
   align-items: center;
-  gap: 8px;
-  min-width: 200px;
+  gap: 10px;
+  min-width: 240px;
   justify-content: flex-end;
 }
+
+.nav-bookings-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: var(--radius-md, 10px);
+  border: 1px solid var(--color-border, #e2e6ee);
+  background: var(--color-surface-2, #f0f2f6);
+  color: var(--color-text-2, #374151);
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.nav-bookings-btn:hover {
+  border-color: var(--color-primary-light, #6366f1);
+  color: var(--color-primary, #3730a3);
+  background: #ffffff;
+}
+
+.nav-login-btn {
+  font-weight: 600;
+  gap: 6px;
+}
+
 .nav-icon-btn {
   width: 36px; height: 36px;
   border-radius: var(--radius-md);
@@ -90,6 +117,8 @@
   position: relative;
   transition: all var(--fast);
   background: transparent;
+  border: none;
+  cursor: pointer;
 }
 .nav-icon-btn:hover {
   background: var(--color-surface-2);
@@ -103,14 +132,143 @@
   border-radius: 50%;
   border: 2px solid white;
 }
+
+/* User Profile Trigger & Dropdown */
+.nav-user-container {
+  position: relative;
+}
+
+.nav-user-trigger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px 4px 4px;
+  border-radius: 99px;
+  border: 1px solid var(--color-border, #e2e6ee);
+  background: #ffffff;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.nav-user-trigger:hover {
+  border-color: var(--color-primary-light, #6366f1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.nav-avatar-img {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
 .nav-avatar {
-  width: 34px; height: 34px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   background: var(--color-primary);
   color: #fff;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
   display: grid;
   place-items: center;
   letter-spacing: .5px;
+}
+
+.nav-user-info-text {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.nav-user-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text, #111827);
+  line-height: 1.2;
+}
+
+.nav-user-vehicle {
+  font-size: 10px;
+  color: var(--color-text-3, #6b7280);
+}
+
+.nav-user-chevron {
+  color: var(--color-text-4, #9ca3af);
+}
+
+.nav-user-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 230px;
+  background: #ffffff;
+  border-radius: var(--radius-md, 10px);
+  padding: 8px 0;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12), 0 0 0 1px var(--color-border, #e2e6ee);
+  animation: fadeIn 0.15s ease-out;
+  z-index: 1000;
+}
+
+.dropdown-user-header {
+  padding: 8px 16px;
+}
+
+.duh-name {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--color-text, #111827);
+}
+
+.duh-email {
+  font-size: 11.5px;
+  color: var(--color-text-3, #6b7280);
+  word-break: break-all;
+}
+
+.duh-plate {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: #4338ca;
+  background: #eef2ff;
+  padding: 3px 6px;
+  border-radius: 4px;
+  margin-top: 6px;
+  font-weight: 600;
+}
+
+.dropdown-divider {
+  border-top: 1px solid var(--color-border, #e2e6ee);
+  margin: 6px 0;
+}
+
+.dropdown-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+  border: none;
+  background: transparent;
+  font-size: 13px;
+  color: var(--color-text-2, #374151);
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.1s ease;
+}
+
+.dropdown-item:hover {
+  background: var(--color-surface-2, #f0f2f6);
+  color: var(--color-text, #111827);
+}
+
+.dropdown-item--danger {
+  color: #dc2626;
+}
+
+.dropdown-item--danger:hover {
+  background: #fef2f2;
+  color: #b91c1c;
 }
