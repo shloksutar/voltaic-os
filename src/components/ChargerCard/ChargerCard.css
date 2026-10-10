@@ -1,0 +1,115 @@
+.charger-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 16px 18px;
+  cursor: pointer;
+  transition: all var(--med);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.charger-card:hover {
+  border-color: var(--color-primary-light);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+.charger-card--selected {
+  border-color: var(--color-primary) !important;
+  box-shadow: 0 0 0 3px rgba(55, 48, 163, .1), var(--shadow-md) !important;
+}
+
+/* Top row */
+.cc-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+.cc-info { flex: 1; min-width: 0; }
+.cc-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cc-city {
+  font-size: 12px;
+  color: var(--color-text-3);
+  margin-top: 2px;
+}
+
+/* Port bar */
+.cc-ports { display: flex; flex-direction: column; gap: 7px; }
+.cc-bar { position: relative; }
+.cc-port-bar {
+  height: 6px;
+  background: var(--color-surface-2);
+  border-radius: 99px;
+  overflow: hidden;
+  display: flex;
+}
+.cc-bar-fill { height: 100%; transition: width 1s var(--ease); }
+.cc-bar-available { background: var(--color-available); }
+.cc-bar-busy      { background: var(--color-busy); }
+
+.cc-port-legend {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+.port-chip {
+  font-size: 11px;
+  font-weight: 500;
+  padding: 2px 7px;
+  border-radius: 99px;
+}
+.port-avail { background: var(--color-available-bg); color: var(--color-available); }
+.port-busy  { background: var(--color-busy-bg);      color: var(--color-busy); }
+.port-off   { background: var(--color-offline-bg);   color: var(--color-offline); }
+.cc-total {
+  font-size: 11px;
+  color: var(--color-text-4);
+  margin-left: auto;
+}
+
+/* Bottom row */
+.cc-bottom {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.speed-badge {
+  font-size: 11px;
+  font-weight: 500;
+  padding: 3px 9px;
+  border-radius: 99px;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-3);
+  background: var(--color-surface-2);
+}
+.speed-fast { border-color: #6366F1; color: var(--color-primary); background: var(--color-primary-pale); }
+.speed-mid  { border-color: #D97706; color: var(--color-busy);    background: var(--color-busy-bg); }
+
+.cc-wait {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--color-busy);
+}
+.cc-wait-off { color: var(--color-offline); }
+
+.cc-arrow {
+  margin-left: auto;
+  color: var(--color-text-4);
+  transition: color var(--fast), transform var(--fast);
+}
+.charger-card:hover .cc-arrow {
+  color: var(--color-primary);
+  transform: translateX(2px);
+}

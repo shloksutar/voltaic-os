@@ -1,0 +1,204 @@
+/* ============================================================
+   VoltaicOS — Global Design System
+   Palette: Off-white · Deep Indigo · Cool Gray
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Syne:wght@600;700;800&display=swap');
+
+/* ─── Tokens ─────────────────────────────────────────────── */
+:root {
+  /* Core palette */
+  --color-bg:           #F7F8FA;
+  --color-surface:      #FFFFFF;
+  --color-surface-2:    #F0F2F6;
+  --color-border:       #E2E6EE;
+  --color-border-soft:  #ECEEF3;
+
+  /* Indigo brand */
+  --color-primary:      #3730A3;
+  --color-primary-mid:  #4338CA;
+  --color-primary-light:#6366F1;
+  --color-primary-pale: #EEF2FF;
+
+  /* Status */
+  --color-available:    #059669;
+  --color-available-bg: #ECFDF5;
+  --color-busy:         #D97706;
+  --color-busy-bg:      #FFFBEB;
+  --color-offline:      #DC2626;
+  --color-offline-bg:   #FEF2F2;
+
+  /* Text */
+  --color-text:         #111827;
+  --color-text-2:       #374151;
+  --color-text-3:       #6B7280;
+  --color-text-4:       #9CA3AF;
+
+  /* Layout */
+  --nav-h:              64px;
+  --sidebar-w:          280px;
+  --radius-sm:          6px;
+  --radius-md:          10px;
+  --radius-lg:          16px;
+  --radius-xl:          24px;
+
+  /* Shadow */
+  --shadow-xs:  0 1px 2px rgba(0,0,0,.05);
+  --shadow-sm:  0 1px 6px rgba(0,0,0,.07), 0 1px 2px rgba(0,0,0,.04);
+  --shadow-md:  0 4px 16px rgba(0,0,0,.08), 0 1px 4px rgba(0,0,0,.04);
+  --shadow-lg:  0 8px 32px rgba(0,0,0,.10), 0 2px 8px rgba(0,0,0,.05);
+
+  /* Timing */
+  --ease:  cubic-bezier(0.4, 0, 0.2, 1);
+  --fast:  150ms var(--ease);
+  --med:   250ms var(--ease);
+  --slow:  400ms var(--ease);
+}
+
+/* ─── Reset ──────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; font-size: 16px; }
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: var(--color-bg);
+  color: var(--color-text);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: inherit; text-decoration: none; }
+button { font-family: inherit; cursor: pointer; border: none; background: none; }
+img { max-width: 100%; display: block; }
+ul { list-style: none; }
+
+/* ─── Typography ─────────────────────────────────────────── */
+.font-display { font-family: 'Syne', sans-serif; }
+h1, h2, h3, h4 { line-height: 1.25; color: var(--color-text); }
+
+/* ─── Layout helpers ─────────────────────────────────────── */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+.flex   { display: flex; }
+.grid   { display: grid; }
+.center { place-items: center; }
+
+/* ─── Scrollbar ──────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--color-surface-2); }
+::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-text-4); }
+
+/* ─── Utility components ─────────────────────────────────── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 99px;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: .3px;
+}
+.badge-available { background: var(--color-available-bg); color: var(--color-available); }
+.badge-busy      { background: var(--color-busy-bg);      color: var(--color-busy); }
+.badge-offline   { background: var(--color-offline-bg);   color: var(--color-offline); }
+.badge-primary   { background: var(--color-primary-pale); color: var(--color-primary); }
+
+.dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.dot-available { background: var(--color-available); }
+.dot-busy      { background: var(--color-busy); }
+.dot-offline   { background: var(--color-offline); }
+.dot-pulse {
+  animation: pulse 1.8s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .35; }
+}
+
+/* ─── Buttons ────────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 20px;
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  font-weight: 500;
+  transition: all var(--fast);
+  white-space: nowrap;
+}
+.btn-primary {
+  background: var(--color-primary);
+  color: #fff;
+}
+.btn-primary:hover { background: var(--color-primary-mid); transform: translateY(-1px); box-shadow: var(--shadow-md); }
+.btn-ghost {
+  background: transparent;
+  color: var(--color-text-2);
+  border: 1px solid var(--color-border);
+}
+.btn-ghost:hover { background: var(--color-surface-2); border-color: var(--color-text-4); }
+.btn-sm { padding: 6px 14px; font-size: 13px; }
+
+/* ─── Card ───────────────────────────────────────────────── */
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ─── Tag / Chip ─────────────────────────────────────────── */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 12px;
+  border-radius: 99px;
+  font-size: 12px;
+  font-weight: 500;
+  background: var(--color-surface-2);
+  color: var(--color-text-3);
+  border: 1px solid var(--color-border);
+}
+
+/* ─── Divider ────────────────────────────────────────────── */
+.divider {
+  height: 1px;
+  background: var(--color-border);
+}
+
+/* ─── Page transitions ───────────────────────────────────── */
+.page-enter {
+  animation: fadeUp var(--slow) var(--ease) both;
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── Leaflet overrides ──────────────────────────────────── */
+.leaflet-container {
+  font-family: inherit !important;
+  border-radius: var(--radius-lg);
+}
+.leaflet-popup-content-wrapper {
+  border-radius: var(--radius-md) !important;
+  box-shadow: var(--shadow-lg) !important;
+  padding: 0 !important;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+}
+.leaflet-popup-content { margin: 0 !important; }
+.leaflet-popup-tip-container { display: none; }
+.leaflet-control-zoom a {
+  font-size: 16px !important;
+  color: var(--color-text-2) !important;
+}
