@@ -983,8 +983,8 @@
       "lng": 78.3867,
       "operator": "ChargeZone",
       "ports": 6,
-      "available": 1,
-      "busy": 5,
+      "available": 0,
+      "busy": 6,
       "offline": 0,
       "speed": 60,
       "status": "busy",
@@ -1015,7 +1015,7 @@
         {
           "bay": 5,
           "type": "Type 2 AC (22 kW)",
-          "status": "available"
+          "status": "busy"
         },
         {
           "bay": 6,
@@ -1317,9 +1317,45 @@
       "vehicleModel": "Tata Nexon EV Max",
       "licensePlate": "MH 02 EK 9912",
       "createdAt": "2026-10-10T16:00:41.196Z"
+    },
+    {
+      "id": "usr_1791741304908_iyguo",
+      "createdAt": "2026-10-11T17:55:04.908Z",
+      "name": "Shlok Sutar",
+      "email": "shlokvsutar@gmail.com",
+      "googleId": "google_1791741304868",
+      "authProvider": "google",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&auto=format&fit=crop&q=80",
+      "vehicleModel": "MG ZS EV",
+      "licensePlate": "DL 01 EV 4421"
     }
   ],
   "bookings": [
+    {
+      "id": "VOLT-5034",
+      "status": "active",
+      "qrCodeData": "VOLT-5034-HYD-CZ-02-BAY5",
+      "createdAt": "2026-10-11T17:55:16.305Z",
+      "stationId": "HYD-CZ-02",
+      "stationName": "ChargeZone Fast Hub — Inorbit Mall Raidurg",
+      "city": "Hyderabad",
+      "address": "Inorbit Mall Road, Mindspace, APIIC Software Layout, Madhapur, Hyderabad 500081",
+      "bayNumber": 5,
+      "portType": "Type 2 AC (22 kW)",
+      "date": "2026-10-11",
+      "startTime": "23:40",
+      "durationMinutes": 30,
+      "estimatedKwh": 21,
+      "tariffPerKwh": 20,
+      "reservationFee": 40,
+      "estimatedCost": 460,
+      "vehicleNumber": "DL 01 EV 4421",
+      "vehicleModel": "MG ZS EV",
+      "userId": "usr_1791741304908_iyguo",
+      "userName": "Shlok Sutar",
+      "userEmail": "shlokvsutar@gmail.com",
+      "userPhone": ""
+    },
     {
       "id": "VOLT-9839",
       "status": "cancelled",
@@ -1371,6 +1407,17 @@
     }
   ],
   "alerts": [
+    {
+      "id": "alt_1791741316307_1h8c",
+      "time": "Just now",
+      "resolved": false,
+      "timestamp": 1791741316307,
+      "type": "reservation",
+      "severity": "low",
+      "station": "ChargeZone Fast Hub — Inorbit Mall Raidurg",
+      "city": "Hyderabad",
+      "msg": "Slot reserved by Shlok Sutar (DL 01 EV 4421). Bay #5 reserved for 30 mins."
+    },
     {
       "id": "alt_1791648136500_79lf",
       "time": "Just now",
