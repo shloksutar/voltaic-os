@@ -16,6 +16,8 @@ import {
 } from 'recharts';
 import { analyticsApi, stationsApi } from '../../api/client';
 import { CHARGERS } from '../../data/chargers';
+import PageMeta from '../../components/PageMeta/PageMeta';
+import SiteFooter from '../../components/SiteFooter/SiteFooter';
 import './Analytics.css';
 
 const OP_COLORS = [

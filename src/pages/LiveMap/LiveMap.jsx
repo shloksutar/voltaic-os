@@ -8,6 +8,8 @@ import { stationsApi } from '../../api/client';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 import ReservationModal from '../../components/ReservationModal/ReservationModal';
 import ReportIssueModal from '../../components/ReportIssueModal/ReportIssueModal';
+import PageMeta from '../../components/PageMeta/PageMeta';
+import { useToast } from '../../context/ToastContext';
 import './LiveMap.css';
 
 // Fix Leaflet default icon paths in Vite
@@ -53,6 +55,8 @@ export default function LiveMap() {
   const [selectedCharger, setSelectedCharger] = useState(null);
   const [forecastData, setForecastData] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [fetchError, setFetchError] = useState('');
+  const toast = useToast();
 
   // Modals
   const [isReserving, setIsReserving] = useState(false);
@@ -66,13 +70,14 @@ export default function LiveMap() {
       });
       if (res?.stations) {
         setStations(res.stations);
+        setFetchError('');
         if (selectedCharger) {
           const updated = res.stations.find((s) => s.id === selectedCharger.id);
           if (updated) setSelectedCharger(updated);
         }
       }
     } catch (err) {
-      console.warn('Failed to fetch stations for map:', err);
+      setFetchError(err.message || 'Could not refresh live stations. Showing cached map data.');
     } finally {
       setLoading(false);
     }
@@ -94,6 +99,10 @@ export default function LiveMap() {
 
   return (
     <div className="livemap page-enter">
+      <PageMeta
+        title="Live Map"
+        description="Interactive live map of VoltaicOS charging hubs with real-time port status and queue forecasts."
+      />
       {/* Toolbar */}
       <div className="lm-toolbar">
         <div className="lm-title-block">
@@ -131,6 +140,11 @@ export default function LiveMap() {
           </div>
         </div>
       </div>
+      {fetchError && (
+        <div className="page-banner page-banner--error" style={{ margin: '8px 16px 0' }}>
+          {fetchError}
+        </div>
+      )}
 
       <div className="lm-body">
         {/* Map */}
@@ -271,7 +285,20 @@ export default function LiveMap() {
                 className="btn btn-primary"
                 style={{ width: '100%', justifyContent: 'center' }}
                 disabled={selectedCharger.status === 'offline' || selectedCharger.available === 0}
-                onClick={() => setIsReserving(true)}
+                title={
+                  selectedCharger.status === 'offline'
+                    ? 'This station is offline'
+                    : selectedCharger.available === 0
+                    ? 'No bays are available right now'
+                    : 'Reserve a charging bay'
+                }
+                onClick={() => {
+                  if (selectedCharger.status === 'offline' || selectedCharger.available === 0) {
+                    toast.error('No bays are available to reserve at this station.');
+                    return;
+                  }
+                  setIsReserving(true);
+                }}
               >
                 <Zap size={14} /> Reserve a Slot
               </button>

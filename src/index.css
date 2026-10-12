@@ -57,14 +57,22 @@
 
 /* ─── Reset ──────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; font-size: 16px; }
+html {
+  scroll-behavior: smooth;
+  font-size: 16px;
+  overflow-x: hidden;
+  max-width: 100%;
+}
 body {
   font-family: 'Inter', system-ui, sans-serif;
   background: var(--color-bg);
   color: var(--color-text);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  max-width: 100%;
 }
+#root { min-width: 0; max-width: 100%; overflow-x: hidden; }
 a { color: inherit; text-decoration: none; }
 button { font-family: inherit; cursor: pointer; border: none; background: none; }
 img { max-width: 100%; display: block; }
@@ -201,4 +209,23 @@ h1, h2, h3, h4 { line-height: 1.25; color: var(--color-text); }
 .leaflet-control-zoom a {
   font-size: 16px !important;
   color: var(--color-text-2) !important;
+}
+
+.page-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-weight: 500;
+}
+.page-banner--error {
+  background: var(--color-offline-bg);
+  color: var(--color-offline);
+  border: 1px solid #fecaca;
+}
+
+@media (max-width: 900px) {
+  .container { padding: 0 16px; }
 }

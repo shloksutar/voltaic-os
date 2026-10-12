@@ -5,6 +5,8 @@ import { stationsApi } from '../../api/client';
 import ChargerCard from '../../components/ChargerCard/ChargerCard';
 import ReservationModal from '../../components/ReservationModal/ReservationModal';
 import ReportIssueModal from '../../components/ReportIssueModal/ReportIssueModal';
+import PageMeta from '../../components/PageMeta/PageMeta';
+import SiteFooter from '../../components/SiteFooter/SiteFooter';
 import './Chargers.css';
 
 const STATUS_OPTS = ['All', 'Available', 'Busy', 'Offline'];
@@ -12,6 +14,7 @@ const STATUS_OPTS = ['All', 'Available', 'Busy', 'Offline'];
 export default function Chargers() {
   const [stations, setStations] = useState(CHARGERS);
   const [loading, setLoading] = useState(false);
+  const [fetchError, setFetchError] = useState('');
   const [search, setSearch] = useState('');
   const [city, setCity] = useState('All Cities');
   const [operator, setOperator] = useState('All Operators');
@@ -33,9 +36,10 @@ export default function Chargers() {
       });
       if (res?.stations) {
         setStations(res.stations);
+        setFetchError('');
       }
     } catch (err) {
-      console.warn('Backend fetch failed, using cached stations:', err);
+      setFetchError(err.message || 'Could not sync live telemetry. Showing cached stations.');
     } finally {
       setLoading(false);
     }
@@ -63,6 +67,10 @@ export default function Chargers() {
 
   return (
     <div className="chargers-page page-enter">
+      <PageMeta
+        title="Charging Stations"
+        description="Browse verified VoltaicOS charging hubs by city, operator, and live port availability."
+      />
       <div className="chp-header">
         <div>
           <h1 className="chp-title font-display">Charging Stations</h1>
@@ -80,6 +88,7 @@ export default function Chargers() {
           <span>Sync Telemetry</span>
         </button>
       </div>
+      {fetchError && <div className="page-banner page-banner--error">{fetchError}</div>}
 
       {/* Filters */}
       <div className="chp-filters card">
@@ -184,6 +193,7 @@ export default function Chargers() {
           }}
         />
       )}
+      <SiteFooter />
     </div>
   );
 }

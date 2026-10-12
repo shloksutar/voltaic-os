@@ -1,0 +1,46 @@
+.not-found {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding-top: var(--nav-h);
+}
+
+.nf-card {
+  max-width: 560px;
+  margin: 48px auto 0;
+  padding: 40px 32px;
+  text-align: center;
+}
+
+.nf-code {
+  font-size: 64px;
+  font-weight: 800;
+  letter-spacing: -3px;
+  color: var(--color-primary);
+  line-height: 1;
+}
+
+.nf-title {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 12px 0 8px;
+}
+
+.nf-desc {
+  font-size: 14px;
+  color: var(--color-text-3);
+  max-width: 420px;
+  margin: 0 auto 24px;
+}
+
+.nf-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+@media (max-width: 600px) {
+  .nf-card { margin: 24px 16px 0; padding: 28px 20px; }
+  .nf-code { font-size: 48px; }
+}

@@ -9,12 +9,13 @@ import {
   Globe,
   Lock,
   ArrowRight,
-  ShieldCheck,
 } from 'lucide-react';
 import { getNetworkStats, CHARGERS } from '../../data/chargers';
 import { stationsApi } from '../../api/client';
 import StatCard from '../../components/StatCard/StatCard';
 import ReservationModal from '../../components/ReservationModal/ReservationModal';
+import PageMeta from '../../components/PageMeta/PageMeta';
+import SiteFooter from '../../components/SiteFooter/SiteFooter';
 import './Overview.css';
 
 const FEATURES = [
@@ -92,6 +93,10 @@ export default function Overview() {
 
   return (
     <div className="overview page-enter">
+      <PageMeta
+        title="Overview"
+        description="VoltaicOS live network overview: charger availability, slot reservations, and multi-operator EV charging intelligence."
+      />
       {/* Hero */}
       <section className="overview-hero">
         <div className="hero-eyebrow">
@@ -246,14 +251,7 @@ export default function Overview() {
         />
       )}
 
-      {/* Footer */}
-      <footer className="overview-footer">
-        <div className="footer-brand">
-          <Zap size={16} />
-          <span className="font-display">VoltaicOS</span>
-        </div>
-        <p className="footer-copy">© 2026 VoltaicOS. Accelerating the electric transition.</p>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

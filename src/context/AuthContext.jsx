@@ -1,9 +1,11 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { authApi } from '../api/client';
+import { useToast } from './ToastContext';
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
+  const toast = useToast();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
@@ -37,12 +39,13 @@ export function AuthProvider({ children }) {
     }
     setUser(userData);
     setIsAuthModalOpen(false);
+    toast.success(`Signed in as ${userData?.name || userData?.email || 'EV driver'}`);
 
     if (authCallback && typeof authCallback === 'function') {
       authCallback(userData);
       setAuthCallback(null);
     }
-  }, [authCallback]);
+  }, [authCallback, toast]);
 
   const loginWithEmail = async (email, password) => {
     const res = await authApi.login({ email, password });
