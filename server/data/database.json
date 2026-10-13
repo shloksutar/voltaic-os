@@ -1321,13 +1321,24 @@
     {
       "id": "usr_1791741304908_iyguo",
       "createdAt": "2026-10-11T17:55:04.908Z",
-      "name": "Shlok Sutar",
-      "email": "shlokvsutar@gmail.com",
+      "name": "Demo EV Driver",
+      "email": "driver@voltaicos.io",
       "googleId": "google_1791741304868",
       "authProvider": "google",
       "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&auto=format&fit=crop&q=80",
       "vehicleModel": "MG ZS EV",
       "licensePlate": "DL 01 EV 4421"
+    },
+    {
+      "id": "usr_1791917066207_kmt4g",
+      "createdAt": "2026-10-13T18:44:26.207Z",
+      "name": "satej",
+      "phone": "9607102196",
+      "email": "9607102196@phone.voltaicos.io",
+      "authProvider": "phone",
+      "avatar": "https://api.dicebear.com/7.x/initials/svg?seed=9607102196",
+      "vehicleModel": "Tata Nexon EV Max",
+      "licensePlate": "MH 02 EV 9912"
     }
   ],
   "bookings": [

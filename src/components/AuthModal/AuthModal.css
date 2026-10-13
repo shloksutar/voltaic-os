@@ -130,59 +130,39 @@
   margin-bottom: 12px;
 }
 
-.google-accounts-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-bottom: 16px;
-}
-
-.google-account-btn {
+.google-auth-btn {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 12px;
-  padding: 10px 14px;
+  width: 100%;
+  padding: 12px 18px;
   border-radius: var(--radius-md, 10px);
   border: 1px solid var(--color-border, #e2e6ee);
   background: #ffffff;
+  color: var(--color-text, #111827);
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
   cursor: pointer;
-  transition: all 0.15s ease;
-  text-align: left;
-  width: 100%;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
-.google-account-btn:hover {
-  border-color: var(--color-primary-light, #6366f1);
-  background: #f9fafb;
+.google-auth-btn:hover:not(:disabled) {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   transform: translateY(-1px);
 }
 
-.google-user-avatar {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  object-fit: cover;
+.google-auth-btn:active:not(:disabled) {
+  transform: translateY(0);
 }
 
-.google-user-meta {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-.google-user-name {
-  font-size: 13.5px;
-  font-weight: 600;
-  color: var(--color-text, #111827);
-}
-
-.google-user-email {
-  font-size: 11.5px;
-  color: var(--color-text-3, #6b7280);
-}
-
-.google-arrow {
-  color: var(--color-text-4, #9ca3af);
+.google-auth-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
 }
 
 .auth-divider {
