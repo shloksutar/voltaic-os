@@ -1410,7 +1410,7 @@
     {
       "id": "alt_1791741316307_1h8c",
       "time": "Just now",
-      "resolved": false,
+      "resolved": true,
       "timestamp": 1791741316307,
       "type": "reservation",
       "severity": "low",

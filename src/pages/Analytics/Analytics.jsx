@@ -66,6 +66,10 @@ export default function Analytics() {
 
   return (
     <div className="analytics page-enter">
+      <PageMeta
+        title="Network Analytics"
+        description="Aggregated real-time charging network telemetry, grid utilization profiles, and operator market share."
+      />
       <div className="analytics-header">
         <h1 className="analytics-title font-display">Network Analytics</h1>
         <p className="analytics-sub">
@@ -259,6 +263,7 @@ export default function Analytics() {
           </div>
         </div>
       </div>
+      <SiteFooter />
     </div>
   );
 }

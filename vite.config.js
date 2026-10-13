@@ -15,6 +15,9 @@ function apiBackendPlugin() {
     configureServer(server) {
       server.middlewares.use(app);
     },
+    configurePreviewServer(server) {
+      server.middlewares.use(app);
+    },
   };
 }
 

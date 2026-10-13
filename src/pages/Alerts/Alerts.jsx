@@ -1,6 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
-import { WifiOff, Car, Clock, CheckCircle, PlusCircle, RefreshCw, AlertTriangle, ShieldCheck } from 'lucide-react';
+import { WifiOff, Car, Clock, CheckCircle, RefreshCw, ShieldCheck } from 'lucide-react';
 import { alertsApi } from '../../api/client';
+import { useToast } from '../../context/ToastContext';
+import PageMeta from '../../components/PageMeta/PageMeta';
+import SiteFooter from '../../components/SiteFooter/SiteFooter';
 import './Alerts.css';
 
 const TYPE_META = {
@@ -17,6 +20,7 @@ export default function Alerts() {
   const [loading, setLoading] = useState(false);
   const [filter, setFilter] = useState('all');
   const [showResolved, setShowResolved] = useState(false);
+  const toast = useToast();
 
   const fetchAlerts = useCallback(async () => {
     setLoading(true);
@@ -25,8 +29,8 @@ export default function Alerts() {
       if (res?.alerts) {
         setAlerts(res.alerts);
       }
-    } catch (err) {
-      console.warn('Failed to load alerts from backend:', err);
+    } catch {
+      // Fallback alerts already populated
     } finally {
       setLoading(false);
     }
@@ -39,18 +43,20 @@ export default function Alerts() {
   const handleResolve = async (id) => {
     try {
       await alertsApi.resolve(id);
+      toast.success('Incident marked as resolved.');
       fetchAlerts();
     } catch (err) {
-      alert(err.message || 'Failed to resolve alert');
+      toast.error(err.message || 'Failed to resolve alert');
     }
   };
 
   const handleDismiss = async (id) => {
     try {
       await alertsApi.dismiss(id);
+      toast.success('Alert dismissed from network feed.');
       fetchAlerts();
     } catch (err) {
-      alert(err.message || 'Failed to dismiss alert');
+      toast.error(err.message || 'Failed to dismiss alert');
     }
   };
 
@@ -64,6 +70,10 @@ export default function Alerts() {
 
   return (
     <div className="alerts-page page-enter">
+      <PageMeta
+        title="Incident Feed"
+        description="Live incident dispatch, ICE violations, hardware faults, and verified charging slot alerts."
+      />
       <div className="al-header">
         <div>
           <h1 className="al-title font-display">Network Incident & Activity Feed</h1>
@@ -176,6 +186,7 @@ export default function Alerts() {
           })
         )}
       </div>
+      <SiteFooter />
     </div>
   );
 }

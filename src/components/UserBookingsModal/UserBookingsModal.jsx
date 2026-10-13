@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { X, Calendar, Clock, MapPin, QrCode, Ban, CheckCircle, ExternalLink, RefreshCw } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../context/ToastContext';
 import { bookingsApi } from '../../api/client';
 import './UserBookingsModal.css';
 
 export default function UserBookingsModal({ isOpen, onClose, onRefreshStations }) {
   const { user } = useAuth();
+  const toast = useToast();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(false);
   const [cancellingId, setCancellingId] = useState(null);
@@ -35,10 +37,11 @@ export default function UserBookingsModal({ isOpen, onClose, onRefreshStations }
     setCancellingId(bookingId);
     try {
       await bookingsApi.cancel(bookingId);
+      toast.success('Slot reservation cancelled successfully.');
       await fetchBookings();
       if (onRefreshStations) onRefreshStations();
     } catch (err) {
-      alert(err.message || 'Failed to cancel reservation');
+      toast.error(err.message || 'Failed to cancel reservation');
     } finally {
       setCancellingId(null);
     }

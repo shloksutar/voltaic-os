@@ -8,9 +8,13 @@ const __dirname = path.dirname(__filename);
 const DB_FILE = path.join(__dirname, 'data', 'database.json');
 
 // Ensure directory exists
-const dir = path.dirname(DB_FILE);
-if (!fs.existsSync(dir)) {
-  fs.mkdirSync(dir, { recursive: true });
+try {
+  const dir = path.dirname(DB_FILE);
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+} catch {
+  // Read-only filesystem in serverless environments
 }
 
 function getInitialData() {
