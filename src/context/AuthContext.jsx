@@ -83,6 +83,7 @@ export function AuthProvider({ children }) {
     }
     localStorage.removeItem('voltaic_token');
     setUser(null);
+    toast.info('You have been signed out.');
   };
 
   const updateProfile = async (updates) => {

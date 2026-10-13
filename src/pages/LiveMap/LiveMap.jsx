@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { Clock, Zap, WifiOff, ChevronDown, AlertTriangle } from 'lucide-react';
+import { Clock, Zap, WifiOff, ChevronDown, AlertTriangle, RefreshCw } from 'lucide-react';
 import { CHARGERS, CITIES, getQueueForecast } from '../../data/chargers';
 import { stationsApi } from '../../api/client';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
@@ -101,8 +101,8 @@ export default function LiveMap() {
   return (
     <div className="livemap page-enter">
       <PageMeta
-        title="Live Map"
-        description="Interactive live map of VoltaicOS charging hubs with real-time port status and queue forecasts."
+        title="Live Charging Map"
+        description="Explore live EV charging hubs, real-time connector occupancy, power delivery rates, and predictive wait time forecasts across India."
       />
       {/* Toolbar */}
       <div className="lm-toolbar">
@@ -115,6 +115,7 @@ export default function LiveMap() {
         <div className="lm-filters">
           <div className="lm-select-wrap">
             <select
+              aria-label="Filter stations by city"
               className="lm-select"
               value={selectedCity}
               onChange={(e) => {
@@ -128,6 +129,19 @@ export default function LiveMap() {
             </select>
             <ChevronDown size={14} className="lm-select-icon" />
           </div>
+          <button
+            type="button"
+            className="btn btn-secondary btn-sm"
+            onClick={async () => {
+              await fetchStations();
+              toast.success('Live charging telemetry refreshed.');
+            }}
+            disabled={loading}
+            title="Refresh live station telemetry"
+          >
+            <RefreshCw size={13} className={loading ? 'spin' : ''} />
+            <span>Sync</span>
+          </button>
           <div className="lm-legend">
             <span className="legend-item">
               <span className="legend-dot" style={{ background: '#059669' }} /> Available
@@ -158,7 +172,7 @@ export default function LiveMap() {
           >
             <TileLayer
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              attribution='© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> contributors'
             />
             {filtered.map((c) => (
               <Marker

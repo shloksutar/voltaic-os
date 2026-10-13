@@ -12,11 +12,13 @@ import {
   AlertTriangle,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../context/ToastContext';
 import { bookingsApi } from '../../api/client';
 import './ReservationModal.css';
 
 export default function ReservationModal({ station, isOpen, onClose, onBookingComplete }) {
   const { user, isAuthenticated, openAuthModal } = useAuth();
+  const toast = useToast();
 
   const [selectedBay, setSelectedBay] = useState(null);
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
@@ -24,8 +26,8 @@ export default function ReservationModal({ station, isOpen, onClose, onBookingCo
     new Date(Date.now() + 15 * 60000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })
   );
   const [duration, setDuration] = useState(45);
-  const [vehicleNumber, setVehicleNumber] = useState(user?.licensePlate || 'MH 02 EV 9912');
-  const [vehicleModel, setVehicleModel] = useState(user?.vehicleModel || 'Tata Nexon EV Max');
+  const [vehicleNumber, setVehicleNumber] = useState(user?.licensePlate || '');
+  const [vehicleModel, setVehicleModel] = useState(user?.vehicleModel || '');
   const [guestName, setGuestName] = useState(user?.name || '');
   const [guestPhone, setGuestPhone] = useState(user?.phone || '');
 
@@ -90,11 +92,14 @@ export default function ReservationModal({ station, isOpen, onClose, onBookingCo
 
       const res = await bookingsApi.create(payload);
       setConfirmedBooking(res.booking);
+      toast.success('Charging slot reserved successfully!');
       if (onBookingComplete) {
         onBookingComplete(res.booking);
       }
     } catch (err) {
-      setError(err.message || 'Failed to complete reservation');
+      const msg = err.message || 'Failed to complete reservation';
+      setError(msg);
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
@@ -106,9 +111,12 @@ export default function ReservationModal({ station, isOpen, onClose, onBookingCo
       setLoading(true);
       await bookingsApi.cancel(confirmedBooking.id);
       setConfirmedBooking(null);
+      toast.info('Reservation has been cancelled.');
       onClose();
     } catch (err) {
-      setError(err.message || 'Failed to cancel reservation');
+      const msg = err.message || 'Failed to cancel reservation';
+      setError(msg);
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
@@ -257,7 +265,7 @@ export default function ReservationModal({ station, isOpen, onClose, onBookingCo
                       <Car size={14} />
                       <input
                         type="text"
-                        placeholder="Tata Nexon EV / MG ZS EV"
+                        placeholder="EV make and model"
                         value={vehicleModel}
                         onChange={(e) => setVehicleModel(e.target.value)}
                         required
@@ -269,7 +277,7 @@ export default function ReservationModal({ station, isOpen, onClose, onBookingCo
                     <div className="res-input-wrap">
                       <input
                         type="text"
-                        placeholder="MH 02 EV 9912"
+                        placeholder="e.g. MH 02 EV 9912"
                         value={vehicleNumber}
                         onChange={(e) => setVehicleNumber(e.target.value.toUpperCase())}
                         required
@@ -284,7 +292,7 @@ export default function ReservationModal({ station, isOpen, onClose, onBookingCo
                       <label>Driver Name</label>
                       <input
                         type="text"
-                        placeholder="Your Full Name"
+                        placeholder="Your full name"
                         className="res-plain-input"
                         value={guestName}
                         onChange={(e) => setGuestName(e.target.value)}
@@ -295,7 +303,7 @@ export default function ReservationModal({ station, isOpen, onClose, onBookingCo
                       <label>Phone Number</label>
                       <input
                         type="tel"
-                        placeholder="+91 98765 43210"
+                        placeholder="10-digit mobile number"
                         className="res-plain-input"
                         value={guestPhone}
                         onChange={(e) => setGuestPhone(e.target.value)}

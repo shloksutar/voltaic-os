@@ -156,3 +156,27 @@
   color: var(--color-text-4);
   font-size: 14px;
 }
+
+@media (max-width: 640px) {
+  .alerts-page {
+    padding: calc(var(--nav-h) + 20px) 16px 40px;
+  }
+  .al-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .al-header-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .al-row {
+    flex-direction: column;
+    gap: 12px;
+  }
+  .al-actions {
+    width: 100%;
+    justify-content: flex-end;
+    border-top: 1px solid var(--color-border-soft);
+    padding-top: 8px;
+  }
+}

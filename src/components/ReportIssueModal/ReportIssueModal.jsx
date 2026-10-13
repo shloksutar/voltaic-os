@@ -2,10 +2,12 @@ import { useState } from 'react';
 import { X, AlertTriangle, Car, WifiOff, Clock, CheckCircle2 } from 'lucide-react';
 import { stationsApi } from '../../api/client';
 import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../context/ToastContext';
 import './ReportIssueModal.css';
 
 export default function ReportIssueModal({ station, isOpen, onClose, onReportSuccess }) {
   const { user } = useAuth();
+  const toast = useToast();
   const [type, setType] = useState('ice'); // 'ice' | 'offline' | 'queue'
   const [bayNumber, setBayNumber] = useState(1);
   const [msg, setMsg] = useState('');
@@ -38,13 +40,16 @@ export default function ReportIssueModal({ station, isOpen, onClose, onReportSuc
         reporterName: user?.name || 'EV Driver',
       });
       setSuccess(true);
+      toast.success('Incident dispatched to network operations.');
       if (onReportSuccess) onReportSuccess();
       setTimeout(() => {
         setSuccess(false);
         onClose();
       }, 1800);
     } catch (err) {
-      setError(err.message || 'Failed to submit report');
+      const errorMsg = err.message || 'Failed to submit report';
+      setError(errorMsg);
+      toast.error(errorMsg);
     } finally {
       setLoading(false);
     }
@@ -124,7 +129,7 @@ export default function ReportIssueModal({ station, isOpen, onClose, onReportSuc
             <div className="rim-field">
               <label>Incident Details</label>
               <textarea
-                placeholder="Describe what happened (e.g. connector broken, screen unresponsive, car unattended)..."
+                placeholder="Describe what happened (connector broken, screen unresponsive, car unattended)..."
                 rows={3}
                 value={msg}
                 onChange={(e) => setMsg(e.target.value)}
@@ -137,6 +142,13 @@ export default function ReportIssueModal({ station, isOpen, onClose, onReportSuc
               <AlertTriangle size={15} />
               {loading ? 'Submitting report...' : 'Submit Incident Report'}
             </button>
+
+            <div style={{ marginTop: '14px', textAlign: 'center', fontSize: '12px', color: 'var(--color-text-3)' }}>
+              Urgent on-site emergency? Reach 24/7 Operations at{' '}
+              <a href="tel:+911800208808" style={{ color: 'var(--color-primary)', fontWeight: 600 }}>
+                +91 1800-208-808
+              </a>
+            </div>
           </form>
         )}
       </div>

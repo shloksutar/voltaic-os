@@ -7,16 +7,16 @@
   gap: 24px;
   min-width: 0;
   width: 100%;
-}
-.chargers-page .site-footer {
-  margin-left: -24px;
-  margin-right: -24px;
+  box-sizing: border-box;
+  overflow-x: hidden;
 }
 
 .chp-header {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
 }
 .chp-title { font-size: 22px; font-weight: 700; letter-spacing: -.6px; }
 .chp-sub   { font-size: 13px; color: var(--color-text-3); margin-top: 3px; }
@@ -28,12 +28,14 @@
   gap: 12px;
   padding: 14px 18px;
   flex-wrap: wrap;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .chp-search-wrap {
   position: relative;
   flex: 1;
-  min-width: 200px;
+  min-width: 220px;
 }
 .chp-search-icon {
   position: absolute;
@@ -45,14 +47,15 @@
 }
 .chp-search {
   width: 100%;
-  padding: 8px 12px 8px 34px;
+  padding: 9px 12px 9px 34px;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  font-size: 13.5px;
+  font-size: 14px;
   font-family: inherit;
   background: var(--color-surface-2);
   color: var(--color-text);
   transition: border-color var(--fast);
+  box-sizing: border-box;
 }
 .chp-search:focus {
   outline: none;
@@ -60,15 +63,23 @@
   background: var(--color-surface);
 }
 
-.chp-selects { display: flex; gap: 10px; }
-.chp-select-wrap { position: relative; }
+.chp-selects {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.chp-select-wrap {
+  position: relative;
+  min-width: 140px;
+}
 .chp-select {
+  width: 100%;
   appearance: none;
   background: var(--color-surface-2);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  padding: 7px 30px 7px 12px;
-  font-size: 13px;
+  padding: 8px 32px 8px 12px;
+  font-size: 13.5px;
   font-family: inherit;
   color: var(--color-text-2);
   cursor: pointer;
@@ -77,7 +88,7 @@
 .chp-select:focus { outline: none; border-color: var(--color-primary-light); }
 .chp-sel-icon {
   position: absolute;
-  right: 9px;
+  right: 10px;
   top: 50%;
   transform: translateY(-50%);
   pointer-events: none;
@@ -92,49 +103,58 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   padding: 3px;
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 .status-tab {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 5px 12px;
+  padding: 6px 14px;
   border-radius: var(--radius-sm);
   font-size: 12.5px;
   font-weight: 500;
   color: var(--color-text-3);
   transition: all var(--fast);
+  white-space: nowrap;
+  cursor: pointer;
 }
 .status-tab:hover { background: var(--color-surface); color: var(--color-text); }
 .status-tab-active {
   background: var(--color-surface) !important;
   color: var(--color-text) !important;
   box-shadow: var(--shadow-xs);
+  font-weight: 600;
 }
 
 /* Grid */
 .chp-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 14px;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+  width: 100%;
 }
 
-/* Empty */
+/* Empty State */
 .chp-empty {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 12px;
-  padding: 64px 0;
+  padding: 64px 20px;
   color: var(--color-text-4);
   font-size: 14px;
+  text-align: center;
 }
 
-@media (max-width: 700px) {
-  .chargers-page { padding: calc(var(--nav-h) + 20px) 16px 0; }
-  .chargers-page .site-footer { margin-left: -16px; margin-right: -16px; }
+@media (max-width: 768px) {
+  .chargers-page { padding: calc(var(--nav-h) + 20px) 16px 0; gap: 20px; }
   .chp-header { flex-direction: column; align-items: flex-start; gap: 12px; }
-  .chp-filters { gap: 10px; }
-  .chp-selects { flex-wrap: wrap; width: 100%; }
-  .chp-status-tabs { width: 100%; overflow-x: auto; }
+  .chp-filters { gap: 12px; padding: 12px; }
+  .chp-search-wrap { width: 100%; min-width: 100%; }
+  .chp-selects { width: 100%; }
+  .chp-select-wrap { flex: 1; min-width: calc(50% - 6px); }
+  .chp-status-tabs { width: 100%; }
   .chp-grid { grid-template-columns: 1fr; }
 }

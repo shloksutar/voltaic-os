@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Calendar, Clock, MapPin, QrCode, Ban, CheckCircle, ExternalLink, RefreshCw } from 'lucide-react';
+import { X, Calendar, Clock, MapPin, Ban, CheckCircle, ExternalLink, RefreshCw } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { bookingsApi } from '../../api/client';

@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { RefreshCw } from 'lucide-react';
 import {
   BarChart,
   Bar,
@@ -16,6 +17,7 @@ import {
 } from 'recharts';
 import { analyticsApi, stationsApi } from '../../api/client';
 import { CHARGERS } from '../../data/chargers';
+import { useToast } from '../../context/ToastContext';
 import PageMeta from '../../components/PageMeta/PageMeta';
 import SiteFooter from '../../components/SiteFooter/SiteFooter';
 import './Analytics.css';
@@ -35,25 +37,27 @@ export default function Analytics() {
   const [data, setData] = useState(null);
   const [stations, setStations] = useState(CHARGERS);
   const [loading, setLoading] = useState(false);
+  const toast = useToast();
+
+  const loadAnalytics = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [anRes, stRes] = await Promise.all([
+        analyticsApi.get(),
+        stationsApi.getAll(),
+      ]);
+      if (anRes) setData(anRes);
+      if (stRes?.stations) setStations(stRes.stations);
+    } catch (err) {
+      console.warn('Analytics API error, falling back:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    async function loadAnalytics() {
-      setLoading(true);
-      try {
-        const [anRes, stRes] = await Promise.all([
-          analyticsApi.get(),
-          stationsApi.getAll(),
-        ]);
-        if (anRes) setData(anRes);
-        if (stRes?.stations) setStations(stRes.stations);
-      } catch (err) {
-        console.warn('Analytics API error, falling back:', err);
-      } finally {
-        setLoading(false);
-      }
-    }
     loadAnalytics();
-  }, []);
+  }, [loadAnalytics]);
 
   const cityData = data?.cityData || [];
   const operatorData = data?.operatorData || [];
@@ -70,11 +74,26 @@ export default function Analytics() {
         title="Network Analytics"
         description="Aggregated real-time charging network telemetry, grid utilization profiles, and operator market share."
       />
-      <div className="analytics-header">
-        <h1 className="analytics-title font-display">Network Analytics</h1>
-        <p className="analytics-sub">
-          Aggregated telemetry and reservation data across connected CPO hubs · Computed Live
-        </p>
+      <div className="analytics-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px' }}>
+        <div>
+          <h1 className="analytics-title font-display">Network Analytics</h1>
+          <p className="analytics-sub">
+            Aggregated telemetry and reservation data across connected CPO hubs · Computed Live
+          </p>
+        </div>
+        <button
+          type="button"
+          className="btn btn-secondary btn-sm"
+          onClick={async () => {
+            await loadAnalytics();
+            toast.success('Analytics metrics and CPO stats refreshed.');
+          }}
+          disabled={loading}
+          title="Refresh analytics metrics"
+        >
+          <RefreshCw size={13} className={loading ? 'spin-icon' : ''} />
+          <span>Sync</span>
+        </button>
       </div>
 
       <div className="analytics-grid">

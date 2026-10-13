@@ -21,12 +21,22 @@ export default function NotFound() {
           <Link to="/" className="btn btn-primary">
             <ArrowLeft size={15} /> Back to Overview
           </Link>
-          <Link to="/map" className="btn btn-ghost">
+          <Link to="/map" className="btn btn-secondary">
             <Map size={15} /> Open Live Map
           </Link>
-          <Link to="/chargers" className="btn btn-ghost">
+          <Link to="/chargers" className="btn btn-secondary">
             <Zap size={15} /> Browse Chargers
           </Link>
+        </div>
+        <div className="nf-support" style={{ marginTop: '28px', paddingTop: '20px', borderTop: '1px solid var(--color-border-soft)', fontSize: '13px', color: 'var(--color-text-3)' }}>
+          Need urgent station dispatch or driver support?{' '}
+          <a href="tel:+911800208808" style={{ color: 'var(--color-primary)', fontWeight: 600 }}>
+            +91 1800-208-808
+          </a>
+          {' · '}
+          <a href="mailto:hello@voltaicos.io" style={{ color: 'var(--color-primary)', fontWeight: 600 }}>
+            hello@voltaicos.io
+          </a>
         </div>
       </div>
       <SiteFooter />

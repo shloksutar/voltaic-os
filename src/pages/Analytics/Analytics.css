@@ -106,3 +106,15 @@
   .analytics-grid { grid-template-columns: 1fr; }
   .an-card-wide { grid-column: 1; }
 }
+
+@media (max-width: 640px) {
+  .analytics {
+    padding: calc(var(--nav-h) + 20px) 16px 40px;
+  }
+  .an-card {
+    padding: 16px 14px;
+  }
+  .an-table-wrap {
+    -webkit-overflow-scrolling: touch;
+  }
+}

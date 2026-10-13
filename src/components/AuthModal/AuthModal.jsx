@@ -304,7 +304,7 @@ export default function AuthModal() {
                   <User size={15} />
                   <input
                     type="text"
-                    placeholder="e.g. Shlok Sutar"
+                    placeholder="Enter your full name"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     required
@@ -319,7 +319,7 @@ export default function AuthModal() {
                 <Mail size={15} />
                 <input
                   type="email"
-                  placeholder="driver@voltaicos.io"
+                  placeholder="name@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -333,7 +333,7 @@ export default function AuthModal() {
                 <Lock size={15} />
                 <input
                   type="password"
-                  placeholder="••••••••"
+                  placeholder="Enter password (min. 6 characters)"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
@@ -360,7 +360,7 @@ export default function AuthModal() {
                   <div className="auth-input-wrap">
                     <input
                       type="text"
-                      placeholder="MH 02 EV 9912"
+                      placeholder="e.g. MH 02 EV 9912"
                       value={licensePlate}
                       onChange={(e) => setLicensePlate(e.target.value.toUpperCase())}
                     />
@@ -390,7 +390,7 @@ export default function AuthModal() {
                     <span className="auth-country-code">+91 (India)</span>
                     <input
                       type="tel"
-                      placeholder="98765 43210"
+                      placeholder="10-digit mobile number"
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
                       required
@@ -404,7 +404,7 @@ export default function AuthModal() {
                     <User size={15} />
                     <input
                       type="text"
-                      placeholder="e.g. Rahul Verma"
+                      placeholder="Your full name"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                     />
