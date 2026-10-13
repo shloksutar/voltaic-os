@@ -1,8 +1,21 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { Clock, Zap, WifiOff, ChevronDown, AlertTriangle, RefreshCw } from 'lucide-react';
+import {
+  Clock,
+  Zap,
+  ChevronDown,
+  AlertTriangle,
+  RefreshCw,
+  Search,
+  X,
+  Navigation,
+  Crosshair,
+  SlidersHorizontal,
+  ExternalLink,
+  Layers,
+} from 'lucide-react';
 import { CHARGERS, CITIES, getQueueForecast } from '../../data/chargers';
 import { stationsApi } from '../../api/client';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
@@ -20,42 +33,127 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
 });
 
-function makeIcon(status) {
-  const colors = {
-    available: '#059669',
-    busy: '#D97706',
-    offline: '#DC2626',
+// Calculate distance between two lat/lng coordinates in km (Haversine formula)
+function calculateDistanceKm(lat1, lon1, lat2, lon2) {
+  if (!lat1 || !lon1 || !lat2 || !lon2) return null;
+  const R = 6371;
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return Math.round(R * c * 10) / 10;
+}
+
+// Google Maps-style Rich Pin Marker
+function makeMarkerIcon(charger, isSelected) {
+  const statusColors = {
+    available: '#059669', // Emerald green
+    busy: '#D97706',      // Warm amber
+    offline: '#DC2626',   // Coral red
   };
-  const c = colors[status] || '#6B7280';
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="36" viewBox="0 0 28 36">
-    <path d="M14 0C6.268 0 0 6.268 0 14c0 9.333 14 22 14 22s14-12.667 14-22C28 6.268 21.732 0 14 0z" fill="${c}" />
-    <circle cx="14" cy="14" r="7" fill="white" />
-    <circle cx="14" cy="14" r="4.5" fill="${c}" />
-  </svg>`;
+  const color = statusColors[charger.status] || '#6B7280';
+  const label = charger.status === 'offline' ? '!' : `${charger.available}`;
+
+  const html = `
+    <div class="gmap-pin ${isSelected ? 'gmap-pin--selected' : ''}" style="--pin-color: ${color};">
+      <div class="gmap-pin-badge">
+        <svg class="gmap-pin-bolt" viewBox="0 0 24 24" width="11" height="11" fill="currentColor">
+          <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+        </svg>
+        <span class="gmap-pin-count">${label}</span>
+      </div>
+      <div class="gmap-pin-pointer"></div>
+      ${isSelected ? '<div class="gmap-pin-halo"></div>' : ''}
+    </div>
+  `;
+
   return L.divIcon({
-    html: svg,
-    className: '',
-    iconSize: [28, 36],
-    iconAnchor: [14, 36],
-    popupAnchor: [0, -38],
+    html,
+    className: 'gmap-marker-container',
+    iconSize: [40, 44],
+    iconAnchor: [20, 42],
+    popupAnchor: [0, -44],
   });
 }
 
-function FlyTo({ charger }) {
+// Google Maps-style Blue GPS dot
+function makeUserDotIcon() {
+  const html = `
+    <div class="gmap-user-dot">
+      <div class="gmap-user-dot-pulse"></div>
+      <div class="gmap-user-dot-core"></div>
+    </div>
+  `;
+  return L.divIcon({
+    html,
+    className: 'gmap-user-container',
+    iconSize: [26, 26],
+    iconAnchor: [13, 13],
+  });
+}
+
+// Smooth Camera Controller
+function MapController({ selectedCharger, userLocation, fitBoundsTrigger }) {
   const map = useMap();
+
   useEffect(() => {
-    if (charger) map.flyTo([charger.lat, charger.lng], 14, { duration: 1.2 });
-  }, [charger, map]);
+    if (selectedCharger) {
+      map.flyTo([selectedCharger.lat, selectedCharger.lng], 15, {
+        duration: 1.2,
+        easeLinearity: 0.25,
+      });
+    }
+  }, [selectedCharger, map]);
+
+  useEffect(() => {
+    if (userLocation) {
+      map.flyTo([userLocation.lat, userLocation.lng], 14, {
+        duration: 1.4,
+        easeLinearity: 0.25,
+      });
+    }
+  }, [userLocation, map]);
+
+  useEffect(() => {
+    if (fitBoundsTrigger && fitBoundsTrigger.length > 0) {
+      try {
+        map.fitBounds(fitBoundsTrigger, {
+          padding: [60, 60],
+          maxZoom: 13,
+          duration: 1.2,
+        });
+      } catch {
+        // ignore bounds calculation edge cases
+      }
+    }
+  }, [fitBoundsTrigger, map]);
+
   return null;
 }
 
 export default function LiveMap() {
   const [stations, setStations] = useState(CHARGERS);
   const [selectedCity, setSelectedCity] = useState('All Cities');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterAvailableOnly, setFilterAvailableOnly] = useState(false);
+  const [filterFastOnly, setFilterFastOnly] = useState(false);
+
   const [selectedCharger, setSelectedCharger] = useState(null);
+  const [showDrawerList, setShowDrawerList] = useState(false);
+  const [showForecastChart, setShowForecastChart] = useState(false);
   const [forecastData, setForecastData] = useState([]);
+
+  // User Geolocation
+  const [userLocation, setUserLocation] = useState(null);
+  const [locating, setLocating] = useState(false);
+
   const [loading, setLoading] = useState(false);
-  const [fetchError, setFetchError] = useState('');
+  const [fitBoundsTrigger, setFitBoundsTrigger] = useState(null);
   const toast = useToast();
 
   // Modals
@@ -70,15 +168,13 @@ export default function LiveMap() {
       });
       if (res?.stations) {
         setStations(res.stations);
-        setFetchError('');
         if (selectedCharger) {
           const updated = res.stations.find((s) => s.id === selectedCharger.id);
           if (updated) setSelectedCharger(updated);
         }
       }
     } catch {
-      // Offline fallback: verified station telemetry is served from cache
-      setFetchError('');
+      // offline fallback
     } finally {
       setLoading(false);
     }
@@ -88,278 +184,505 @@ export default function LiveMap() {
     fetchStations();
   }, [fetchStations]);
 
-  const filtered = selectedCity === 'All Cities'
-    ? stations
-    : stations.filter((c) => c.city === selectedCity);
+  // Handle GPS "Near Me" Locate action
+  const handleLocateMe = () => {
+    if (!navigator.geolocation) {
+      toast.error('Geolocation is not supported by your browser.');
+      return;
+    }
+    setLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        setUserLocation(coords);
+        setLocating(false);
+        toast.success('Location found! Showing nearest charging stations.');
+      },
+      (err) => {
+        setLocating(false);
+        console.warn('Geolocation error:', err);
+        // Fallback to central Mumbai BKC for demo if permission denied
+        const demoCoords = { lat: 19.0633, lng: 72.8687 };
+        setUserLocation(demoCoords);
+        toast.info('Using simulated GPS position near Mumbai BKC.');
+      },
+      { timeout: 8000, enableHighAccuracy: true }
+    );
+  };
 
+  // Filter and sort stations
+  const filtered = useMemo(() => {
+    let result = stations;
+
+    // City filter
+    if (selectedCity !== 'All Cities') {
+      result = result.filter((c) => c.city === selectedCity);
+    }
+
+    // Search query
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase().trim();
+      result = result.filter(
+        (c) =>
+          c.name.toLowerCase().includes(q) ||
+          c.city.toLowerCase().includes(q) ||
+          c.operator.toLowerCase().includes(q) ||
+          (c.address && c.address.toLowerCase().includes(q))
+      );
+    }
+
+    // Available only filter
+    if (filterAvailableOnly) {
+      result = result.filter((c) => c.status === 'available' && c.available > 0);
+    }
+
+    // Fast chargers only filter (speed >= 60 kW)
+    if (filterFastOnly) {
+      result = result.filter((c) => c.speed >= 60);
+    }
+
+    // If userLocation is set, sort by distance
+    if (userLocation) {
+      return [...result].sort((a, b) => {
+        const distA = calculateDistanceKm(userLocation.lat, userLocation.lng, a.lat, a.lng) || 9999;
+        const distB = calculateDistanceKm(userLocation.lat, userLocation.lng, b.lat, b.lng) || 9999;
+        return distA - distB;
+      });
+    }
+
+    return result;
+  }, [stations, selectedCity, searchQuery, filterAvailableOnly, filterFastOnly, userLocation]);
+
+  // Recenter / Fit All Bounds
+  const handleFitAll = () => {
+    if (filtered.length > 0) {
+      const bounds = filtered.map((c) => [c.lat, c.lng]);
+      setFitBoundsTrigger(bounds);
+    }
+  };
+
+  // Trigger fit bounds when city changes
+  useEffect(() => {
+    if (selectedCity !== 'All Cities' && filtered.length > 0) {
+      const bounds = filtered.map((c) => [c.lat, c.lng]);
+      setFitBoundsTrigger(bounds);
+    }
+  }, [selectedCity]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Load forecast when charger selected
   useEffect(() => {
     if (selectedCharger) {
       setForecastData(getQueueForecast(selectedCharger.id, selectedCharger.busy));
     }
   }, [selectedCharger]);
 
+  // Turn-by-turn navigation URL
+  const getDirectionsUrl = (charger) => {
+    return `https://www.google.com/maps/dir/?api=1&destination=${charger.lat},${charger.lng}`;
+  };
+
   return (
-    <div className="livemap page-enter">
+    <div className="livemap gmap-fullscreen page-enter">
       <PageMeta
         title="Live Charging Map"
-        description="Explore live EV charging hubs, real-time connector occupancy, power delivery rates, and predictive wait time forecasts across India."
+        description="Find EV chargers on a smooth Google Maps experience with real-time port availability, GPS location, and 1-tap navigation."
       />
-      {/* Toolbar */}
-      <div className="lm-toolbar">
-        <div className="lm-title-block">
-          <h1 className="lm-title font-display">Live Map</h1>
-          <span className="lm-subtitle">
-            {filtered.length} stations online · Live charger availability
-          </span>
-        </div>
-        <div className="lm-filters">
-          <div className="lm-select-wrap">
+
+      {/* ─── 1. GOOGLE MAPS FLOATING SEARCH & FILTER BAR ─── */}
+      <div className="gmap-floating-overlay">
+        <div className="gmap-search-bar card">
+          <div className="gmap-search-input-wrap">
+            <Search size={16} className="gmap-search-icon" />
+            <input
+              type="text"
+              className="gmap-search-input"
+              placeholder="Search stations, areas, or landmarks…"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                className="gmap-clear-btn"
+                onClick={() => setSearchQuery('')}
+                title="Clear search"
+              >
+                <X size={14} />
+              </button>
+            )}
+          </div>
+
+          <div className="gmap-city-picker">
             <select
               aria-label="Filter stations by city"
-              className="lm-select"
               value={selectedCity}
               onChange={(e) => {
                 setSelectedCity(e.target.value);
                 setSelectedCharger(null);
               }}
+              className="gmap-city-select"
             >
               {CITIES.map((c) => (
-                <option key={c}>{c}</option>
+                <option key={c} value={c}>
+                  {c}
+                </option>
               ))}
             </select>
-            <ChevronDown size={14} className="lm-select-icon" />
+            <ChevronDown size={14} className="gmap-city-icon" />
           </div>
+        </div>
+
+        {/* Quick Filter Chips */}
+        <div className="gmap-filter-chips">
           <button
             type="button"
-            className="btn btn-secondary btn-sm"
-            onClick={async () => {
-              await fetchStations();
-              toast.success('Live charger availability updated.');
-            }}
-            disabled={loading}
-            title="Refresh live charger status"
+            className={`gmap-chip ${filterAvailableOnly ? 'gmap-chip--active' : ''}`}
+            onClick={() => setFilterAvailableOnly(!filterAvailableOnly)}
           >
-            <RefreshCw size={13} className={loading ? 'spin' : ''} />
-            <span>Refresh</span>
+            <span className="gmap-chip-dot dot-available" />
+            <span>Open Now</span>
           </button>
-          <div className="lm-legend">
-            <span className="legend-item">
-              <span className="legend-dot" style={{ background: '#059669' }} /> Available
-            </span>
-            <span className="legend-item">
-              <span className="legend-dot" style={{ background: '#D97706' }} /> Busy
-            </span>
-            <span className="legend-item">
-              <span className="legend-dot" style={{ background: '#DC2626' }} /> Offline
-            </span>
-          </div>
+
+          <button
+            type="button"
+            className={`gmap-chip ${filterFastOnly ? 'gmap-chip--active' : ''}`}
+            onClick={() => setFilterFastOnly(!filterFastOnly)}
+          >
+            <Zap size={13} />
+            <span>Fast (≥60 kW)</span>
+          </button>
+
+          <button
+            type="button"
+            className={`gmap-chip ${showDrawerList ? 'gmap-chip--active' : ''}`}
+            onClick={() => setShowDrawerList(!showDrawerList)}
+            title="Toggle list view"
+          >
+            <SlidersHorizontal size={13} />
+            <span>{filtered.length} Stations</span>
+          </button>
+
+          {(searchQuery || filterAvailableOnly || filterFastOnly || selectedCity !== 'All Cities') && (
+            <button
+              type="button"
+              className="gmap-chip gmap-chip--reset"
+              onClick={() => {
+                setSearchQuery('');
+                setSelectedCity('All Cities');
+                setFilterAvailableOnly(false);
+                setFilterFastOnly(false);
+                toast.info('All filters reset.');
+              }}
+            >
+              Reset
+            </button>
+          )}
         </div>
       </div>
-      {fetchError && (
-        <div className="page-banner page-banner--error" style={{ margin: '8px 16px 0' }}>
-          {fetchError}
-        </div>
-      )}
 
-      <div className="lm-body">
-        {/* Map */}
-        <div className="lm-map-wrap">
-          <MapContainer
-            center={[20.5937, 78.9629]}
-            zoom={5}
-            style={{ height: '100%', width: '100%' }}
-            zoomControl={true}
-          >
-            <TileLayer
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> contributors'
-            />
-            {filtered.map((c) => (
+      {/* ─── 2. FLOATING ACTION CONTROLS (Google Maps Style) ─── */}
+      <div className="gmap-action-controls">
+        <button
+          type="button"
+          className={`gmap-control-btn ${locating ? 'gmap-control-btn--active' : ''}`}
+          onClick={handleLocateMe}
+          title="Find chargers near my location"
+          aria-label="Locate me"
+        >
+          <Crosshair size={18} className={locating ? 'spin' : ''} />
+        </button>
+
+        <button
+          type="button"
+          className="gmap-control-btn"
+          onClick={handleFitAll}
+          title="Fit all stations in view"
+          aria-label="Fit all stations"
+        >
+          <Layers size={18} />
+        </button>
+
+        <button
+          type="button"
+          className="gmap-control-btn"
+          onClick={async () => {
+            await fetchStations();
+            toast.success('Live station availability updated.');
+          }}
+          title="Refresh live status"
+          aria-label="Refresh status"
+        >
+          <RefreshCw size={17} className={loading ? 'spin' : ''} />
+        </button>
+      </div>
+
+      {/* ─── 3. FULL-BLEED CARTO VOYAGER MAP CONTAINER ─── */}
+      <div className="gmap-canvas-container">
+        <MapContainer
+          center={[20.5937, 78.9629]}
+          zoom={5}
+          style={{ height: '100%', width: '100%' }}
+          zoomControl={false}
+        >
+          {/* CartoDB Voyager clean tiles (Google Maps style) */}
+          <TileLayer
+            url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener noreferrer">CARTO</a>'
+            maxZoom={19}
+            subdomains="abcd"
+          />
+
+          {/* User GPS location dot */}
+          {userLocation && (
+            <Marker position={[userLocation.lat, userLocation.lng]} icon={makeUserDotIcon()}>
+              <Popup>
+                <div style={{ fontSize: '12px', fontWeight: 600 }}>📍 Your Location</div>
+              </Popup>
+            </Marker>
+          )}
+
+          {/* Charging Station Pins */}
+          {filtered.map((c) => {
+            const isSelected = selectedCharger?.id === c.id;
+            return (
               <Marker
                 key={c.id}
                 position={[c.lat, c.lng]}
-                icon={makeIcon(c.status)}
-                eventHandlers={{ click: () => setSelectedCharger(c) }}
+                icon={makeMarkerIcon(c, isSelected)}
+                eventHandlers={{
+                  click: () => {
+                    setSelectedCharger(c);
+                    setShowDrawerList(false);
+                  },
+                }}
               >
                 <Popup>
-                  <div className="map-popup">
-                    <div className="mp-name">{c.name}</div>
-                    <div className="mp-city">{c.city} · {c.operator}</div>
-                    <div className="mp-row">
+                  <div className="gmap-mini-popup">
+                    <div className="gmp-name">{c.name}</div>
+                    <div className="gmp-city">{c.city} · {c.operator}</div>
+                    <div className="gmp-row">
                       <span className={`badge badge-${c.status}`}>
                         <span className={`dot dot-${c.status}`} />
                         {c.status === 'available' ? 'Available' : c.status === 'busy' ? 'Busy' : 'Offline'}
                       </span>
-                      <span className="mp-speed">{c.speed} kW</span>
+                      <span className="gmp-speed">{c.speed} kW DC</span>
                     </div>
-                    <div className="mp-ports">
-                      <span className="mpp-avail">{c.available} avail</span> ·
-                      <span className="mpp-busy"> {c.busy} busy</span> ·
-                      <span className="mpp-off"> {c.offline} offline</span>
+                    <div className="gmp-ports">
+                      <strong style={{ color: '#059669' }}>{c.available} free</strong> / {c.ports} total
                     </div>
                   </div>
                 </Popup>
               </Marker>
-            ))}
-            <FlyTo charger={selectedCharger} />
-          </MapContainer>
-        </div>
+            );
+          })}
 
-        {/* Side panel */}
-        <div className="lm-panel">
-          {selectedCharger ? (
-            <div className="lm-detail">
-              <div className="lmd-header">
-                <div>
-                  <div className="lmd-name">{selectedCharger.name}</div>
-                  <div className="lmd-city">{selectedCharger.city} · {selectedCharger.operator}</div>
-                  {selectedCharger.address && (
-                    <div style={{ fontSize: '11px', color: '#6B7280', marginTop: '3px' }}>
-                      {selectedCharger.address}
-                    </div>
-                  )}
-                </div>
-                <span className={`badge badge-${selectedCharger.status}`}>
-                  <span
-                    className={`dot dot-${selectedCharger.status} ${
-                      selectedCharger.status === 'available' ? 'dot-pulse' : ''
-                    }`}
-                  />
-                  {selectedCharger.status === 'available'
-                    ? 'Available'
-                    : selectedCharger.status === 'busy'
-                    ? 'Busy'
-                    : 'Offline'}
-                </span>
-              </div>
+          <MapController
+            selectedCharger={selectedCharger}
+            userLocation={userLocation}
+            fitBoundsTrigger={fitBoundsTrigger}
+          />
+        </MapContainer>
+      </div>
 
-              <div className="lmd-stats-grid">
-                <div className="lmd-stat">
-                  <div className="lmd-stat-val lmd-avail">{selectedCharger.available}</div>
-                  <div className="lmd-stat-lbl">Available</div>
-                </div>
-                <div className="lmd-stat">
-                  <div className="lmd-stat-val lmd-busy">{selectedCharger.busy}</div>
-                  <div className="lmd-stat-lbl">In Use</div>
-                </div>
-                <div className="lmd-stat">
-                  <div className="lmd-stat-val lmd-off">{selectedCharger.offline}</div>
-                  <div className="lmd-stat-lbl">Offline</div>
-                </div>
-                <div className="lmd-stat">
-                  <div className="lmd-stat-val">{selectedCharger.speed}kW</div>
-                  <div className="lmd-stat-lbl">Max Speed</div>
-                </div>
-              </div>
+      {/* ─── 4. GOOGLE MAPS FLOATING PLACE CARD ─── */}
+      {selectedCharger && (
+        <div className="gmap-place-card card page-enter">
+          <div className="gpc-header">
+            <div className="gpc-meta">
+              <span className="gpc-operator-badge">{selectedCharger.operator}</span>
+              <h2 className="gpc-title font-display">{selectedCharger.name}</h2>
+              <div className="gpc-address">{selectedCharger.address || `${selectedCharger.city}, India`}</div>
+            </div>
+            <button
+              type="button"
+              className="gpc-close-btn"
+              onClick={() => setSelectedCharger(null)}
+              aria-label="Close place details"
+            >
+              <X size={16} />
+            </button>
+          </div>
 
-              {selectedCharger.status === 'busy' && selectedCharger.waitMin > 0 && (
-                <div className="lmd-wait-banner">
-                  <Clock size={15} />
-                  Estimated wait: <strong>~{selectedCharger.waitMin} minutes</strong>
-                </div>
-              )}
-              {selectedCharger.status === 'offline' && (
-                <div className="lmd-wait-banner lmd-wait-off">
-                  <WifiOff size={15} />
-                  Station under maintenance. No ETA available.
-                </div>
-              )}
+          {/* Distance & Hours Pill */}
+          <div className="gpc-tags-row">
+            {userLocation && (
+              <span className="gpc-tag gpc-tag--dist">
+                <Navigation size={12} />
+                {calculateDistanceKm(userLocation.lat, userLocation.lng, selectedCharger.lat, selectedCharger.lng)} km away
+              </span>
+            )}
+            <span className="gpc-tag gpc-tag--hours">
+              <Clock size={12} /> {selectedCharger.hours || '24 Hours Open'}
+            </span>
+            <span className={`badge badge-${selectedCharger.status}`}>
+              <span className={`dot dot-${selectedCharger.status}`} />
+              {selectedCharger.status === 'available'
+                ? 'Open Now'
+                : selectedCharger.status === 'busy'
+                ? 'Busy'
+                : 'Offline'}
+            </span>
+          </div>
 
-              <div className="lmd-section-title">Busy Hours Forecast (Next 8h)</div>
-              <div className="lmd-chart">
-                <ResponsiveContainer width="100%" height={140}>
-                  <BarChart data={forecastData} margin={{ top: 5, right: 5, bottom: 0, left: -20 }}>
-                    <XAxis dataKey="time" tick={{ fontSize: 10, fill: '#9CA3AF' }} tickLine={false} axisLine={false} />
-                    <YAxis tick={{ fontSize: 10, fill: '#9CA3AF' }} tickLine={false} axisLine={false} />
-                    <Tooltip
-                      contentStyle={{
-                        fontSize: 12,
-                        border: '1px solid #E2E6EE',
-                        borderRadius: 8,
-                        boxShadow: 'var(--shadow-sm)',
-                      }}
-                      cursor={{ fill: '#F0F2F6' }}
-                    />
-                    <ReferenceLine
-                      y={selectedCharger.ports}
-                      stroke="#E2E6EE"
-                      strokeDasharray="4 2"
-                      label={{
-                        value: 'capacity',
-                        position: 'insideTopRight',
-                        fontSize: 10,
-                        fill: '#9CA3AF',
-                      }}
-                    />
-                    <Bar dataKey="vehicles" fill="#6366F1" radius={[3, 3, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
+          {/* Stats Bar */}
+          <div className="gpc-stats-grid">
+            <div className="gpc-stat-item">
+              <span className="gpc-stat-val gpc-stat--avail">{selectedCharger.available}</span>
+              <span className="gpc-stat-lbl">Open Plugs</span>
+            </div>
+            <div className="gpc-stat-item">
+              <span className="gpc-stat-val gpc-stat--busy">{selectedCharger.busy}</span>
+              <span className="gpc-stat-lbl">In Use</span>
+            </div>
+            <div className="gpc-stat-item">
+              <span className="gpc-stat-val">{selectedCharger.speed} kW</span>
+              <span className="gpc-stat-lbl">Max Power</span>
+            </div>
+            <div className="gpc-stat-item">
+              <span className="gpc-stat-val">₹{selectedCharger.tariffPerKwh || 19.5}</span>
+              <span className="gpc-stat-lbl">Per kWh</span>
+            </div>
+          </div>
 
-              <button
-                className="btn btn-primary"
-                style={{ width: '100%', justifyContent: 'center' }}
-                disabled={selectedCharger.status === 'offline' || selectedCharger.available === 0}
-                title={
-                  selectedCharger.status === 'offline'
-                    ? 'This station is offline'
-                    : selectedCharger.available === 0
-                    ? 'No bays are available right now'
-                    : 'Reserve a charging bay'
-                }
-                onClick={() => {
-                  if (selectedCharger.status === 'offline' || selectedCharger.available === 0) {
-                    toast.error('No bays are available to reserve at this station.');
-                    return;
-                  }
-                  setIsReserving(true);
-                }}
-              >
-                <Zap size={14} /> Reserve a Slot
-              </button>
+          {/* Wait banner if station is busy */}
+          {selectedCharger.status === 'busy' && selectedCharger.waitMin > 0 && (
+            <div className="gpc-wait-alert">
+              <Clock size={14} />
+              <span>Estimated wait time: <strong>~{selectedCharger.waitMin} minutes</strong></span>
+            </div>
+          )}
 
-              <div style={{ display: 'flex', gap: '8px', marginTop: '6px' }}>
-                <button
-                  className="btn btn-ghost btn-sm"
-                  style={{ flex: 1, justifyContent: 'center' }}
-                  onClick={() => setIsReporting(true)}
-                >
-                  <AlertTriangle size={13} /> Report Issue
-                </button>
-                <button
-                  className="btn btn-ghost btn-sm"
-                  style={{ flex: 1, justifyContent: 'center' }}
-                  onClick={() => setSelectedCharger(null)}
-                >
-                  Close
-                </button>
+          {/* Station Amenities */}
+          {Array.isArray(selectedCharger.amenities) && selectedCharger.amenities.length > 0 && (
+            <div className="gpc-amenities-wrap">
+              <span className="gpc-section-label">Nearby Amenities:</span>
+              <div className="gpc-amenities-list">
+                {selectedCharger.amenities.map((item) => (
+                  <span key={item} className="gpc-amenity-chip">
+                    {item}
+                  </span>
+                ))}
               </div>
             </div>
-          ) : (
-            <div className="lm-station-list">
-              <div className="lm-panel-title">Stations ({filtered.length})</div>
-              {filtered.map((c) => (
-                <div key={c.id} className="lm-station-row" onClick={() => setSelectedCharger(c)}>
-                  <div className={`lm-status-bar lm-status-bar--${c.status}`} />
-                  <div className="lm-sr-info">
-                    <div className="lm-sr-name">{c.name}</div>
-                    <div className="lm-sr-city">{c.city}</div>
-                  </div>
-                  <div className="lm-sr-ports">
-                    <span className="lm-avail">{c.available}</span>
-                    <span className="lm-sep">/</span>
-                    <span className="lm-total">{c.ports}</span>
-                  </div>
-                  <span className={`badge badge-${c.status}`}>
-                    <span className={`dot dot-${c.status}`} />
-                    {c.status === 'available' ? 'Available' : c.status === 'busy' ? 'Busy' : 'Offline'}
-                  </span>
-                </div>
-              ))}
+          )}
+
+          {/* PRIMARY ACTIONS: Directions & Reserve */}
+          <div className="gpc-actions-row">
+            <a
+              href={getDirectionsUrl(selectedCharger)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn btn-secondary gpc-directions-btn"
+              title="Open turn-by-turn navigation in Google Maps"
+            >
+              <Navigation size={15} />
+              <span>Directions</span>
+              <ExternalLink size={12} />
+            </a>
+
+            <button
+              type="button"
+              className="btn btn-primary gpc-reserve-btn"
+              disabled={selectedCharger.status === 'offline' || selectedCharger.available === 0}
+              onClick={() => {
+                if (selectedCharger.status === 'offline' || selectedCharger.available === 0) {
+                  toast.error('No charging spots are available at this station right now.');
+                  return;
+                }
+                setIsReserving(true);
+              }}
+            >
+              <Zap size={15} />
+              <span>Reserve a Spot</span>
+            </button>
+          </div>
+
+          {/* Secondary Actions */}
+          <div className="gpc-sub-actions">
+            <button
+              type="button"
+              className="btn btn-ghost btn-sm"
+              onClick={() => setShowForecastChart(!showForecastChart)}
+            >
+              <Clock size={13} />
+              <span>{showForecastChart ? 'Hide Rush Hours' : 'Check Rush Hours'}</span>
+            </button>
+
+            <button
+              type="button"
+              className="btn btn-ghost btn-sm"
+              onClick={() => setIsReporting(true)}
+              style={{ color: '#9CA3AF' }}
+            >
+              <AlertTriangle size={13} />
+              <span>Report Issue</span>
+            </button>
+          </div>
+
+          {/* Collapsible Rush Hours Forecast Chart */}
+          {showForecastChart && (
+            <div className="gpc-forecast-chart-wrap page-enter">
+              <div className="gpc-chart-title">Estimated Wait Load (Next 8 Hours)</div>
+              <ResponsiveContainer width="100%" height={120}>
+                <BarChart data={forecastData} margin={{ top: 5, right: 5, bottom: 0, left: -25 }}>
+                  <XAxis dataKey="time" tick={{ fontSize: 10, fill: '#9CA3AF' }} tickLine={false} axisLine={false} />
+                  <YAxis tick={{ fontSize: 10, fill: '#9CA3AF' }} tickLine={false} axisLine={false} />
+                  <Tooltip
+                    contentStyle={{ fontSize: 12, borderRadius: 8, border: '1px solid #E2E6EE' }}
+                    cursor={{ fill: '#F0F2F6' }}
+                  />
+                  <ReferenceLine y={selectedCharger.ports} stroke="#E2E6EE" strokeDasharray="3 3" />
+                  <Bar dataKey="vehicles" fill="#6366F1" radius={[3, 3, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
             </div>
           )}
         </div>
-      </div>
+      )}
+
+      {/* ─── 5. FLOATING STATION LIST DRAWER (When Toggled) ─── */}
+      {showDrawerList && (
+        <div className="gmap-list-drawer card page-enter">
+          <div className="gld-header">
+            <div>
+              <div className="gld-title font-display">Charging Stations ({filtered.length})</div>
+              <div className="gld-sub">{userLocation ? 'Sorted by closest distance' : 'Live network availability'}</div>
+            </div>
+            <button type="button" className="gpc-close-btn" onClick={() => setShowDrawerList(false)}>
+              <X size={16} />
+            </button>
+          </div>
+
+          <div className="gld-body">
+            {filtered.map((c) => {
+              const dist = userLocation ? calculateDistanceKm(userLocation.lat, userLocation.lng, c.lat, c.lng) : null;
+              return (
+                <div
+                  key={c.id}
+                  className="gld-item"
+                  onClick={() => {
+                    setSelectedCharger(c);
+                    setShowDrawerList(false);
+                  }}
+                >
+                  <div className={`gld-status-bar gld-status-bar--${c.status}`} />
+                  <div className="gld-item-info">
+                    <div className="gld-item-name">{c.name}</div>
+                    <div className="gld-item-meta">
+                      {c.city} · {c.operator}
+                      {dist && <span className="gld-dist"> · {dist} km</span>}
+                    </div>
+                  </div>
+                  <div className="gld-item-badge">
+                    <span className="gld-item-avail">{c.available}</span>
+                    <span className="gld-item-total">/{c.ports} free</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Reservation Modal */}
       {selectedCharger && (
