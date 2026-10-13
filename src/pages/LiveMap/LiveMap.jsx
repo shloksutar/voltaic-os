@@ -109,7 +109,7 @@ export default function LiveMap() {
         <div className="lm-title-block">
           <h1 className="lm-title font-display">Live Map</h1>
           <span className="lm-subtitle">
-            {filtered.length} stations online · Real-time CPO telemetry
+            {filtered.length} stations online · Live charger availability
           </span>
         </div>
         <div className="lm-filters">
@@ -134,13 +134,13 @@ export default function LiveMap() {
             className="btn btn-secondary btn-sm"
             onClick={async () => {
               await fetchStations();
-              toast.success('Live charging telemetry refreshed.');
+              toast.success('Live charger availability updated.');
             }}
             disabled={loading}
-            title="Refresh live station telemetry"
+            title="Refresh live charger status"
           >
             <RefreshCw size={13} className={loading ? 'spin' : ''} />
-            <span>Sync</span>
+            <span>Refresh</span>
           </button>
           <div className="lm-legend">
             <span className="legend-item">
@@ -265,7 +265,7 @@ export default function LiveMap() {
                 </div>
               )}
 
-              <div className="lmd-section-title">Queue Forecast (next 8h)</div>
+              <div className="lmd-section-title">Busy Hours Forecast (Next 8h)</div>
               <div className="lmd-chart">
                 <ResponsiveContainer width="100%" height={140}>
                   <BarChart data={forecastData} margin={{ top: 5, right: 5, bottom: 0, left: -20 }}>

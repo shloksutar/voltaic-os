@@ -21,46 +21,46 @@ import './Overview.css';
 const FEATURES = [
   {
     icon: Activity,
-    title: 'Real-Time Telemetry',
-    desc: 'Sub-second hardware status streaming via OCPI 2.2.1 across all connected Charge Point Operators.',
+    title: 'Live Charger Availability',
+    desc: 'See which charging plugs are open, in use, or broken in real time before you hit the road.',
   },
   {
     icon: Lock,
-    title: 'Guaranteed Slot Reservation',
-    desc: 'Reserve charging ports and connectors directly in advance. Real-time hold with digital QR passes.',
+    title: 'Book Before You Drive',
+    desc: 'Reserve your charging bay in advance. Your spot is held and guaranteed so nobody takes it.',
   },
   {
     icon: Globe,
-    title: 'Multi-Operator Bridge',
-    desc: 'Unified aggregation layer normalizing Tata Power, ChargeZone, Statiq, Ather Grid, BPCL, and HPCL into one schema.',
+    title: 'All Charging Networks in One Place',
+    desc: 'No need for 10 different apps. Find Tata Power, ChargeZone, Statiq, and more on a single map.',
   },
   {
     icon: TrendingUp,
-    title: 'Predictive Queue Modeling',
-    desc: 'Historical demand models and live arrival trajectories forecast queues and wait times hours in advance.',
+    title: 'Avoid Rush Hours',
+    desc: 'Check live wait times and busy hours so you can pick the fastest time to recharge your car.',
   },
 ];
 
 const HOW_IT_WORKS = [
   {
     step: '01',
-    title: 'Connect CPOs',
-    desc: 'Hardware operators connect via OCPI REST endpoints and real-time WebSocket telemetry streams.',
+    title: 'Find a Station Nearby',
+    desc: 'Search our live map to see all nearby EV chargers from every major brand in one place.',
   },
   {
     step: '02',
-    title: 'Aggregate & Normalize',
-    desc: 'Our backend layer normalizes telemetry — bays, power kW, health, pricing — into a unified real-time database.',
+    title: 'Check Live Open Spots',
+    desc: 'See how many charging spots are free right now, charging speeds, prices, and station status.',
   },
   {
     step: '03',
-    title: 'Reserve & Dispatch',
-    desc: 'Drivers reserve charging bays in advance with Google, Email, or Phone auth, securing guaranteed charging slots.',
+    title: 'Reserve Your Spot',
+    desc: 'Book your charging time slot in advance so a spot is guaranteed and waiting for you.',
   },
   {
     step: '04',
-    title: 'Deterministic Charging',
-    desc: 'Arrive at the charging hub, verify via digital pass or camera, and begin high-speed charging without queues.',
+    title: 'Plug In & Charge',
+    desc: 'Drive up to your reserved spot, show your digital pass, plug in, and drive away fully charged.',
   },
 ];
 
@@ -95,32 +95,31 @@ export default function Overview() {
     <div className="overview page-enter">
       <PageMeta
         title="Overview"
-        description="VoltaicOS live network overview: charger availability, slot reservations, and multi-operator EV charging intelligence."
+        description="Find live EV chargers near you, check open spots in real time, and reserve your charging bay before you drive."
       />
       {/* Hero */}
       <section className="overview-hero">
         <div className="hero-eyebrow">
           <span className="dot dot-available dot-pulse" />
-          Live Network · {stats.stations} Verified Hubs Synced
+          Live Network · {stats.stations} Charging Stations Ready
         </div>
         <h1 className="hero-title font-display">
-          EV Charging Infrastructure,<br />
-          <span className="hero-accent">Unified & Predictable</span>
+          Charge Your EV Anywhere,<br />
+          <span className="hero-accent">Without The Wait</span>
         </h1>
         <p className="hero-desc">
-          VoltaicOS bridges fragmented Charge Point Operators into a single real-time intelligence layer —
-          eliminating range anxiety with instant slot reservations and deterministic journey planning.
+          VoltaicOS brings every EV charger into one simple app. Check live availability, reserve your spot ahead of time, and charge your car without long lines or range anxiety.
         </p>
         <div className="hero-cta">
           <Link to="/map" className="btn btn-primary">
-            Open Live Map <ArrowRight size={15} />
+            Find Open Chargers <ArrowRight size={15} />
           </Link>
           <Link to="/chargers" className="btn btn-ghost">
-            Browse All Chargers
+            Browse All Stations
           </Link>
         </div>
         <div className="hero-update">
-          Last telemetry sync: {lastUpdate.toLocaleTimeString()}
+          Updated live: {lastUpdate.toLocaleTimeString()}
         </div>
       </section>
 
@@ -128,32 +127,32 @@ export default function Overview() {
       <section className="overview-stats">
         <StatCard
           icon={Zap}
-          label="Total Ports"
+          label="Total Charging Plugs"
           value={stats.total}
-          sub="Across all connected operators"
+          sub="Across all connected networks"
           accent="primary"
           trend={4}
         />
         <StatCard
           icon={CheckCircle}
-          label="Available Now"
+          label="Ready to Use"
           value={stats.available}
-          sub={`${Math.round((stats.available / (stats.total || 1)) * 100)}% of capacity`}
+          sub={`${Math.round((stats.available / (stats.total || 1)) * 100)}% of spots free right now`}
           accent="available"
           trend={12}
         />
         <StatCard
           icon={Activity}
-          label="In Use / Reserved"
+          label="Currently Charging"
           value={stats.busy}
-          sub="Active charging sessions"
+          sub="Cars actively charging"
           accent="busy"
         />
         <StatCard
           icon={WifiOff}
-          label="Offline / Maint."
+          label="Out of Order"
           value={stats.offline}
-          sub="Under maintenance"
+          sub="Temporarily under service"
           accent="offline"
           trend={-5}
         />
@@ -162,8 +161,8 @@ export default function Overview() {
       {/* Features */}
       <section className="overview-section">
         <div className="section-header">
-          <h2 className="section-title font-display">Platform Capabilities</h2>
-          <p className="section-sub">Built for scale across every metro, operator, and EV model.</p>
+          <h2 className="section-title font-display">Built for EV Drivers</h2>
+          <p className="section-sub">Everything you need for an easy, stress-free road trip.</p>
         </div>
         <div className="features-grid">
           {FEATURES.map((f) => (
@@ -182,7 +181,7 @@ export default function Overview() {
       <section className="overview-section">
         <div className="section-header">
           <h2 className="section-title font-display">How It Works</h2>
-          <p className="section-sub">Four steps from fragmented hardware to guaranteed charging slots.</p>
+          <p className="section-sub">Four simple steps to find, book, and charge your electric vehicle without the wait.</p>
         </div>
         <div className="steps-grid">
           {HOW_IT_WORKS.map((s, i) => (
@@ -199,7 +198,7 @@ export default function Overview() {
       {/* Recent activity */}
       <section className="overview-section">
         <div className="section-header">
-          <h2 className="section-title font-display">Real-Time Hub Telemetry</h2>
+          <h2 className="section-title font-display">Live Nearby Stations</h2>
           <Link to="/chargers" className="section-link">
             View all {stations.length} stations <ArrowRight size={13} />
           </Link>

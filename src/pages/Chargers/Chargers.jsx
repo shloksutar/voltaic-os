@@ -40,7 +40,7 @@ export default function Chargers() {
         setStations(res.stations);
         setFetchError('');
         if (isManual) {
-          toast.success('Station telemetry synced with live network.');
+          toast.success('Live charger status updated.');
         }
       }
     } catch {
@@ -83,25 +83,25 @@ export default function Chargers() {
     <div className="chargers-page page-enter">
       <PageMeta
         title="Chargers Directory"
-        description="Browse, filter, and reserve high-speed DC fast chargers from Tata Power, ChargeZone, Statiq, Ather Grid, BPCL, and HPCL."
+        description="Browse, filter, and reserve high-speed fast chargers from Tata Power, ChargeZone, Statiq, and more."
       />
       {/* Header */}
       <div className="chp-header">
         <div>
           <h1 className="chp-title font-display">EV Charging Stations</h1>
           <p className="chp-sub">
-            {filtered.length} of {stations.length} hubs matched across connected CPOs
+            {filtered.length} of {stations.length} charging stations found across India
           </p>
         </div>
         <button
           className="btn btn-ghost btn-sm chp-refresh-btn"
           onClick={() => fetchStations(true)}
           disabled={loading}
-          title="Refresh Live Port Status"
-          aria-label="Sync Live Port Status"
+          title="Refresh live charger status"
+          aria-label="Refresh live charger status"
         >
           <RefreshCw size={14} className={loading ? 'spin-icon' : ''} />
-          <span>Sync Telemetry</span>
+          <span>Refresh</span>
         </button>
       </div>
       {fetchError && <div className="page-banner page-banner--error">{fetchError}</div>}
