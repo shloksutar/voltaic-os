@@ -239,6 +239,43 @@
   box-shadow: 0 4px 16px rgba(67, 56, 202, 0.4) !important;
 }
 
+/* Paired Zoom Controls Group (Google Maps Style) */
+.gmap-zoom-group {
+  display: flex;
+  flex-direction: column;
+  background: #FFFFFF;
+  border-radius: 12px;
+  border: 1px solid rgba(226, 230, 238, 0.9);
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.14), 0 1px 3px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+}
+
+.gmap-zoom-btn {
+  width: 44px !important;
+  height: 40px !important;
+  border-radius: 0 !important;
+  border: none !important;
+  box-shadow: none !important;
+  background: #FFFFFF !important;
+}
+
+.gmap-zoom-btn:hover {
+  background: #F8FAFC !important;
+  color: var(--color-primary, #4338CA) !important;
+  transform: none !important;
+}
+
+.gmap-zoom-btn:active {
+  background: #EEF2F6 !important;
+  transform: none !important;
+}
+
+.gmap-zoom-divider {
+  height: 1px;
+  background: #E5E7EB;
+  margin: 0 6px;
+}
+
 /* ─── Rich Google Maps Style Markers ────────────────────── */
 .gmap-marker-container {
   background: transparent !important;
@@ -788,4 +825,191 @@
     max-height: 70vh;
     border-radius: 20px 20px 0 0;
   }
+}
+
+/* ─── Location Permission Modal (Nearest Station Prompt) ─── */
+.gmap-loc-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: gmapModalFadeIn 0.25s ease-out;
+}
+
+.gmap-loc-modal-card {
+  position: relative;
+  width: 100%;
+  max-width: 440px;
+  background: #FFFFFF;
+  border-radius: 24px;
+  padding: 36px 30px 28px;
+  box-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.3), 0 0 0 1px rgba(226, 230, 238, 0.8);
+  text-align: center;
+  animation: gmapCardPop 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glp-modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: var(--color-surface-2, #F3F4F6);
+  border: none;
+  color: #6B7280;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.glp-modal-close:hover {
+  background: #E5E7EB;
+  color: #111827;
+}
+
+/* Beacon Radar Pulse */
+.glp-beacon-wrap {
+  position: relative;
+  width: 76px;
+  height: 76px;
+  margin: 0 auto 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.glp-beacon-icon-circle {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #4F46E5 0%, #3B82F6 100%);
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 25px -4px rgba(79, 70, 229, 0.45);
+  position: relative;
+  z-index: 2;
+}
+
+.glp-beacon-svg {
+  transform: rotate(45deg);
+  transition: transform 0.3s ease;
+}
+
+.glp-beacon-ring {
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 2px solid rgba(79, 70, 229, 0.4);
+  animation: glpPulseRing 2.2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+  z-index: 1;
+}
+
+@keyframes glpPulseRing {
+  0% {
+    transform: scale(0.85);
+    opacity: 0.9;
+  }
+  50% {
+    transform: scale(1.35);
+    opacity: 0.3;
+  }
+  100% {
+    transform: scale(1.6);
+    opacity: 0;
+  }
+}
+
+@keyframes gmapModalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes gmapCardPop {
+  from {
+    opacity: 0;
+    transform: scale(0.93) translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.glp-content-block {
+  margin-bottom: 24px;
+}
+
+.glp-heading {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--color-text, #111827);
+  letter-spacing: -0.02em;
+  margin-bottom: 10px;
+  line-height: 1.3;
+}
+
+.glp-subheading {
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--color-text-3, #6B7280);
+  max-width: 360px;
+  margin: 0 auto;
+}
+
+.glp-btn-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.glp-btn-primary {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 13px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #4F46E5 0%, #4338CA 100%);
+  color: #FFFFFF;
+  border: none;
+  box-shadow: 0 4px 16px rgba(79, 70, 229, 0.35);
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.glp-btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(79, 70, 229, 0.45);
+}
+
+.glp-btn-secondary {
+  width: 100%;
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-3, #6B7280);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  border-radius: 10px;
+  transition: all 0.15s ease;
+}
+
+.glp-btn-secondary:hover {
+  background: var(--color-surface-2, #F3F4F6);
+  color: var(--color-text, #111827);
 }

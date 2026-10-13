@@ -15,6 +15,9 @@ import {
   SlidersHorizontal,
   ExternalLink,
   Layers,
+  Plus,
+  Minus,
+  RotateCcw,
 } from 'lucide-react';
 import { CHARGERS, CITIES, getQueueForecast } from '../../data/chargers';
 import { stationsApi } from '../../api/client';
@@ -97,6 +100,96 @@ function makeUserDotIcon() {
   });
 }
 
+// Floating Action Controls inside Leaflet Container (Access to useMap for Zoom In / Zoom Out)
+function MapActionControls({
+  locating,
+  onLocate,
+  onFitAll,
+  onRefresh,
+  loading,
+  onResetCountry,
+}) {
+  const map = useMap();
+
+  return (
+    <div
+      className="gmap-action-controls"
+      onMouseDown={(e) => e.stopPropagation()}
+      onDoubleClick={(e) => e.stopPropagation()}
+    >
+      {/* Zoom In & Zoom Out Controls */}
+      <div className="gmap-zoom-group">
+        <button
+          type="button"
+          className="gmap-control-btn gmap-zoom-btn"
+          onClick={() => map.zoomIn()}
+          title="Zoom In (+)"
+          aria-label="Zoom in"
+        >
+          <Plus size={18} strokeWidth={2.4} />
+        </button>
+        <div className="gmap-zoom-divider" />
+        <button
+          type="button"
+          className="gmap-control-btn gmap-zoom-btn"
+          onClick={() => map.zoomOut()}
+          title="Zoom Out (-)"
+          aria-label="Zoom out"
+        >
+          <Minus size={18} strokeWidth={2.4} />
+        </button>
+      </div>
+
+      {/* Reset to Full Country View */}
+      <button
+        type="button"
+        className="gmap-control-btn"
+        onClick={() => {
+          map.setView([20.5937, 78.9629], 5, { duration: 1.2 });
+          if (onResetCountry) onResetCountry();
+        }}
+        title="Zoom Out to Whole Country (India)"
+        aria-label="Zoom out to whole country"
+      >
+        <RotateCcw size={16} />
+      </button>
+
+      {/* GPS Locate Me Button */}
+      <button
+        type="button"
+        className={`gmap-control-btn ${locating ? 'gmap-control-btn--active' : ''}`}
+        onClick={onLocate}
+        title="Find chargers near my location"
+        aria-label="Locate me"
+      >
+        <Crosshair size={18} className={locating ? 'spin' : ''} />
+      </button>
+
+      {/* Fit All Stations */}
+      <button
+        type="button"
+        className="gmap-control-btn"
+        onClick={onFitAll}
+        title="Fit all matching stations in view"
+        aria-label="Fit all stations"
+      >
+        <Layers size={18} />
+      </button>
+
+      {/* Refresh Status */}
+      <button
+        type="button"
+        className="gmap-control-btn"
+        onClick={onRefresh}
+        title="Refresh live charger status"
+        aria-label="Refresh status"
+      >
+        <RefreshCw size={17} className={loading ? 'spin' : ''} />
+      </button>
+    </div>
+  );
+}
+
 // Smooth Camera Controller
 function MapController({ selectedCharger, userLocation, fitBoundsTrigger }) {
   const map = useMap();
@@ -151,6 +244,7 @@ export default function LiveMap() {
   // User Geolocation
   const [userLocation, setUserLocation] = useState(null);
   const [locating, setLocating] = useState(false);
+  const [showLocationPrompt, setShowLocationPrompt] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [fitBoundsTrigger, setFitBoundsTrigger] = useState(null);
@@ -159,6 +253,17 @@ export default function LiveMap() {
   // Modals
   const [isReserving, setIsReserving] = useState(false);
   const [isReporting, setIsReporting] = useState(false);
+
+  // Check if location prompt should show on initial page load
+  useEffect(() => {
+    const prompted = sessionStorage.getItem('voltaic_loc_prompted');
+    if (!userLocation && !prompted) {
+      const timer = setTimeout(() => {
+        setShowLocationPrompt(true);
+      }, 700);
+      return () => clearTimeout(timer);
+    }
+  }, [userLocation]);
 
   const fetchStations = useCallback(async () => {
     setLoading(true);
@@ -380,49 +485,18 @@ export default function LiveMap() {
         </div>
       </div>
 
-      {/* ─── 2. FLOATING ACTION CONTROLS (Google Maps Style) ─── */}
-      <div className="gmap-action-controls">
-        <button
-          type="button"
-          className={`gmap-control-btn ${locating ? 'gmap-control-btn--active' : ''}`}
-          onClick={handleLocateMe}
-          title="Find chargers near my location"
-          aria-label="Locate me"
-        >
-          <Crosshair size={18} className={locating ? 'spin' : ''} />
-        </button>
-
-        <button
-          type="button"
-          className="gmap-control-btn"
-          onClick={handleFitAll}
-          title="Fit all stations in view"
-          aria-label="Fit all stations"
-        >
-          <Layers size={18} />
-        </button>
-
-        <button
-          type="button"
-          className="gmap-control-btn"
-          onClick={async () => {
-            await fetchStations();
-            toast.success('Live station availability updated.');
-          }}
-          title="Refresh live status"
-          aria-label="Refresh status"
-        >
-          <RefreshCw size={17} className={loading ? 'spin' : ''} />
-        </button>
-      </div>
-
-      {/* ─── 3. FULL-BLEED CARTO VOYAGER MAP CONTAINER ─── */}
+      {/* ─── 2. FULL-BLEED CARTO VOYAGER MAP CONTAINER ─── */}
       <div className="gmap-canvas-container">
         <MapContainer
           center={[20.5937, 78.9629]}
           zoom={5}
-          style={{ height: '100%', width: '100%' }}
+          minZoom={3}
+          maxZoom={19}
+          scrollWheelZoom={true}
+          doubleClickZoom={true}
+          touchZoom={true}
           zoomControl={false}
+          style={{ height: '100%', width: '100%' }}
         >
           {/* CartoDB Voyager clean tiles (Google Maps style) */}
           <TileLayer
@@ -481,10 +555,26 @@ export default function LiveMap() {
             userLocation={userLocation}
             fitBoundsTrigger={fitBoundsTrigger}
           />
+
+          {/* Dedicated Zoom and Action Controls with useMap access */}
+          <MapActionControls
+            locating={locating}
+            onLocate={handleLocateMe}
+            onFitAll={handleFitAll}
+            onRefresh={async () => {
+              await fetchStations();
+              toast.success('Live station availability updated.');
+            }}
+            loading={loading}
+            onResetCountry={() => {
+              setSelectedCity('All Cities');
+              setSelectedCharger(null);
+            }}
+          />
         </MapContainer>
       </div>
 
-      {/* ─── 4. GOOGLE MAPS FLOATING PLACE CARD ─── */}
+      {/* ─── 3. GOOGLE MAPS FLOATING PLACE CARD ─── */}
       {selectedCharger && (
         <div className="gmap-place-card card page-enter">
           <div className="gpc-header">
@@ -640,7 +730,7 @@ export default function LiveMap() {
         </div>
       )}
 
-      {/* ─── 5. FLOATING STATION LIST DRAWER (When Toggled) ─── */}
+      {/* ─── 4. FLOATING STATION LIST DRAWER (When Toggled) ─── */}
       {showDrawerList && (
         <div className="gmap-list-drawer card page-enter">
           <div className="gld-header">
@@ -680,6 +770,65 @@ export default function LiveMap() {
                 </div>
               );
             })}
+          </div>
+        </div>
+      )}
+
+      {/* ─── 5. POPUP ASKING USER FOR LOCATION ACCESS ─── */}
+      {showLocationPrompt && (
+        <div className="gmap-loc-modal-overlay page-enter">
+          <div className="gmap-loc-modal-card card" onClick={(e) => e.stopPropagation()}>
+            <button
+              type="button"
+              className="glp-modal-close"
+              onClick={() => {
+                setShowLocationPrompt(false);
+                sessionStorage.setItem('voltaic_loc_prompted', 'true');
+              }}
+              aria-label="Dismiss location request"
+            >
+              <X size={16} />
+            </button>
+
+            <div className="glp-beacon-wrap">
+              <div className="glp-beacon-icon-circle">
+                <Navigation size={24} className="glp-beacon-svg" />
+              </div>
+              <div className="glp-beacon-ring" />
+            </div>
+
+            <div className="glp-content-block">
+              <h3 className="glp-heading font-display">Find Nearest Charging Stations?</h3>
+              <p className="glp-subheading">
+                Allow location access so VoltaicOS can detect where your electric car is, calculate driving distances, and guide you to the closest available charging plugs.
+              </p>
+            </div>
+
+            <div className="glp-btn-stack">
+              <button
+                type="button"
+                className="btn btn-primary glp-btn-primary"
+                onClick={() => {
+                  setShowLocationPrompt(false);
+                  sessionStorage.setItem('voltaic_loc_prompted', 'true');
+                  handleLocateMe();
+                }}
+              >
+                <Crosshair size={16} />
+                <span>Allow Location Access</span>
+              </button>
+
+              <button
+                type="button"
+                className="btn btn-ghost glp-btn-secondary"
+                onClick={() => {
+                  setShowLocationPrompt(false);
+                  sessionStorage.setItem('voltaic_loc_prompted', 'true');
+                }}
+              >
+                Browse Stations Manually
+              </button>
+            </div>
           </div>
         </div>
       )}
