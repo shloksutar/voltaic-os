@@ -1339,17 +1339,6 @@
       "avatar": "https://api.dicebear.com/7.x/initials/svg?seed=9607102196",
       "vehicleModel": "Tata Nexon EV Max",
       "licensePlate": "MH 02 EV 9912"
-    },
-    {
-      "id": "usr_1791917286534_0gh4w",
-      "createdAt": "2026-10-13T18:48:06.534Z",
-      "name": "EV Driver",
-      "email": "driver@gmail.com",
-      "googleId": "google_1791917286531",
-      "authProvider": "google",
-      "avatar": "https://api.dicebear.com/7.x/initials/svg?seed=driver%40gmail.com",
-      "vehicleModel": "MG ZS EV",
-      "licensePlate": "DL 01 EV 4421"
     }
   ],
   "bookings": [
