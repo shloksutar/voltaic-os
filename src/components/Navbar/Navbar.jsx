@@ -4,6 +4,7 @@ import {
   Zap,
   LayoutDashboard,
   Map,
+  Compass,
   BarChart2,
   Bell,
   User,
@@ -26,6 +27,7 @@ import './Navbar.css';
 const NAV_ITEMS = [
   { to: '/', label: 'Overview', icon: LayoutDashboard },
   { to: '/map', label: 'Live Map', icon: Map },
+  { to: '/interactive-map', label: 'Interactive Map', icon: Compass },
   { to: '/chargers', label: 'Chargers', icon: Zap },
   { to: '/analytics', label: 'Analytics', icon: BarChart2 },
   { to: '/alerts', label: 'Alerts', icon: Bell },

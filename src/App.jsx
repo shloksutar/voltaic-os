@@ -8,6 +8,7 @@ import LiveMap from './pages/LiveMap/LiveMap';
 import Chargers from './pages/Chargers/Chargers';
 import Analytics from './pages/Analytics/Analytics';
 import Alerts from './pages/Alerts/Alerts';
+import InteractiveMap from './pages/InteractiveMap/InteractiveMap';
 import NotFound from './pages/NotFound/NotFound';
 import './index.css';
 
@@ -23,6 +24,8 @@ export default function App() {
             <Route path="/home" element={<Navigate to="/" replace />} />
             <Route path="/map" element={<LiveMap />} />
             <Route path="/livemap" element={<Navigate to="/map" replace />} />
+            <Route path="/interactive-map" element={<InteractiveMap />} />
+            <Route path="/leaflet" element={<Navigate to="/interactive-map" replace />} />
             <Route path="/chargers" element={<Chargers />} />
             <Route path="/stations" element={<Navigate to="/chargers" replace />} />
             <Route path="/analytics" element={<Analytics />} />

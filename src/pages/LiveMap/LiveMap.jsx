@@ -18,6 +18,7 @@ import {
   Plus,
   Minus,
   RotateCcw,
+  Maximize2,
 } from 'lucide-react';
 import { CHARGERS, CITIES, getQueueForecast } from '../../data/chargers';
 import { stationsApi } from '../../api/client';
@@ -51,6 +52,37 @@ function calculateDistanceKm(lat1, lon1, lat2, lon2) {
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return Math.round(R * c * 10) / 10;
 }
+
+// 100% Free, reliable tile providers with NO API key required and NO watermarks
+const MAP_TILES = {
+  osm: {
+    id: 'osm',
+    name: 'OpenStreetMap',
+    label: 'Street',
+    url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+    attribution:
+      '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> contributors',
+    maxZoom: 19,
+  },
+  esriStreet: {
+    id: 'esriStreet',
+    name: 'Esri World Street',
+    label: 'Clean Street',
+    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
+    attribution:
+      'Tiles &copy; <a href="https://www.esri.com" target="_blank" rel="noopener noreferrer">Esri</a>, DeLorme, NAVTEQ',
+    maxZoom: 19,
+  },
+  satellite: {
+    id: 'satellite',
+    name: 'Esri Satellite',
+    label: 'Satellite',
+    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    attribution:
+      '&copy; <a href="https://www.esri.com" target="_blank" rel="noopener noreferrer">Esri</a>, Maxar, Earthstar Geographics',
+    maxZoom: 18,
+  },
+};
 
 // Google Maps-style Rich Pin Marker
 function makeMarkerIcon(charger, isSelected) {
@@ -108,6 +140,8 @@ function MapActionControls({
   onRefresh,
   loading,
   onResetCountry,
+  activeLayerKey,
+  onToggleLayer,
 }) {
   const map = useMap();
 
@@ -139,6 +173,17 @@ function MapActionControls({
           <Minus size={18} strokeWidth={2.4} />
         </button>
       </div>
+
+      {/* Switch Map Style Layer (OpenStreetMap / Clean Street / Satellite) */}
+      <button
+        type="button"
+        className="gmap-control-btn"
+        onClick={onToggleLayer}
+        title={`Map layer: ${MAP_TILES[activeLayerKey]?.name || 'OpenStreetMap'}. Click to toggle style.`}
+        aria-label="Toggle map layer style"
+      >
+        <Layers size={18} />
+      </button>
 
       {/* Reset to Full Country View */}
       <button
@@ -173,7 +218,7 @@ function MapActionControls({
         title="Fit all matching stations in view"
         aria-label="Fit all stations"
       >
-        <Layers size={18} />
+        <Maximize2 size={18} />
       </button>
 
       {/* Refresh Status */}
@@ -190,9 +235,26 @@ function MapActionControls({
   );
 }
 
-// Smooth Camera Controller
+// Smooth Camera Controller with Auto Resize Invalidation
 function MapController({ selectedCharger, userLocation, fitBoundsTrigger }) {
   const map = useMap();
+
+  // Ensure map fills container and re-renders tiles without grey blank areas
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      map.invalidateSize();
+    }, 150);
+
+    const handleResize = () => {
+      map.invalidateSize();
+    };
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [map]);
 
   useEffect(() => {
     if (selectedCharger) {
@@ -215,11 +277,15 @@ function MapController({ selectedCharger, userLocation, fitBoundsTrigger }) {
   useEffect(() => {
     if (fitBoundsTrigger && fitBoundsTrigger.length > 0) {
       try {
-        map.fitBounds(fitBoundsTrigger, {
-          padding: [60, 60],
-          maxZoom: 13,
-          duration: 1.2,
-        });
+        if (fitBoundsTrigger.length === 1) {
+          map.flyTo(fitBoundsTrigger[0], 14, { duration: 1.2 });
+        } else {
+          map.fitBounds(fitBoundsTrigger, {
+            padding: [60, 60],
+            maxZoom: 14,
+            duration: 1.2,
+          });
+        }
       } catch {
         // ignore bounds calculation edge cases
       }
@@ -235,6 +301,7 @@ export default function LiveMap() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterAvailableOnly, setFilterAvailableOnly] = useState(false);
   const [filterFastOnly, setFilterFastOnly] = useState(false);
+  const [activeTileLayer, setActiveTileLayer] = useState('osm');
 
   const [selectedCharger, setSelectedCharger] = useState(null);
   const [showDrawerList, setShowDrawerList] = useState(false);
@@ -249,6 +316,14 @@ export default function LiveMap() {
   const [loading, setLoading] = useState(false);
   const [fitBoundsTrigger, setFitBoundsTrigger] = useState(null);
   const toast = useToast();
+
+  const handleToggleTileLayer = () => {
+    const keys = Object.keys(MAP_TILES);
+    const nextIdx = (keys.indexOf(activeTileLayer) + 1) % keys.length;
+    const nextKey = keys[nextIdx];
+    setActiveTileLayer(nextKey);
+    toast.info(`Map layer switched to ${MAP_TILES[nextKey].name}`);
+  };
 
   // Modals
   const [isReserving, setIsReserving] = useState(false);
@@ -366,13 +441,19 @@ export default function LiveMap() {
     }
   };
 
-  // Trigger fit bounds when city changes
+  // Trigger fit bounds when city changes OR search query changes
   useEffect(() => {
-    if (selectedCity !== 'All Cities' && filtered.length > 0) {
+    if (searchQuery.trim() && filtered.length > 0) {
+      const bounds = filtered.map((c) => [c.lat, c.lng]);
+      setFitBoundsTrigger(bounds);
+      if (filtered.length === 1) {
+        setSelectedCharger(filtered[0]);
+      }
+    } else if (!searchQuery.trim() && selectedCity !== 'All Cities' && filtered.length > 0) {
       const bounds = filtered.map((c) => [c.lat, c.lng]);
       setFitBoundsTrigger(bounds);
     }
-  }, [selectedCity]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [searchQuery, selectedCity]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Load forecast when charger selected
   useEffect(() => {
@@ -467,6 +548,17 @@ export default function LiveMap() {
             <span>{filtered.length} Stations</span>
           </button>
 
+          {/* Quick Map Style Layer Switcher Chip */}
+          <button
+            type="button"
+            className="gmap-chip"
+            onClick={handleToggleTileLayer}
+            title="Switch map layer (OpenStreetMap / Clean Street / Satellite)"
+          >
+            <Layers size={13} />
+            <span>Map: {MAP_TILES[activeTileLayer]?.label || 'Street'}</span>
+          </button>
+
           {(searchQuery || filterAvailableOnly || filterFastOnly || selectedCity !== 'All Cities') && (
             <button
               type="button"
@@ -483,9 +575,23 @@ export default function LiveMap() {
             </button>
           )}
         </div>
+
+        {/* Floating No Stations Found Banner */}
+        {filtered.length === 0 && searchQuery && (
+          <div className="gmap-empty-alert card page-enter">
+            <span>No charging stations found matching &ldquo;{searchQuery}&rdquo;</span>
+            <button
+              type="button"
+              className="gmap-empty-clear-btn"
+              onClick={() => setSearchQuery('')}
+            >
+              Clear Search
+            </button>
+          </div>
+        )}
       </div>
 
-      {/* ─── 2. FULL-BLEED CARTO VOYAGER MAP CONTAINER ─── */}
+      {/* ─── 2. FULL-BLEED INTERACTIVE MAP CONTAINER ─── */}
       <div className="gmap-canvas-container">
         <MapContainer
           center={[20.5937, 78.9629]}
@@ -498,12 +604,12 @@ export default function LiveMap() {
           zoomControl={false}
           style={{ height: '100%', width: '100%' }}
         >
-          {/* CartoDB Voyager clean tiles (Google Maps style) */}
+          {/* 100% Free, reliable tile provider (NO API key watermark, crystal clear visibility) */}
           <TileLayer
-            url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener noreferrer">CARTO</a>'
-            maxZoom={19}
-            subdomains="abcd"
+            key={activeTileLayer}
+            url={MAP_TILES[activeTileLayer].url}
+            attribution={MAP_TILES[activeTileLayer].attribution}
+            maxZoom={MAP_TILES[activeTileLayer].maxZoom}
           />
 
           {/* User GPS location dot */}
@@ -570,6 +676,8 @@ export default function LiveMap() {
               setSelectedCity('All Cities');
               setSelectedCharger(null);
             }}
+            activeLayerKey={activeTileLayer}
+            onToggleLayer={handleToggleTileLayer}
           />
         </MapContainer>
       </div>

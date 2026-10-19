@@ -59,11 +59,6 @@ export function AuthProvider({ children }) {
     return res.user;
   };
 
-  const signInWithGoogle = async (googleData) => {
-    const res = await authApi.google(googleData);
-    handleAuthSuccess(res.user, res.token);
-    return res.user;
-  };
 
   const sendPhoneOtp = async (phone) => {
     return authApi.sendPhoneOtp(phone);
@@ -113,7 +108,6 @@ export function AuthProvider({ children }) {
         isAuthenticated: !!user,
         loginWithEmail,
         registerWithEmail,
-        signInWithGoogle,
         sendPhoneOtp,
         verifyPhoneOtp,
         logout,

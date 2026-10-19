@@ -153,7 +153,7 @@ export default function ReservationModal({ station, isOpen, onClose, onBookingCo
             {!isAuthenticated && (
               <div className="res-guest-banner">
                 <div>
-                  <strong>Fast Pass:</strong> Sign in with Google, Email, or Phone for instant 1-tap bookings.
+                  <strong>Fast Pass:</strong> Sign in with your Email or Phone Number for instant 1-tap bookings.
                 </div>
                 <button
                   type="button"
