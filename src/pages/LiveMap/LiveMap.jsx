@@ -21,7 +21,6 @@ import {
   Maximize2,
 } from 'lucide-react';
 import { CHARGERS, CITIES, getQueueForecast } from '../../data/chargers';
-import { INDIA_BOUNDS, INDIA_CENTER, INDIA_DEFAULT_ZOOM, INDIA_MIN_ZOOM, INDIA_MAX_ZOOM } from '../../data/mapBounds';
 import { stationsApi } from '../../api/client';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 import ReservationModal from '../../components/ReservationModal/ReservationModal';
@@ -191,7 +190,7 @@ function MapActionControls({
         type="button"
         className="gmap-control-btn"
         onClick={() => {
-          map.setView(INDIA_CENTER, INDIA_DEFAULT_ZOOM, { duration: 1.2 });
+          map.setView([20.5937, 78.9629], 5, { duration: 1.2 });
           if (onResetCountry) onResetCountry();
         }}
         title="Zoom Out to Whole Country (India)"
@@ -595,26 +594,22 @@ export default function LiveMap() {
       {/* ─── 2. FULL-BLEED INTERACTIVE MAP CONTAINER ─── */}
       <div className="gmap-canvas-container">
         <MapContainer
-          center={INDIA_CENTER}
-          zoom={INDIA_DEFAULT_ZOOM}
-          minZoom={INDIA_MIN_ZOOM}
-          maxZoom={INDIA_MAX_ZOOM}
-          maxBounds={INDIA_BOUNDS}
-          maxBoundsViscosity={1.0}
+          center={[20.5937, 78.9629]}
+          zoom={5}
+          minZoom={3}
+          maxZoom={19}
           scrollWheelZoom={true}
           doubleClickZoom={true}
           touchZoom={true}
           zoomControl={false}
           style={{ height: '100%', width: '100%' }}
         >
-          {/* 100% Free, reliable tile provider (restricted strictly to India bounds) */}
+          {/* 100% Free, reliable tile provider (NO API key watermark, crystal clear visibility) */}
           <TileLayer
             key={activeTileLayer}
             url={MAP_TILES[activeTileLayer].url}
             attribution={MAP_TILES[activeTileLayer].attribution}
             maxZoom={MAP_TILES[activeTileLayer].maxZoom}
-            bounds={INDIA_BOUNDS}
-            noWrap={true}
           />
 
           {/* User GPS location dot */}

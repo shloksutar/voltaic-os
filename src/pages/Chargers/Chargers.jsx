@@ -15,7 +15,6 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { CITIES, OPERATORS, CHARGERS } from '../../data/chargers';
-import { INDIA_BOUNDS, INDIA_CENTER, INDIA_DEFAULT_ZOOM, INDIA_MIN_ZOOM, INDIA_MAX_ZOOM } from '../../data/mapBounds';
 import { stationsApi } from '../../api/client';
 import { useToast } from '../../context/ToastContext';
 import ChargerCard from '../../components/ChargerCard/ChargerCard';
@@ -812,12 +811,10 @@ export default function Chargers() {
 
             <div className="chp-map-wrapper">
               <MapContainer
-                center={INDIA_CENTER}
-                zoom={INDIA_DEFAULT_ZOOM}
-                minZoom={INDIA_MIN_ZOOM}
-                maxZoom={INDIA_MAX_ZOOM}
-                maxBounds={INDIA_BOUNDS}
-                maxBoundsViscosity={1.0}
+                center={[20.5937, 78.9629]}
+                zoom={5}
+                minZoom={3}
+                maxZoom={19}
                 scrollWheelZoom={true}
                 style={{ height: '100%', width: '100%' }}
               >
@@ -825,8 +822,6 @@ export default function Chargers() {
                   url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
                   attribution='&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> contributors'
                   maxZoom={19}
-                  bounds={INDIA_BOUNDS}
-                  noWrap={true}
                 />
 
                 {mapStations.map((c) => {
@@ -949,12 +944,10 @@ export default function Chargers() {
 
           <div className="chp-fullmap-wrapper">
             <MapContainer
-              center={INDIA_CENTER}
-              zoom={INDIA_DEFAULT_ZOOM}
-              minZoom={INDIA_MIN_ZOOM}
-              maxZoom={INDIA_MAX_ZOOM}
-              maxBounds={INDIA_BOUNDS}
-              maxBoundsViscosity={1.0}
+              center={[20.5937, 78.9629]}
+              zoom={5}
+              minZoom={3}
+              maxZoom={19}
               scrollWheelZoom={true}
               style={{ height: '100%', width: '100%' }}
             >
@@ -962,8 +955,6 @@ export default function Chargers() {
                 url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> contributors'
                 maxZoom={19}
-                bounds={INDIA_BOUNDS}
-                noWrap={true}
               />
 
               {mapStations.map((c) => {
