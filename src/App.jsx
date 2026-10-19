@@ -10,6 +10,7 @@ import Analytics from './pages/Analytics/Analytics';
 import Alerts from './pages/Alerts/Alerts';
 import InteractiveMap from './pages/InteractiveMap/InteractiveMap';
 import NotFound from './pages/NotFound/NotFound';
+import RentCharger from './pages/RentCharger/RentCharger';
 import './index.css';
 
 export default function App() {
@@ -32,6 +33,7 @@ export default function App() {
             <Route path="/dashboard" element={<Navigate to="/analytics" replace />} />
             <Route path="/alerts" element={<Alerts />} />
             <Route path="/incidents" element={<Navigate to="/alerts" replace />} />
+            <Route path="/rent-charger" element={<RentCharger />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           <AuthModal />

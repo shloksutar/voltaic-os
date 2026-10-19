@@ -17,6 +17,7 @@ import {
   Phone,
   Mail,
   Shield,
+  Plug,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
@@ -31,6 +32,7 @@ const NAV_ITEMS = [
   { to: '/chargers', label: 'Chargers', icon: Zap },
   { to: '/analytics', label: 'Analytics', icon: BarChart2 },
   { to: '/alerts', label: 'Alerts', icon: Bell },
+  { to: '/rent-charger', label: 'Rent Charger', icon: Plug },
 ];
 
 export default function Navbar() {
