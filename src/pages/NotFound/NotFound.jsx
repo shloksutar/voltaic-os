@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Map, Zap, Compass } from 'lucide-react';
+import { ArrowLeft, Map, Zap } from 'lucide-react';
 import PageMeta from '../../components/PageMeta/PageMeta';
 import SiteFooter from '../../components/SiteFooter/SiteFooter';
 import './NotFound.css';
@@ -23,9 +23,6 @@ export default function NotFound() {
           </Link>
           <Link to="/map" className="btn btn-secondary">
             <Map size={15} /> Open Live Map
-          </Link>
-          <Link to="/interactive-map" className="btn btn-secondary">
-            <Compass size={15} /> Interactive Map
           </Link>
           <Link to="/chargers" className="btn btn-secondary">
             <Zap size={15} /> Browse Chargers

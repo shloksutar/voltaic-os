@@ -1,4 +1,4 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import { Zap, User, Phone, Mail, MapPin, Clock, DollarSign, Shield, Upload, CheckCircle2, AlertCircle, ChevronRight, Star, Wifi, Battery, Car, Info, ArrowRight } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import PageMeta from "../../components/PageMeta/PageMeta";
@@ -22,10 +22,10 @@ export default function RentCharger() {
   const[address,setAddress]=useState("");const[city,setCity]=useState("");const[pincode,setPincode]=useState("");
   const[chargerBrand,setChargerBrand]=useState("");const[connectorType,setConnectorType]=useState("");
   const[powerLevel,setPowerLevel]=useState("");const[pricePerUnit,setPricePerUnit]=useState("");
-  const[maxSessions,setMaxSessions]=useState("4");const[chargerDescription,setChargerDescription]=useState("");
-  const[selectedDays,setSelectedDays]=useState([]);const[timeFrom,setTimeFrom]=useState("08:00");
-  const[timeTo,setTimeTo]=useState("20:00");const[minBookingHours,setMinBookingHours]=useState("1");
-  const[advanceNoticeHours,setAdvanceNoticeHours]=useState("2");
+  const[maxSessions,setMaxSessions]=useState("");const[chargerDescription,setChargerDescription]=useState("");
+  const[selectedDays,setSelectedDays]=useState([]);const[timeFrom,setTimeFrom]=useState("");
+  const[timeTo,setTimeTo]=useState("");const[minBookingHours,setMinBookingHours]=useState("");
+  const[advanceNoticeHours,setAdvanceNoticeHours]=useState("");
   const[idType,setIdType]=useState("");const[idNumber,setIdNumber]=useState("");
   const[idFileName,setIdFileName]=useState("");const[selfieFileName,setSelfieFileName]=useState("");
   const[agreeTerms,setAgreeTerms]=useState(false);
@@ -34,13 +34,13 @@ export default function RentCharger() {
     setError("");
     if(step===0){if(!fullName.trim()){setError("Please enter your full name.");return false;}if(!phone.trim()||phone.length<8){setError("Please enter a valid phone number.");return false;}if(!email.trim()||!email.includes("@")){setError("Please enter a valid email address.");return false;}if(!address.trim()){setError("Please enter your charger location address.");return false;}if(!city.trim()){setError("Please enter your city.");return false;}}
     if(step===1){if(!connectorType){setError("Please select a connector type.");return false;}if(!powerLevel){setError("Please select a power level.");return false;}if(!pricePerUnit||isNaN(Number(pricePerUnit))){setError("Please enter a valid price per unit.");return false;}}
-    if(step===2){if(selectedDays.length===0){setError("Please select at least one available day.");return false;}if(!timeFrom||!timeTo){setError("Please set your availability window.");return false;}}
+    if(step===2){if(selectedDays.length===0){setError("Please select at least one available day.");return false;}}
     if(step===3){if(!idType){setError("Please select your ID type.");return false;}if(!idNumber.trim()){setError("Please enter your ID number.");return false;}if(!agreeTerms){setError("Please accept the host terms to continue.");return false;}}
     return true;
   };
   const handleNext=()=>{if(!isAuthenticated){openAuthModal();return;}if(validateStep()){if(step===STEP_LABELS.length-1)setSubmitted(true);else setStep(s=>s+1);}};
   const handleBack=()=>{setError("");setStep(s=>s-1);};
-  const resetAll=()=>{setSubmitted(false);setStep(0);setError("");setFullName("");setEmail("");setPhone("");setAddress("");setCity("");setPincode("");setChargerBrand("");setConnectorType("");setPowerLevel("");setPricePerUnit("");setMaxSessions("4");setChargerDescription("");setSelectedDays([]);setTimeFrom("08:00");setTimeTo("20:00");setMinBookingHours("1");setAdvanceNoticeHours("2");setIdType("");setIdNumber("");setIdFileName("");setSelfieFileName("");setAgreeTerms(false);};
+  const resetAll=()=>{setSubmitted(false);setStep(0);setError("");setFullName("");setEmail("");setPhone("");setAddress("");setCity("");setPincode("");setChargerBrand("");setConnectorType("");setPowerLevel("");setPricePerUnit("");setMaxSessions("");setChargerDescription("");setSelectedDays([]);setTimeFrom("");setTimeTo("");setMinBookingHours("");setAdvanceNoticeHours("");setIdType("");setIdNumber("");setIdFileName("");setSelfieFileName("");setAgreeTerms(false);};
   if(submitted){return(<div className="rc-page"><PageMeta title="Application Submitted — VoltaicOS" description="Your charger rental application has been submitted."/><div className="rc-success-wrap"><div className="rc-success-card card"><div className="rc-success-icon"><CheckCircle2 size={52} strokeWidth={1.5}/></div><h2 className="rc-success-title font-display">Application Submitted!</h2><p className="rc-success-sub">Thank you, <strong>{fullName}</strong>! Your charger listing for <strong>{city}</strong> is under review. Our team will contact you at <strong>+91 {phone}</strong> within <strong>24–48 hours</strong>.</p><div className="rc-success-steps">{[{num:"01",text:"ID verification in progress"},{num:"02",text:"Location inspection scheduled"},{num:"03",text:"Listing goes live on VoltaicOS"}].map(s=><div key={s.num} className="rc-success-step"><span className="rc-step-num">{s.num}</span><span>{s.text}</span></div>)}</div><button className="btn btn-primary" onClick={resetAll}>Submit Another Charger</button></div></div><SiteFooter/></div>);}
   return(
     <div className="rc-page">

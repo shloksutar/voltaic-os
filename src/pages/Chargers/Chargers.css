@@ -410,3 +410,215 @@
   .chp-status-tabs { width: 100%; }
   .chp-grid { grid-template-columns: 1fr; }
 }
+
+/* ── 2-Wheeler Community Charger Enhancements ──────────────── */
+.chp-post-2w-btn {
+  background: var(--color-primary) !important;
+  color: #fff !important;
+  border: 1px solid var(--color-primary-mid) !important;
+  box-shadow: var(--shadow-sm);
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 14px;
+  border-radius: var(--radius-md, 8px);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.chp-post-2w-btn:hover {
+  background: var(--color-primary-mid) !important;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+/* Category Navigation Switcher */
+.chp-cat-tabs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+
+.chp-cat-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 9999px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-2);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.chp-cat-tab:hover {
+  color: var(--color-text);
+  border-color: var(--color-text-4);
+}
+
+.chp-cat-tab.is-active {
+  background: var(--color-primary-pale);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.chp-cat-badge {
+  font-size: 11px;
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  padding: 1px 7px;
+  border-radius: 9999px;
+  color: inherit;
+}
+
+.chp-cat-tab.is-active .chp-cat-badge {
+  background: var(--color-primary);
+  color: #fff;
+  border-color: var(--color-primary);
+}
+
+/* 2W Hero / Community Banner */
+.chp-2w-banner {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg, 12px);
+  box-shadow: var(--shadow-sm);
+  padding: 18px 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.chp-2w-banner-content {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  max-width: 720px;
+}
+
+.chp-2w-banner-icon {
+  font-size: 28px;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: var(--color-primary-pale);
+  border: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.chp-2w-banner-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 0 0 4px;
+}
+
+.chp-2w-banner-desc {
+  font-size: 13px;
+  color: var(--color-text-3);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.chp-2w-banner-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* 2W Scooter Model Filter Pills */
+.chp-scooter-pills {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  padding: 10px 14px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+}
+
+.chp-scooter-pill-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-3);
+  margin-right: 4px;
+}
+
+.chp-scooter-pill {
+  font-size: 11.5px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-3);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.chp-scooter-pill:hover {
+  background: #e2e6ee;
+  color: var(--color-text);
+}
+
+.chp-scooter-pill.is-active {
+  background: var(--color-primary-pale);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.chp-avail-toggle-btn {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-3);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.chp-avail-toggle-btn.is-active {
+  background: var(--color-available-bg);
+  border-color: var(--color-available);
+  color: var(--color-available);
+}
+
+/* 2W Leaflet Marker Pin */
+.tw-map-pin .tw-pin-badge {
+  background: var(--color-primary);
+  border: 2px solid #fff;
+  box-shadow: 0 4px 12px rgba(55, 48, 163, 0.35);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 6px;
+  border-radius: 12px;
+  color: #fff;
+}
+
+.tw-popup-host {
+  font-size: 11px;
+  color: var(--color-primary);
+  font-weight: 600;
+  margin-bottom: 3px;
+}
+

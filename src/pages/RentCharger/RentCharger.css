@@ -1,18 +1,18 @@
-﻿/* RentCharger.css */
-.rc-page { min-height:100vh; padding-top:var(--nav-h); display:flex; flex-direction:column; }
-.rc-hero { position:relative; overflow:hidden; background:linear-gradient(135deg,#1e1b4b 0%,#312e81 40%,#3730a3 70%,#4338ca 100%); padding:72px 24px 56px; }
-.rc-hero-glow { position:absolute; inset:0; background:radial-gradient(ellipse 60% 50% at 20% 50%,rgba(99,102,241,.35) 0%,transparent 70%),radial-gradient(ellipse 40% 60% at 80% 30%,rgba(167,139,250,.2) 0%,transparent 70%); pointer-events:none; }
+/* RentCharger.css */
+.rc-page { min-height:100vh; padding-top:var(--nav-h); display:flex; flex-direction:column; background:var(--color-bg); }
+.rc-hero { position:relative; background:var(--color-surface); border-bottom:1px solid var(--color-border); padding:64px 24px 48px; }
+.rc-hero-glow { display:none; }
 .rc-hero-inner { position:relative; z-index:1; max-width:960px; margin:0 auto; }
-.rc-hero-badge { display:inline-flex; align-items:center; gap:6px; background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.2); color:#c7d2fe; font-size:.72rem; font-weight:600; letter-spacing:.06em; text-transform:uppercase; padding:5px 12px; border-radius:99px; margin-bottom:20px; backdrop-filter:blur(8px); }
-.rc-hero-title { font-size:clamp(2rem,5vw,3.25rem); font-weight:800; color:#fff; line-height:1.15; margin-bottom:16px; }
-.rc-hero-accent { background:linear-gradient(90deg,#a5b4fc,#c4b5fd,#7dd3fc); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
-.rc-hero-sub { font-size:1.05rem; color:rgba(255,255,255,.75); max-width:600px; line-height:1.65; margin-bottom:40px; }
+.rc-hero-badge { display:inline-flex; align-items:center; gap:6px; background:var(--color-primary-pale); border:1px solid var(--color-border); color:var(--color-primary); font-size:.72rem; font-weight:600; letter-spacing:.06em; text-transform:uppercase; padding:5px 12px; border-radius:99px; margin-bottom:20px; }
+.rc-hero-title { font-size:clamp(2rem,5vw,3.25rem); font-weight:800; color:var(--color-text); line-height:1.15; margin-bottom:16px; letter-spacing:-1.2px; }
+.rc-hero-accent { color:var(--color-primary); background:none; -webkit-text-fill-color:initial; }
+.rc-hero-sub { font-size:1.05rem; color:var(--color-text-3); max-width:600px; line-height:1.65; margin-bottom:36px; }
 .rc-benefits-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; }
-.rc-benefit-chip { display:flex; align-items:flex-start; gap:12px; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.14); border-radius:var(--radius-md); padding:14px 16px; backdrop-filter:blur(8px); transition:background var(--med),transform var(--med); }
-.rc-benefit-chip:hover { background:rgba(255,255,255,.13); transform:translateY(-2px); }
-.rc-benefit-icon { flex-shrink:0; width:34px; height:34px; border-radius:var(--radius-sm); background:rgba(165,180,252,.2); display:flex; align-items:center; justify-content:center; color:#c7d2fe; }
-.rc-benefit-title { font-size:.82rem; font-weight:600; color:#fff; margin-bottom:2px; }
-.rc-benefit-desc { font-size:.75rem; color:rgba(255,255,255,.6); line-height:1.45; }
+.rc-benefit-chip { display:flex; align-items:flex-start; gap:12px; background:var(--color-surface-2); border:1px solid var(--color-border); border-radius:var(--radius-md); padding:14px 16px; transition:background var(--med),transform var(--med); }
+.rc-benefit-chip:hover { background:#e9ecf2; transform:translateY(-2px); }
+.rc-benefit-icon { flex-shrink:0; width:34px; height:34px; border-radius:var(--radius-sm); background:var(--color-primary-pale); display:flex; align-items:center; justify-content:center; color:var(--color-primary); }
+.rc-benefit-title { font-size:.82rem; font-weight:600; color:var(--color-text); margin-bottom:2px; }
+.rc-benefit-desc { font-size:.75rem; color:var(--color-text-3); line-height:1.45; }
 .rc-form-section { flex:1; padding:48px 24px 64px; background:var(--color-bg); }
 .rc-form-wrap { max-width:800px; margin:0 auto; }
 .rc-stepper { display:flex; align-items:center; flex-wrap:wrap; gap:6px; margin-bottom:28px; }
