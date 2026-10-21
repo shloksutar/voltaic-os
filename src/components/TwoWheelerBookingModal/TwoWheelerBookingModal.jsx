@@ -8,7 +8,6 @@ import {
   MapPin,
   CheckCircle2,
   AlertCircle,
-  ExternalLink,
   ShieldCheck,
   Navigation,
 } from 'lucide-react';

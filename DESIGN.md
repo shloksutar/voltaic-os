@@ -1,7 +1,7 @@
 # VoltaicOS — System Design & Architecture Specification
 
 > **EV Charging Intelligence Platform**  
-> Unifying fragmented Charge Point Operators (CPOs) into a real-time intelligence layer with predictive queue forecasting and deterministic journey planning.
+> Unifying fragmented Charge Point Operators (CPOs) into a real-time intelligence layer with live hardware telemetry, multi-network discovery, and advance bay reservations.
 
 ---
 
@@ -11,7 +11,7 @@ Electric Vehicle (EV) adoption faces a critical bottleneck: **fragmentation and 
 
 **VoltaicOS** solves this by acting as an intelligent aggregation and forecasting middleware layer:
 - **OCPI Aggregation:** Ingests live telemetry from multiple independent CPOs (Tata Power EV, ChargeZone, Ather Grid, Statiq, BPCL EV, HPCL EV, EVCS India).
-- **Predictive ML Queue Forecasting:** Estimates queue depth and wait times up to 8 hours ahead based on historical demand and live vehicle arrivals.
+- **Live Port Availability & Telemetry:** Monitors real-time port states (Available / In Use / Offline), kW delivery tiers, and per-kWh tariffs across verified CPO hubs.
 - **Unified Telemetry & Incident Management:** Dispatches alerts for ICE bay blocking, sudden hardware faults, and power anomalies.
 - **Deterministic Journey Guidance:** Gives drivers transparent status (Available / In Use / Offline), charging speeds (7 kW AC up to 240 kW DC Ultra-Fast), and dynamic routing.
 
@@ -36,8 +36,8 @@ Electric Vehicle (EV) adoption faces a critical bottleneck: **fragmentation and 
 ┌───────────────────────────────────┴────────────────────────────────────┐
 │                       STATE & DATA LAYER (CLIENT)                      │
 │   • Live Telemetry Poller (5s Heartbeat interval)                      │
-│   • Mock / OCPI v2.2.1 Data Models (20 Stations across 6 metros)       │
-│   • Dynamic Queue Simulation Engine (`getQueueForecast()`)             │
+│   • Verified Stations Registry (20 Stations across 6 metros)           │
+│   • Real-Time CPO Network Aggregation & Telemetry Helpers              │
 └───────────────────────────────────▲────────────────────────────────────┘
                                     │ (Simulated / Future Backend)
 ┌───────────────────────────────────┴────────────────────────────────────┐
@@ -58,7 +58,7 @@ Electric Vehicle (EV) adoption faces a critical bottleneck: **fragmentation and 
 | **Routing** | React Router DOM | `^7.18.4` | Declarative client-side routing & page navigation |
 | **Mapping Engine** | Leaflet | `^1.9.4` | Interactive tile-based mapping engine |
 | **React Map Wrapper** | React Leaflet | `^5.0.0` | Declarative React bindings for Leaflet elements |
-| **Data Visualization**| Recharts | `^3.10.1` | SVG charts for queue forecasting & network metrics |
+| **Data Visualization**| Recharts | `^3.10.1` | SVG charts for port availability & network metrics |
 | **Iconography** | Lucide React | `^1.55.0` | Crisp, modern vector icon set |
 | **Linter** | Oxlint | `^1.81.0` | High-performance Rust-based JavaScript linter |
 
@@ -127,12 +127,18 @@ interface Station {
 }
 ```
 
-### 5.2 Queue Forecast Entity (`QueuePoint`)
+### 5.2 Reservation Entity (`Booking`)
 ```typescript
-interface QueuePoint {
-  time: string;             // Hourly timestamp (e.g. "17:00")
-  vehicles: number;         // Projected vehicle arrivals
-  capacity: number;         // Total charger hardware bays
+interface Booking {
+  id: string;               // e.g. "VOLT-8921"
+  stationId: string;        // ID of target station
+  bayNumber: number;        // Reserved charging bay
+  portType: string;         // Connector type (e.g. CCS2 150 kW)
+  date: string;             // YYYY-MM-DD
+  startTime: string;        // HH:mm
+  durationMinutes: number;  // 15 - 120 mins
+  vehicleNumber: string;    // License plate
+  status: 'active' | 'completed' | 'cancelled';
 }
 ```
 

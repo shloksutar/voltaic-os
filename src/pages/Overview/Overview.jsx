@@ -5,7 +5,6 @@ import {
   Activity,
   CheckCircle,
   WifiOff,
-  TrendingUp,
   Globe,
   Lock,
   ArrowRight,
@@ -35,9 +34,9 @@ const FEATURES = [
     desc: 'No need for 10 different apps. Find Tata Power, ChargeZone, Statiq, and more on a single map.',
   },
   {
-    icon: TrendingUp,
-    title: 'Avoid Rush Hours',
-    desc: 'Check live wait times and busy hours so you can pick the fastest time to recharge your car.',
+    icon: Zap,
+    title: 'Verified Tariffs & Speeds',
+    desc: 'View transparent per-kWh tariffs, DC Fast and Ultra-Fast kW power ratings, and amenities before you arrive.',
   },
 ];
 
@@ -67,7 +66,7 @@ const HOW_IT_WORKS = [
 export default function Overview() {
   const [stations, setStations] = useState(CHARGERS);
   const [stats, setStats] = useState(getNetworkStats(CHARGERS));
-  const [lastUpdate, setLastUpdate] = useState(new Date());
+  const [lastUpdate, setLastUpdate] = useState(() => new Date());
   const [selectedForReservation, setSelectedForReservation] = useState(null);
 
   const syncData = useCallback(async () => {

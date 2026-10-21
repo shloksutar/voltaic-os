@@ -20,9 +20,8 @@ import {
   RotateCcw,
   Maximize2,
 } from 'lucide-react';
-import { CHARGERS, CITIES, getQueueForecast } from '../../data/chargers';
+import { CHARGERS, CITIES } from '../../data/chargers';
 import { stationsApi } from '../../api/client';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 import ReservationModal from '../../components/ReservationModal/ReservationModal';
 import ReportIssueModal from '../../components/ReportIssueModal/ReportIssueModal';
 import PageMeta from '../../components/PageMeta/PageMeta';
@@ -305,8 +304,6 @@ export default function LiveMap() {
 
   const [selectedCharger, setSelectedCharger] = useState(null);
   const [showDrawerList, setShowDrawerList] = useState(false);
-  const [showForecastChart, setShowForecastChart] = useState(false);
-  const [forecastData, setForecastData] = useState([]);
 
   // User Geolocation
   const [userLocation, setUserLocation] = useState(null);
@@ -455,12 +452,6 @@ export default function LiveMap() {
     }
   }, [searchQuery, selectedCity]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Load forecast when charger selected
-  useEffect(() => {
-    if (selectedCharger) {
-      setForecastData(getQueueForecast(selectedCharger.id, selectedCharger.busy));
-    }
-  }, [selectedCharger]);
 
   // Turn-by-turn navigation URL
   const getDirectionsUrl = (charger) => {
@@ -800,15 +791,6 @@ export default function LiveMap() {
             <button
               type="button"
               className="btn btn-ghost btn-sm"
-              onClick={() => setShowForecastChart(!showForecastChart)}
-            >
-              <Clock size={13} />
-              <span>{showForecastChart ? 'Hide Rush Hours' : 'Check Rush Hours'}</span>
-            </button>
-
-            <button
-              type="button"
-              className="btn btn-ghost btn-sm"
               onClick={() => setIsReporting(true)}
               style={{ color: '#9CA3AF' }}
             >
@@ -816,25 +798,6 @@ export default function LiveMap() {
               <span>Report Issue</span>
             </button>
           </div>
-
-          {/* Collapsible Rush Hours Forecast Chart */}
-          {showForecastChart && (
-            <div className="gpc-forecast-chart-wrap page-enter">
-              <div className="gpc-chart-title">Estimated Wait Load (Next 8 Hours)</div>
-              <ResponsiveContainer width="100%" height={120}>
-                <BarChart data={forecastData} margin={{ top: 5, right: 5, bottom: 0, left: -25 }}>
-                  <XAxis dataKey="time" tick={{ fontSize: 10, fill: '#9CA3AF' }} tickLine={false} axisLine={false} />
-                  <YAxis tick={{ fontSize: 10, fill: '#9CA3AF' }} tickLine={false} axisLine={false} />
-                  <Tooltip
-                    contentStyle={{ fontSize: 12, borderRadius: 8, border: '1px solid #E2E6EE' }}
-                    cursor={{ fill: '#F0F2F6' }}
-                  />
-                  <ReferenceLine y={selectedCharger.ports} stroke="#E2E6EE" strokeDasharray="3 3" />
-                  <Bar dataKey="vehicles" fill="#6366F1" radius={[3, 3, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          )}
         </div>
       )}
 

@@ -11,8 +11,6 @@ import {
   Pie,
   Cell,
   Legend,
-  AreaChart,
-  Area,
   CartesianGrid,
 } from 'recharts';
 import { analyticsApi, stationsApi } from '../../api/client';
@@ -66,13 +64,12 @@ export default function Analytics() {
     { name: 'In Use', value: 35, color: '#D97706' },
     { name: 'Offline', value: 5, color: '#DC2626' },
   ];
-  const hours = data?.hours || [];
 
   return (
     <div className="analytics page-enter">
       <PageMeta
         title="Network Analytics"
-        description="Aggregated real-time charging network telemetry, grid utilization profiles, and operator market share."
+        description="Aggregated real-time charging network telemetry, port availability distributions, and operator market share."
       />
       <div className="analytics-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px' }}>
         <div>
@@ -97,49 +94,6 @@ export default function Analytics() {
       </div>
 
       <div className="analytics-grid">
-        {/* 24h Utilization trend */}
-        <div className="an-card card an-card-wide">
-          <div className="an-card-header">
-            <div className="an-card-title">24-Hour Grid Utilization Profile</div>
-            <span className="chip">Active Model</span>
-          </div>
-          <ResponsiveContainer width="100%" height={200}>
-            <AreaChart data={hours} margin={{ top: 10, right: 10, bottom: 0, left: -20 }}>
-              <defs>
-                <linearGradient id="utilGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#6366F1" stopOpacity={0.18} />
-                  <stop offset="95%" stopColor="#6366F1" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid stroke="#F0F2F6" vertical={false} />
-              <XAxis
-                dataKey="time"
-                tick={{ fontSize: 10, fill: '#9CA3AF' }}
-                tickLine={false}
-                axisLine={false}
-                interval={2}
-              />
-              <YAxis
-                tick={{ fontSize: 10, fill: '#9CA3AF' }}
-                tickLine={false}
-                axisLine={false}
-                unit="%"
-              />
-              <Tooltip
-                contentStyle={{ fontSize: 12, border: '1px solid #E2E6EE', borderRadius: 8 }}
-                formatter={(v) => [`${v}%`, 'Occupancy']}
-              />
-              <Area
-                type="monotone"
-                dataKey="utilization"
-                stroke="#6366F1"
-                strokeWidth={2}
-                fill="url(#utilGrad)"
-                dot={false}
-              />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
 
         {/* Port status distribution */}
         <div className="an-card card">
@@ -194,9 +148,10 @@ export default function Analytics() {
         </div>
 
         {/* Operator market share */}
-        <div className="an-card card">
+        <div className="an-card card an-card-full">
           <div className="an-card-header">
             <div className="an-card-title">CPO Port Share</div>
+            <span className="chip">Verified Networks</span>
           </div>
           <div className="op-share-list">
             {operatorData

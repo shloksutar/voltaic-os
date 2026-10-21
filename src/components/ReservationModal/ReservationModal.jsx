@@ -21,8 +21,8 @@ export default function ReservationModal({ station, isOpen, onClose, onBookingCo
   const toast = useToast();
 
   const [selectedBay, setSelectedBay] = useState(null);
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
-  const [startTime, setStartTime] = useState(
+  const [date, setDate] = useState(() => new Date().toISOString().split('T')[0]);
+  const [startTime, setStartTime] = useState(() =>
     new Date(Date.now() + 15 * 60000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })
   );
   const [duration, setDuration] = useState(45);
@@ -215,7 +215,7 @@ export default function ReservationModal({ station, isOpen, onClose, onBookingCo
                       <input
                         type="date"
                         value={date}
-                        min={new Date().toISOString().split('T')[0]}
+                        min={date}
                         onChange={(e) => setDate(e.target.value)}
                         required
                       />

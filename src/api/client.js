@@ -304,16 +304,6 @@ async function handleFallback(endpoint, options = {}) {
       { name: 'Offline', value: totalOffline, color: '#DC2626' },
     ];
 
-    const nowHour = new Date().getHours();
-    const hours = Array.from({ length: 24 }, (_, i) => {
-      const h = `${String(i).padStart(2, '0')}:00`;
-      const diurnalFactor = Math.sin(((i - 5) / 24) * 2 * Math.PI);
-      const activeResCount = bookings.filter((b) => b.status === 'active').length;
-      const baseUtil = Math.round(35 + diurnalFactor * 30 + activeResCount * 4);
-      const clamped = Math.max(10, Math.min(95, baseUtil));
-      return { time: h, utilization: clamped, isCurrent: i === nowHour };
-    });
-
     return {
       stationsCount: stations.length,
       totalPorts,
@@ -324,7 +314,6 @@ async function handleFallback(endpoint, options = {}) {
       cityData: Object.values(cityMap),
       operatorData: Object.entries(opMap).map(([name, value]) => ({ name, value })),
       pieData,
-      hours,
     };
   }
 

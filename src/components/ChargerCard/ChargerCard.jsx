@@ -1,4 +1,4 @@
-import { Zap, Clock, WifiOff, ChevronRight, AlertTriangle, MapPin } from 'lucide-react';
+import { Zap, Clock, WifiOff, AlertTriangle, MapPin } from 'lucide-react';
 import './ChargerCard.css';
 
 function SpeedBadge({ speed }) {

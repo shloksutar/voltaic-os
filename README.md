@@ -6,14 +6,14 @@
 [![Leaflet](https://img.shields.io/badge/Leaflet-1.9-199900?logo=leaflet&logoColor=white)](https://leafletjs.com/)
 [![Recharts](https://img.shields.io/badge/Recharts-3.10-22B5BF)](https://recharts.org/)
 
-**VoltaicOS** bridges fragmented Charge Point Operators (CPOs) into a unified real-time intelligence layer — eliminating EV range anxiety with deterministic journey planning, live hardware telemetry, and predictive machine-learning queue forecasts.
+**VoltaicOS** bridges fragmented Charge Point Operators (CPOs) into a unified real-time intelligence layer — eliminating EV range anxiety with verified multi-network discovery, live hardware telemetry, and advance bay reservations.
 
 ---
 
 ## ⚡ Key Features
 
 - **🌐 Live Interactive Map:** Real-time geospatial charge station tracking across metro hubs (Mumbai, Delhi, Bengaluru, Hyderabad, Pune, Chennai) powered by Leaflet OSM with custom SVG status pins and fly-to zoom.
-- **📈 Predictive Queue Analytics:** 8-hour forward-looking arrival forecasts and capacity comparisons using Recharts.
+- **📈 Verified Network Analytics:** Aggregated real-time port availability distributions, metro capacity breakdowns, and operator market share using Recharts.
 - **⚡ Multi-Operator Aggregation:** Seamlessly aggregates stations from **Tata Power EV, ChargeZone, Ather Grid, Statiq, BPCL EV, HPCL EV, and EVCS India**.
 - **🚨 Incident & ICE Bay Detection:** Active triage feed for ICE vehicle blockages, sudden offline hardware faults, and power fluctuations with resolution toggles.
 - **📊 Real-Time Network KPIs:** Sub-second metric tracking for online stations, active ports, current utilization, and power delivery throughput.
@@ -40,7 +40,7 @@ voltaic-os/
     │   ├── ChargerCard/             # Modular station display card
     │   └── StatCard/                # Network KPI highlight card
     ├── data/
-    │   └── chargers.js              # Station datasets, queue heuristics, and CPO metadata
+    │   └── chargers.js              # Station registry, network telemetry stats, and CPO metadata
     └── pages/
         ├── Overview/                # Dashboard hero, architecture flow, and live highlights
         ├── LiveMap/                 # Interactive geospatial map with slide-over drawer

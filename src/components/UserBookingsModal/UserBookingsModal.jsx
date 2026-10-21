@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { X, Calendar, Clock, MapPin, Ban, CheckCircle, ExternalLink, RefreshCw } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
@@ -12,7 +12,7 @@ export default function UserBookingsModal({ isOpen, onClose, onRefreshStations }
   const [loading, setLoading] = useState(false);
   const [cancellingId, setCancellingId] = useState(null);
 
-  const fetchBookings = async () => {
+  const fetchBookings = useCallback(async () => {
     setLoading(true);
     try {
       const res = await bookingsApi.getAll(user?.id);
@@ -22,13 +22,13 @@ export default function UserBookingsModal({ isOpen, onClose, onRefreshStations }
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
 
   useEffect(() => {
     if (isOpen) {
       fetchBookings();
     }
-  }, [isOpen, user]);
+  }, [isOpen, fetchBookings]);
 
   if (!isOpen) return null;
 
