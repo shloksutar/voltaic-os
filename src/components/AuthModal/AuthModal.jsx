@@ -41,25 +41,51 @@ export default function AuthModal() {
 
   if (!isAuthModalOpen) return null;
 
-  // Email: send OTP via Supabase Auth (works for both sign up and sign in)
-  const handleEmailSendOtp = async (e) => {
+  // Email: sign up or sign in with email + password via Supabase Auth
+  const handleEmailSubmit = async (e) => {
     e.preventDefault();
-    if (!email) { setError('Please enter your email address'); return; }
     setError('');
     setLoading(true);
     try {
       if (isSupabaseConfigured && supabase) {
-        const { error: otpError } = await supabase.auth.signInWithOtp({
-          email,
-          options: {
-            data: { name: name || email.split('@')[0] },
-            shouldCreateUser: true,
-          },
-        });
-        if (otpError) throw new Error(otpError.message);
-        setEmailOtpSent(true);
+        if (isRegister) {
+          const { data, error: signUpErr } = await supabase.auth.signUp({
+            email,
+            password,
+            options: { data: { name: name || email.split('@')[0] } },
+          });
+          if (signUpErr) throw new Error(signUpErr.message);
+          // Supabase sends a confirmation email automatically
+          const sbUser = data?.user;
+          if (sbUser) {
+            const userData = {
+              id: sbUser.id,
+              name: sbUser.user_metadata?.name || name || email.split('@')[0],
+              email: sbUser.email,
+              avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name || email)}`,
+              vehicleModel: 'Tata Nexon EV Max',
+              licensePlate: 'MH 02 EV 1001',
+            };
+            handleAuthSuccess(userData, `token_${sbUser.id}`);
+          }
+        } else {
+          const { data, error: signInErr } = await supabase.auth.signInWithPassword({ email, password });
+          if (signInErr) throw new Error(signInErr.message);
+          const sbUser = data?.user;
+          if (sbUser) {
+            const userData = {
+              id: sbUser.id,
+              name: sbUser.user_metadata?.name || email.split('@')[0],
+              email: sbUser.email,
+              avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(email)}`,
+              vehicleModel: 'Tata Nexon EV Max',
+              licensePlate: 'MH 02 EV 1001',
+            };
+            handleAuthSuccess(userData, `token_${sbUser.id}`);
+          }
+        }
       } else {
-        // Fallback: use the custom backend email/password flow
+        // Fallback: custom backend
         if (isRegister) {
           await registerWithEmail({ email, password, name });
         } else {
@@ -67,42 +93,7 @@ export default function AuthModal() {
         }
       }
     } catch (err) {
-      setError(err.message || 'Failed to send verification email');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Email: verify OTP token from inbox
-  const handleEmailVerifyOtp = async (e) => {
-    e.preventDefault();
-    if (!emailOtp) { setError('Please enter the 6-digit code from your email'); return; }
-    setError('');
-    setLoading(true);
-    try {
-      const { data, error: verifyError } = await supabase.auth.verifyOtp({
-        email,
-        token: emailOtp,
-        type: 'email',
-      });
-      if (verifyError) throw new Error(verifyError.message);
-      const sbUser = data?.user;
-      if (sbUser) {
-        const userData = {
-          id: sbUser.id,
-          name: sbUser.user_metadata?.name || name || email.split('@')[0],
-          email: sbUser.email,
-          avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name || email)}`,
-          vehicleModel: 'Tata Nexon EV Max',
-          licensePlate: 'MH 02 EV 1001',
-        };
-        localStorage.setItem('voltaic_token', `token_${sbUser.id}`);
-        localStorage.setItem('voltaic_user', JSON.stringify(userData));
-        closeAuthModal();
-        window.location.reload();
-      }
-    } catch (err) {
-      setError(err.message || 'Verification failed. Check the code and try again.');
+      setError(err.message || 'Authentication failed');
     } finally {
       setLoading(false);
     }
@@ -210,87 +201,79 @@ export default function AuthModal() {
           </div>
         )}
 
-        {/* 1. EMAIL OTP TAB */}
+        {/* 1. EMAIL SIGN UP / SIGN IN TAB */}
         {activeTab === 'email' && (
-          <div className="auth-tab-content">
-            {!emailOtpSent ? (
-              <form onSubmit={handleEmailSendOtp}>
-                <div className="auth-field">
-                  <label>Your Name (optional)</label>
-                  <div className="auth-input-wrap">
-                    <User size={15} />
-                    <input
-                      type="text"
-                      placeholder="Your full name"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                    />
-                  </div>
-                </div>
+          <form className="auth-tab-content" onSubmit={handleEmailSubmit}>
+            <div className="auth-sub-toggle">
+              <button
+                type="button"
+                className={`auth-sub-btn ${isRegister ? 'auth-sub-btn--active' : ''}`}
+                onClick={() => { setIsRegister(true); setError(''); }}
+              >
+                Create Account
+              </button>
+              <button
+                type="button"
+                className={`auth-sub-btn ${!isRegister ? 'auth-sub-btn--active' : ''}`}
+                onClick={() => { setIsRegister(false); setError(''); }}
+              >
+                Sign In
+              </button>
+            </div>
 
-                <div className="auth-field">
-                  <label>Email Address</label>
-                  <div className="auth-input-wrap">
-                    <Mail size={15} />
-                    <input
-                      type="email"
-                      placeholder="name@example.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                    />
-                  </div>
-                </div>
-
-                <button
-                  type="submit"
-                  className="btn btn-primary auth-submit-btn"
-                  disabled={loading || !email}
-                >
-                  {loading ? 'Sending Code...' : 'Send Verification Code'}
-                </button>
-              </form>
-            ) : (
-              <form onSubmit={handleEmailVerifyOtp}>
-                <div className="otp-sent-banner">
-                  <CheckCircle2 size={16} />
-                  <span>
-                    6-digit code sent to <strong>{email}</strong> — check your inbox & spam folder
-                  </span>
-                </div>
-
-                <div className="auth-field">
-                  <label>Enter 6-Digit Code</label>
+            {isRegister && (
+              <div className="auth-field">
+                <label>Full Name</label>
+                <div className="auth-input-wrap">
+                  <User size={15} />
                   <input
                     type="text"
-                    className="auth-otp-input"
-                    maxLength={6}
-                    placeholder="123456"
-                    value={emailOtp}
-                    onChange={(e) => setEmailOtp(e.target.value.replace(/\D/g, ''))}
-                    autoFocus
+                    placeholder="Enter your full name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
                     required
                   />
                 </div>
-
-                <button
-                  type="submit"
-                  className="btn btn-primary auth-submit-btn"
-                  disabled={loading || emailOtp.length < 6}
-                >
-                  {loading ? 'Verifying...' : 'Verify & Sign In'}
-                </button>
-
-                <button
-                  type="button"
-                  className="btn btn-ghost btn-sm auth-resend-btn"
-                  onClick={resetModal}
-                >
-                  ← Use different email
-                </button>
-              </form>
+              </div>
             )}
-          </div>
+
+            <div className="auth-field">
+              <label>Email Address</label>
+              <div className="auth-input-wrap">
+                <Mail size={15} />
+                <input
+                  type="email"
+                  placeholder="name@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="auth-field">
+              <label>Password</label>
+              <div className="auth-input-wrap">
+                <Lock size={15} />
+                <input
+                  type="password"
+                  placeholder={isRegister ? 'Create a password (min. 6 characters)' : 'Enter your password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  minLength={6}
+                  required
+                />
+              </div>
+            </div>
+
+            <button type="submit" className="btn btn-primary auth-submit-btn" disabled={loading}>
+              {loading
+                ? 'Processing...'
+                : isRegister
+                ? 'Create EV Driver Account'
+                : 'Sign In to Account'}
+            </button>
+          </form>
         )}
 
         {/* 2. PHONE NUMBER TAB */}
