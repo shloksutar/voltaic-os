@@ -110,6 +110,7 @@ export function AuthProvider({ children }) {
         registerWithEmail,
         sendPhoneOtp,
         verifyPhoneOtp,
+        handleAuthSuccess,
         logout,
         updateProfile,
         isAuthModalOpen,
