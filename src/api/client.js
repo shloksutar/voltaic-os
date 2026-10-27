@@ -38,41 +38,9 @@ const INITIAL_ALERTS = [
   },
 ];
 
-const INITIAL_BOOKINGS = [
-  {
-    id: 'VOLT-8921',
-    userId: 'usr_demo_01',
-    userName: 'Demo Driver',
-    userEmail: 'driver@voltaicos.io',
-    userPhone: '+91 98765 43210',
-    stationId: 'MUM-EZ-01',
-    stationName: 'Tata Power EZ Charge — Jio World Convention Centre',
-    city: 'Mumbai',
-    bayNumber: 2,
-    portType: 'CCS2 (150 kW DC Fast)',
-    date: new Date().toISOString().split('T')[0],
-    startTime: '16:00',
-    durationMinutes: 45,
-    vehicleNumber: 'MH 02 EK 9912',
-    vehicleModel: 'Tata Nexon EV Max',
-    tariffPerKwh: 19.5,
-    reservationFee: 50,
-    estimatedCost: 650,
-    status: 'active',
-    qrCodeData: 'VOLT-8921-MUM-EZ-01-BAY2',
-    createdAt: new Date(Date.now() - 3600000).toISOString(),
-  },
-];
+const INITIAL_BOOKINGS = [];
 
-const INITIAL_USER = {
-  id: 'usr_demo_01',
-  name: 'Demo Driver',
-  email: 'driver@voltaicos.io',
-  phone: '+91 98765 43210',
-  avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80',
-  vehicleModel: 'Tata Nexon EV Max',
-  licensePlate: 'MH 02 EK 9912',
-};
+const INITIAL_USER = null;
 
 // In-memory / localStorage helpers for offline/static resilience
 function getStorageItem(key, fallback) {
@@ -106,6 +74,10 @@ function getLocalAlerts() {
 
 function getLocalUser() {
   return getStorageItem('voltaic_user', INITIAL_USER);
+}
+
+function getLocalChargerListings() {
+  return getStorageItem('voltaic_charger_listings', []);
 }
 
 // Fallback execution when API endpoint returns 404 or server is unreachable
@@ -178,9 +150,18 @@ async function handleFallback(endpoint, options = {}) {
   // 2. Bookings
   if (pathOnly === '/bookings' && method === 'GET') {
     const userId = params.get('userId');
-    const list = getLocalBookings();
-    const userBookings = userId ? list.filter((b) => b.userId === userId) : list;
-    return { bookings: userBookings, count: userBookings.length };
+    const userEmail = params.get('userEmail');
+    const userPhone = params.get('userPhone');
+    let list = getLocalBookings();
+    if (userEmail) {
+      list = list.filter((b) => b.userEmail === userEmail);
+    } else if (userPhone) {
+      const cleanPhone = userPhone.replace(/[^0-9]/g, '').slice(-10);
+      list = list.filter((b) => (b.userPhone || '').replace(/[^0-9]/g, '').includes(cleanPhone));
+    } else if (userId) {
+      list = list.filter((b) => b.userId === userId);
+    }
+    return { bookings: list, count: list.length };
   }
 
   if (pathOnly === '/bookings' && method === 'POST') {
@@ -322,9 +303,9 @@ async function handleFallback(endpoint, options = {}) {
     const user = {
       id: body.id || `usr_${Date.now()}`,
       name: body.name || (body.email ? body.email.split('@')[0] : 'EV Driver'),
-      email: body.email || 'driver@voltaicos.io',
-      phone: body.phone || '+91 98765 43210',
-      avatar: body.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80',
+      email: body.email || null,
+      phone: body.phone || null,
+      avatar: body.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(body.name || body.email || 'EV')}`,
       vehicleModel: body.vehicleModel || 'Tata Nexon EV Max',
       licensePlate: body.licensePlate || 'MH 02 EV 1001',
     };
@@ -342,11 +323,12 @@ async function handleFallback(endpoint, options = {}) {
   if (pathOnly === '/auth/phone/verify-otp') {
     const user = {
       id: `usr_${Date.now()}`,
-      name: body.phone ? `Driver (${body.phone.slice(-4)})` : 'EV Driver',
-      phone: body.phone || '+91 98765 43210',
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80',
-      vehicleModel: 'Tata Nexon EV Max',
-      licensePlate: 'MH 02 EV 1001',
+      name: body.name || (body.phone ? `Driver (${body.phone.slice(-4)})` : 'EV Driver'),
+      email: null,
+      phone: body.phone || null,
+      avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(body.phone || 'Driver')}`,
+      vehicleModel: body.vehicleModel || 'Tata Nexon EV Max',
+      licensePlate: body.licensePlate || 'MH 02 EV 1001',
     };
     try {
       localStorage.setItem('voltaic_token', `token_${user.id}`);
@@ -374,6 +356,43 @@ async function handleFallback(endpoint, options = {}) {
       localStorage.removeItem('voltaic_token');
     } catch {}
     return { message: 'Logged out successfully' };
+  }
+
+  // 6. Charger Listings (Rent My Charger applications)
+  if (pathOnly === '/charger-listings' && method === 'POST') {
+    const listings = getLocalChargerListings();
+    const id = `HOST-${Date.now()}`;
+    const newListing = {
+      id,
+      status: 'pending_review',
+      submittedAt: new Date().toISOString(),
+      ...body,
+    };
+    setStorageItem('voltaic_charger_listings', [newListing, ...listings]);
+
+    // Fire an alert so it's visible in the Alerts / Incident Feed
+    const alerts = getLocalAlerts();
+    const listingAlert = {
+      id: `alt_${Date.now()}`,
+      type: 'host_application',
+      severity: 'low',
+      station: `New Host Application — ${body.city || 'Unknown City'}`,
+      city: body.city || 'India',
+      msg: `${body.fullName || 'A user'} submitted a charger listing for ${body.address || 'an address'} in ${body.city || 'an unknown city'}. Connector: ${body.connectorType || '—'} · Power: ${body.powerLevel || '—'} · ₹${body.pricePerUnit || '—'}/kWh. Ref: ${id}.`,
+      time: 'Just now',
+      resolved: false,
+      timestamp: Date.now(),
+    };
+    setStorageItem('voltaic_mock_alerts', [listingAlert, ...alerts]);
+
+    return { message: 'Charger listing application submitted', listing: newListing };
+  }
+
+  if (pathOnly === '/charger-listings' && method === 'GET') {
+    const listings = getLocalChargerListings();
+    const userId = params.get('userId');
+    const result = userId ? listings.filter((l) => l.userId === userId) : listings;
+    return { listings: result, count: result.length };
   }
 
   throw new Error(`Endpoint ${endpoint} not handled`);
@@ -436,9 +455,13 @@ export const stationsApi = {
 
 // Bookings API
 export const bookingsApi = {
-  getAll: (userId) => {
-    const qs = userId ? `?userId=${encodeURIComponent(userId)}` : '';
-    return request(`/bookings${qs}`);
+  getAll: (user) => {
+    const query = new URLSearchParams();
+    if (user?.id) query.set('userId', user.id);
+    if (user?.email) query.set('userEmail', user.email);
+    if (user?.phone) query.set('userPhone', user.phone);
+    const qs = query.toString();
+    return request(`/bookings${qs ? `?${qs}` : ''}`);
   },
   getById: (id) => request(`/bookings/${id}`),
   create: (bookingData) =>
@@ -507,6 +530,19 @@ export const alertsApi = {
     request(`/alerts/${id}`, {
       method: 'DELETE',
     }),
+};
+
+// Charger Listings API (Rent My Charger host applications)
+export const chargerListingsApi = {
+  create: (payload) =>
+    request('/charger-listings', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+  getAll: (userId) => {
+    const qs = userId ? `?userId=${encodeURIComponent(userId)}` : '';
+    return request(`/charger-listings${qs}`);
+  },
 };
 
 // Analytics API

@@ -142,13 +142,6 @@ export default function ReportIssueModal({ station, isOpen, onClose, onReportSuc
               <AlertTriangle size={15} />
               {loading ? 'Submitting report...' : 'Submit Incident Report'}
             </button>
-
-            <div style={{ marginTop: '14px', textAlign: 'center', fontSize: '12px', color: 'var(--color-text-3)' }}>
-              Urgent on-site emergency? Reach 24/7 Operations at{' '}
-              <a href="tel:+911800208808" style={{ color: 'var(--color-primary)', fontWeight: 600 }}>
-                +91 1800-208-808
-              </a>
-            </div>
           </form>
         )}
       </div>

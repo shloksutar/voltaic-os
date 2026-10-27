@@ -340,26 +340,28 @@ export default function Chargers() {
             </button>
           </div>
 
-          <Link
-            to="/map"
-            className="btn btn-secondary btn-sm chp-livemap-link"
-            title="Open Fullscreen Live Map"
-          >
-            <MapIcon size={14} />
-            <span>Live Map</span>
-            <ExternalLink size={12} />
-          </Link>
+          <div className="chp-header-subactions">
+            <Link
+              to="/map"
+              className="btn btn-secondary btn-sm chp-livemap-link"
+              title="Open Fullscreen Live Map"
+            >
+              <MapIcon size={14} />
+              <span>Live Map</span>
+              <ExternalLink size={12} />
+            </Link>
 
-          <button
-            className="btn btn-ghost btn-sm chp-refresh-btn"
-            onClick={() => fetchStations(true)}
-            disabled={loading}
-            title="Refresh live charger status"
-            aria-label="Refresh live charger status"
-          >
-            <RefreshCw size={14} className={loading ? 'spin-icon' : ''} />
-            <span>Refresh</span>
-          </button>
+            <button
+              className="btn btn-ghost btn-sm chp-refresh-btn"
+              onClick={() => fetchStations(true)}
+              disabled={loading}
+              title="Refresh live charger status"
+              aria-label="Refresh live charger status"
+            >
+              <RefreshCw size={14} className={loading ? 'spin-icon' : ''} />
+              <span>Refresh</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -372,7 +374,7 @@ export default function Chargers() {
           className={`chp-cat-tab ${activeCategory === 'two_wheeler' ? 'is-active' : ''}`}
           onClick={() => setActiveCategory('two_wheeler')}
         >
-          <span>🛵 2-Wheeler Community Rentals (P2P)</span>
+          <span>🛵 2W Community (P2P)</span>
           <span className="chp-cat-badge">{filtered2W.length}</span>
         </button>
 
@@ -381,7 +383,7 @@ export default function Chargers() {
           className={`chp-cat-tab ${activeCategory === 'commercial' ? 'is-active' : ''}`}
           onClick={() => setActiveCategory('commercial')}
         >
-          <span>⚡ Commercial Fast Hubs</span>
+          <span>⚡ Fast Hubs</span>
           <span className="chp-cat-badge">{filtered.length}</span>
         </button>
 
@@ -390,7 +392,7 @@ export default function Chargers() {
           className={`chp-cat-tab ${activeCategory === 'all' ? 'is-active' : ''}`}
           onClick={() => setActiveCategory('all')}
         >
-          <span>🌐 All EV Charging</span>
+          <span>🌐 All Stations</span>
           <span className="chp-cat-badge">{filtered2W.length + filtered.length}</span>
         </button>
       </div>
@@ -413,7 +415,7 @@ export default function Chargers() {
           <div className="chp-2w-banner-actions">
             <button
               type="button"
-              className="btn btn-primary btn-sm"
+              className="btn btn-primary btn-sm chp-2w-banner-btn"
               onClick={() => setShowPost2WModal(true)}
             >
               <Zap size={13} />
@@ -422,7 +424,7 @@ export default function Chargers() {
             {activeCategory !== 'two_wheeler' && (
               <button
                 type="button"
-                className="btn btn-secondary btn-sm"
+                className="btn btn-secondary btn-sm chp-2w-banner-btn"
                 onClick={() => setActiveCategory('two_wheeler')}
               >
                 <span>Check 2W Chargers ({filtered2W.length})</span>
@@ -440,8 +442,8 @@ export default function Chargers() {
             className="chp-search"
             placeholder={
               activeCategory === 'two_wheeler'
-                ? 'Search 2W chargers by area, host name, city, landmark, or scooter (Ather, Ola)…'
-                : 'Search by station name, metro, landmark, or city…'
+                ? 'Search 2W hosts, area, city, or scooter...'
+                : 'Search stations, metro, landmark, or city...'
             }
             value={search}
             onChange={(e) => setSearch(e.target.value)}

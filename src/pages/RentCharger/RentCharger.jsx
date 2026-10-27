@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { Zap, User, Phone, Mail, MapPin, Clock, DollarSign, Shield, Upload, CheckCircle2, AlertCircle, ChevronRight, Star, Wifi, Battery, Car, Info, ArrowRight } from "lucide-react";
+import { Zap, User, Phone, Mail, MapPin, Clock, DollarSign, Shield, Upload, CheckCircle2, AlertCircle, ChevronRight, Star, Wifi, Battery, Car, Info, ArrowRight, Loader2 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
+import { chargerListingsApi } from "../../api/client";
 import PageMeta from "../../components/PageMeta/PageMeta";
 import SiteFooter from "../../components/SiteFooter/SiteFooter";
 import "./RentCharger.css";
@@ -16,8 +17,8 @@ const BENEFITS = [
   {icon:Wifi,title:"Smart Scheduling",desc:"Auto-block unavailable slots — zero manual effort."},
 ];
 export default function RentCharger() {
-  const { isAuthenticated, openAuthModal } = useAuth();
-  const [step,setStep]=useState(0);const[submitted,setSubmitted]=useState(false);const[error,setError]=useState("");
+  const { user, isAuthenticated, openAuthModal } = useAuth();
+  const [step,setStep]=useState(0);const[submitted,setSubmitted]=useState(false);const[error,setError]=useState("");const[submitting,setSubmitting]=useState(false);
   const[fullName,setFullName]=useState("");const[email,setEmail]=useState("");const[phone,setPhone]=useState("");
   const[address,setAddress]=useState("");const[city,setCity]=useState("");const[pincode,setPincode]=useState("");
   const[chargerBrand,setChargerBrand]=useState("");const[connectorType,setConnectorType]=useState("");
@@ -38,7 +39,32 @@ export default function RentCharger() {
     if(step===3){if(!idType){setError("Please select your ID type.");return false;}if(!idNumber.trim()){setError("Please enter your ID number.");return false;}if(!agreeTerms){setError("Please accept the host terms to continue.");return false;}}
     return true;
   };
-  const handleNext=()=>{if(!isAuthenticated){openAuthModal();return;}if(validateStep()){if(step===STEP_LABELS.length-1)setSubmitted(true);else setStep(s=>s+1);}};
+  const handleNext = async () => {
+    if (!isAuthenticated) { openAuthModal(); return; }
+    if (!validateStep()) return;
+    if (step === STEP_LABELS.length - 1) {
+      // Final step — submit to API
+      setSubmitting(true);
+      setError("");
+      try {
+        await chargerListingsApi.create({
+          userId: user?.id || null,
+          fullName, email, phone, address, city, pincode,
+          chargerBrand, connectorType, powerLevel, pricePerUnit,
+          maxSessions, chargerDescription, selectedDays,
+          timeFrom, timeTo, minBookingHours, advanceNoticeHours,
+          idType, idNumber,
+        });
+        setSubmitted(true);
+      } catch (err) {
+        setError(err.message || "Failed to submit application. Please try again.");
+      } finally {
+        setSubmitting(false);
+      }
+    } else {
+      setStep((s) => s + 1);
+    }
+  };
   const handleBack=()=>{setError("");setStep(s=>s-1);};
   const resetAll=()=>{setSubmitted(false);setStep(0);setError("");setFullName("");setEmail("");setPhone("");setAddress("");setCity("");setPincode("");setChargerBrand("");setConnectorType("");setPowerLevel("");setPricePerUnit("");setMaxSessions("");setChargerDescription("");setSelectedDays([]);setTimeFrom("");setTimeTo("");setMinBookingHours("");setAdvanceNoticeHours("");setIdType("");setIdNumber("");setIdFileName("");setSelfieFileName("");setAgreeTerms(false);};
   if(submitted){return(<div className="rc-page"><PageMeta title="Application Submitted — VoltaicOS" description="Your charger rental application has been submitted."/><div className="rc-success-wrap"><div className="rc-success-card card"><div className="rc-success-icon"><CheckCircle2 size={52} strokeWidth={1.5}/></div><h2 className="rc-success-title font-display">Application Submitted!</h2><p className="rc-success-sub">Thank you, <strong>{fullName}</strong>! Your charger listing for <strong>{city}</strong> is under review. Our team will contact you at <strong>+91 {phone}</strong> within <strong>24–48 hours</strong>.</p><div className="rc-success-steps">{[{num:"01",text:"ID verification in progress"},{num:"02",text:"Location inspection scheduled"},{num:"03",text:"Listing goes live on VoltaicOS"}].map(s=><div key={s.num} className="rc-success-step"><span className="rc-step-num">{s.num}</span><span>{s.text}</span></div>)}</div><button className="btn btn-primary" onClick={resetAll}>Submit Another Charger</button></div></div><SiteFooter/></div>);}
@@ -139,8 +165,12 @@ export default function RentCharger() {
             {error&&<div className="rc-error-banner"><AlertCircle size={15}/><span>{error}</span></div>}
             <div className="rc-form-nav">
               {step>0&&<button type="button" className="btn btn-ghost" onClick={handleBack}>← Back</button>}
-              <button type="button" className="btn btn-primary rc-next-btn" onClick={handleNext}>
-                {step===STEP_LABELS.length-1?<><span>Submit Application</span><CheckCircle2 size={16}/></>:<><span>Next: {STEP_LABELS[step+1]}</span><ArrowRight size={16}/></>}
+              <button type="button" className="btn btn-primary rc-next-btn" onClick={handleNext} disabled={submitting}>
+                {step === STEP_LABELS.length - 1
+                  ? submitting
+                    ? <><Loader2 size={16} className="spin-icon" /><span>Submitting…</span></>
+                    : <><span>Submit Application</span><CheckCircle2 size={16} /></>
+                  : <><span>Next: {STEP_LABELS[step + 1]}</span><ArrowRight size={16} /></>}
               </button>
             </div>
           </div>

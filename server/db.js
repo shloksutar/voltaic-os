@@ -20,44 +20,9 @@ try {
 function getInitialData() {
   return {
     stations: JSON.parse(JSON.stringify(REAL_STATIONS)),
-    users: [
-      {
-        id: 'usr_demo_01',
-        name: 'Demo Driver',
-        email: 'driver@voltaicos.io',
-        phone: '+91 98765 43210',
-        authProvider: 'email',
-        avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80',
-        vehicleModel: 'Tata Nexon EV Max',
-        licensePlate: 'MH 02 EK 9912',
-        createdAt: new Date().toISOString(),
-      },
-    ],
-    bookings: [
-      {
-        id: 'VOLT-8921',
-        userId: 'usr_demo_01',
-        userName: 'Demo Driver',
-        userEmail: 'driver@voltaicos.io',
-        userPhone: '+91 98765 43210',
-        stationId: 'MUM-EZ-01',
-        stationName: 'Tata Power EZ Charge — Jio World Convention Centre',
-        city: 'Mumbai',
-        bayNumber: 2,
-        portType: 'CCS2 (150 kW DC Fast)',
-        date: new Date().toISOString().split('T')[0],
-        startTime: '16:00',
-        durationMinutes: 45,
-        vehicleNumber: 'MH 02 EK 9912',
-        vehicleModel: 'Tata Nexon EV Max',
-        tariffPerKwh: 19.5,
-        reservationFee: 50,
-        estimatedCost: 650,
-        status: 'active',
-        qrCodeData: 'VOLT-8921-MUM-EZ-01-BAY2',
-        createdAt: new Date(Date.now() - 3600000).toISOString(),
-      },
-    ],
+    users: [],
+    bookings: [],
+    charger_listings: [], // Host applications submitted via Rent My Charger
     alerts: [
       {
         id: 'alt_001',
@@ -339,6 +304,35 @@ class Database {
     }
     return isValid;
   }
+
+  // Charger Listings (host applications)
+  getChargerListings(userId) {
+    const all = this.data.charger_listings || [];
+    return userId ? all.filter((l) => l.userId === userId) : all;
+  }
+
+  addChargerListing(listingData) {
+    if (!this.data.charger_listings) this.data.charger_listings = [];
+    const newListing = {
+      submittedAt: new Date().toISOString(),
+      status: 'pending_review',
+      ...listingData,
+    };
+    this.data.charger_listings.unshift(newListing);
+    this.write();
+    return newListing;
+  }
+
+  updateChargerListingStatus(id, status) {
+    const listing = (this.data.charger_listings || []).find((l) => l.id === id);
+    if (listing) {
+      listing.status = status;
+      this.write();
+      return listing;
+    }
+    return null;
+  }
 }
 
 export const db = new Database();
+

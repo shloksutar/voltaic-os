@@ -400,14 +400,80 @@
 }
 
 @media (max-width: 768px) {
-  .chargers-page { padding: calc(var(--nav-h) + 16px) 16px 0; gap: 16px; }
-  .chp-header { flex-direction: column; align-items: flex-start; gap: 12px; }
-  .chp-header-actions { width: 100%; justify-content: space-between; }
-  .chp-filters { gap: 12px; padding: 12px; }
+  .chargers-page { padding: calc(var(--nav-h) + 16px) 14px 0; gap: 14px; }
+  .chp-header { flex-direction: column; align-items: stretch; gap: 12px; }
+  .chp-header-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    gap: 8px;
+  }
+  .chp-post-2w-btn {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+    box-sizing: border-box;
+    padding: 8px 14px;
+    font-size: 13px;
+  }
+  .chp-view-switch {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    box-sizing: border-box;
+  }
+  .chp-view-btn {
+    flex: 1;
+    justify-content: center;
+    padding: 7px 4px;
+    font-size: 12px;
+  }
+  .chp-header-subactions {
+    display: flex;
+    width: 100%;
+    gap: 8px;
+  }
+  .chp-livemap-link,
+  .chp-refresh-btn {
+    flex: 1;
+    justify-content: center;
+    text-align: center;
+    box-sizing: border-box;
+    padding: 7px 10px;
+    font-size: 12.5px;
+  }
+  .chp-filters { gap: 10px; padding: 12px; }
   .chp-search-wrap { width: 100%; min-width: 100%; }
-  .chp-selects { width: 100%; }
-  .chp-select-wrap { flex: 1; min-width: calc(50% - 6px); }
-  .chp-status-tabs { width: 100%; }
+  .chp-selects { width: 100%; display: flex; gap: 8px; }
+  .chp-select-wrap { flex: 1; min-width: 0; }
+  .chp-select { font-size: 13px; padding: 8px 28px 8px 10px; text-overflow: ellipsis; }
+  .chp-status-tabs {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .chp-status-tabs::-webkit-scrollbar {
+    display: none;
+  }
+  .status-tab {
+    flex: 1;
+    justify-content: center;
+    padding: 6px 4px;
+    font-size: 11.5px;
+    text-align: center;
+  }
+  .chp-avail-toggle-btn {
+    margin-left: 0 !important;
+    width: 100%;
+    justify-content: center;
+    padding: 8px 12px;
+    box-sizing: border-box;
+    font-size: 12px;
+  }
   .chp-grid { grid-template-columns: 1fr; }
 }
 
@@ -425,6 +491,7 @@
   border-radius: var(--radius-md, 8px);
   cursor: pointer;
   transition: all 0.2s ease;
+  white-space: nowrap;
 }
 
 .chp-post-2w-btn:hover {
@@ -433,29 +500,45 @@
   box-shadow: var(--shadow-md);
 }
 
+.chp-header-subactions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
 /* Category Navigation Switcher */
 .chp-cat-tabs {
   display: flex;
   align-items: center;
   gap: 8px;
   overflow-x: auto;
-  padding-bottom: 2px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding: 2px 2px 6px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.chp-cat-tabs::-webkit-scrollbar {
+  display: none;
 }
 
 .chp-cat-tab {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
+  gap: 7px;
+  padding: 7px 14px;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: 9999px;
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 600;
   color: var(--color-text-2);
   cursor: pointer;
   transition: all 0.15s ease;
   white-space: nowrap;
+  flex-shrink: 0;
+  max-width: 100%;
 }
 
 .chp-cat-tab:hover {
@@ -494,21 +577,31 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 20px;
+  gap: 18px;
   flex-wrap: wrap;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .chp-2w-banner-content {
   display: flex;
-  align-items: center;
-  gap: 16px;
-  max-width: 720px;
+  align-items: flex-start;
+  gap: 14px;
+  flex: 1 1 300px;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.chp-2w-banner-content > div {
+  min-width: 0;
+  flex: 1;
 }
 
 .chp-2w-banner-icon {
-  font-size: 28px;
-  width: 48px;
-  height: 48px;
+  font-size: 26px;
+  width: 44px;
+  height: 44px;
   border-radius: 12px;
   background: var(--color-primary-pale);
   border: 1px solid var(--color-border);
@@ -522,20 +615,61 @@
   font-size: 16px;
   font-weight: 700;
   color: var(--color-text);
-  margin: 0 0 4px;
+  margin: 0 0 6px;
+  line-height: 1.35;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .chp-2w-banner-desc {
   font-size: 13px;
   color: var(--color-text-3);
   margin: 0;
-  line-height: 1.4;
+  line-height: 1.45;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .chp-2w-banner-actions {
   display: flex;
   align-items: center;
   gap: 10px;
+  flex-wrap: wrap;
+  max-width: 100%;
+}
+
+.chp-2w-banner-btn {
+  white-space: normal;
+  text-align: center;
+  line-height: 1.3;
+}
+
+@media (max-width: 768px) {
+  .chp-2w-banner {
+    padding: 14px;
+    gap: 14px;
+  }
+  .chp-2w-banner-content {
+    gap: 10px;
+  }
+  .chp-2w-banner-title {
+    font-size: 15px;
+  }
+  .chp-2w-banner-desc {
+    font-size: 12px;
+  }
+  .chp-2w-banner-actions {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+  .chp-2w-banner-actions .btn {
+    width: 100%;
+    justify-content: center;
+    padding: 9px 12px;
+    box-sizing: border-box;
+  }
 }
 
 /* 2W Scooter Model Filter Pills */

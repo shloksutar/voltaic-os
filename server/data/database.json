@@ -1308,17 +1308,6 @@
   ],
   "users": [
     {
-      "id": "usr_demo_01",
-      "name": "Demo Driver",
-      "email": "driver@voltaicos.io",
-      "phone": "+91 98765 43210",
-      "authProvider": "email",
-      "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80",
-      "vehicleModel": "Tata Nexon EV Max",
-      "licensePlate": "MH 02 EK 9912",
-      "createdAt": "2026-10-10T16:00:41.196Z"
-    },
-    {
       "id": "usr_1791741304908_iyguo",
       "createdAt": "2026-10-11T17:55:04.908Z",
       "name": "Shlok Sutar",
@@ -1334,7 +1323,7 @@
       "createdAt": "2026-10-13T18:44:26.207Z",
       "name": "satej",
       "phone": "9607102196",
-      "email": "9607102196@phone.voltaicos.io",
+      "email": null,
       "authProvider": "phone",
       "avatar": "https://api.dicebear.com/7.x/initials/svg?seed=9607102196",
       "vehicleModel": "Tata Nexon EV Max",
@@ -1403,29 +1392,6 @@
       "userEmail": "",
       "userPhone": "",
       "cancelledAt": "2026-10-10T16:02:16.500Z"
-    },
-    {
-      "id": "VOLT-8921",
-      "userId": "usr_demo_01",
-      "userName": "Demo Driver",
-      "userEmail": "driver@voltaicos.io",
-      "userPhone": "+91 98765 43210",
-      "stationId": "MUM-EZ-01",
-      "stationName": "Tata Power EZ Charge — Jio World Convention Centre",
-      "city": "Mumbai",
-      "bayNumber": 2,
-      "portType": "CCS2 (150 kW DC Fast)",
-      "date": "2026-10-10",
-      "startTime": "16:00",
-      "durationMinutes": 45,
-      "vehicleNumber": "MH 02 EK 9912",
-      "vehicleModel": "Tata Nexon EV Max",
-      "tariffPerKwh": 19.5,
-      "reservationFee": 50,
-      "estimatedCost": 650,
-      "status": "active",
-      "qrCodeData": "VOLT-8921-MUM-EZ-01-BAY2",
-      "createdAt": "2026-10-10T15:00:41.196Z"
     }
   ],
   "alerts": [

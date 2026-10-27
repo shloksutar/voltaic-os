@@ -4,8 +4,6 @@ import {
   Zap,
   LayoutDashboard,
   Map,
-  BarChart2,
-  Bell,
   User,
   Calendar,
   LogOut,
@@ -13,23 +11,17 @@ import {
   ChevronDown,
   Menu,
   X,
-  Phone,
-  Mail,
-  Shield,
   Plug,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import UserBookingsModal from '../UserBookingsModal/UserBookingsModal';
-import { SUPPORT_EMAIL, SUPPORT_PHONE, SUPPORT_PHONE_DISPLAY } from '../../constants/contact';
 import './Navbar.css';
 
 const NAV_ITEMS = [
   { to: '/', label: 'Overview', icon: LayoutDashboard },
   { to: '/map', label: 'Live Map', icon: Map },
   { to: '/chargers', label: 'Chargers', icon: Zap },
-  { to: '/analytics', label: 'Analytics', icon: BarChart2 },
-  { to: '/alerts', label: 'Alerts', icon: Bell },
   { to: '/rent-charger', label: 'Rent Charger', icon: Plug },
 ];
 
@@ -131,7 +123,13 @@ export default function Navbar() {
           <button
             type="button"
             className="nav-bookings-btn"
-            onClick={() => setShowBookingsModal(true)}
+            onClick={() => {
+              if (!isAuthenticated) {
+                openAuthModal();
+              } else {
+                setShowBookingsModal(true);
+              }
+            }}
             title="My Slot Reservations"
             aria-label="My Slot Reservations"
           >
@@ -167,7 +165,7 @@ export default function Navbar() {
                 <div className="nav-user-dropdown card">
                   <div className="dropdown-user-header">
                     <div className="duh-name">{user.name}</div>
-                    {user.email && (
+                    {user.email && !user.email.endsWith('@phone.voltaicos.io') && user.email !== 'driver@voltaicos.io' && (
                       <a className="duh-email" href={`mailto:${user.email}`}>
                         {user.email}
                       </a>
@@ -263,7 +261,11 @@ export default function Navbar() {
                     )}
                     <div>
                       <div className="drawer-user-name">{user.name || 'EV Driver'}</div>
-                      <div className="drawer-user-sub">{user.email || user.phone || 'Verified Member'}</div>
+                      <div className="drawer-user-sub">
+                        {user.email && !user.email.endsWith('@phone.voltaicos.io') && user.email !== 'driver@voltaicos.io'
+                          ? user.email
+                          : user.phone || 'Verified Member'}
+                      </div>
                     </div>
                   </div>
                   <button type="button" className="btn btn-ghost btn-sm drawer-logout-btn" onClick={handleLogout}>
@@ -315,24 +317,6 @@ export default function Navbar() {
                 <Calendar size={16} />
                 <span>My Slot Reservations</span>
               </button>
-            </div>
-
-            {/* Support hotline contact */}
-            <div className="nav-drawer-contact">
-              <div className="drawer-contact-title">24/7 EV Driver Assistance</div>
-              <a href={`tel:${SUPPORT_PHONE}`} className="drawer-contact-link">
-                <Phone size={15} />
-                <span>{SUPPORT_PHONE_DISPLAY}</span>
-              </a>
-              <a href={`mailto:${SUPPORT_EMAIL}`} className="drawer-contact-link">
-                <Mail size={15} />
-                <span>{SUPPORT_EMAIL}</span>
-              </a>
-            </div>
-
-            <div className="nav-drawer-footer">
-              <Shield size={13} color="#059669" />
-              <span>OCPI 2.2.1 Secure Network Bridge</span>
             </div>
           </aside>
         </div>

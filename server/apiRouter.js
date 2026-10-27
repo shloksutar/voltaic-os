@@ -277,7 +277,7 @@ apiRouter.post('/auth/phone/verify-otp', async (req, res) => {
         id: `usr_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
         name: name || `EV Driver (${phone.slice(-4)})`,
         phone,
-        email: `${cleanPhone}@phone.voltaicos.io`,
+        email: null,
         auth_provider: 'phone',
         avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(phone)}`,
         vehicle_model: vehicleModel || 'Hyundai Ioniq 5',
@@ -296,7 +296,7 @@ apiRouter.post('/auth/phone/verify-otp', async (req, res) => {
     user = db.createUser({
       name: name || `EV Driver (${phone.slice(-4)})`,
       phone,
-      email: `${phone.replace(/[^0-9]/g, '')}@phone.voltaicos.io`,
+      email: null,
       authProvider: 'phone',
       avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(phone)}`,
       vehicleModel: vehicleModel || 'Hyundai Ioniq 5',
@@ -466,11 +466,18 @@ apiRouter.post('/stations/:id/report', async (req, res) => {
 
 // Get User Bookings
 apiRouter.get('/bookings', async (req, res) => {
-  const { userId } = req.query;
+  const { userId, userEmail, userPhone } = req.query;
 
   if (isSupabaseServerConfigured) {
     let query = supabaseServer.from('bookings').select('*').order('created_at', { ascending: false });
-    if (userId) query = query.eq('user_id', userId);
+    if (userEmail) {
+      query = query.eq('user_email', userEmail);
+    } else if (userPhone) {
+      const cleanPhone = userPhone.replace(/[^0-9]/g, '').slice(-10);
+      query = query.ilike('user_phone', `%${cleanPhone}%`);
+    } else if (userId) {
+      query = query.eq('user_id', userId);
+    }
 
     const { data, error } = await query;
     if (error) return res.status(500).json({ error: error.message });
@@ -479,7 +486,16 @@ apiRouter.get('/bookings', async (req, res) => {
     return res.json({ bookings, count: bookings.length });
   }
 
-  const bookings = db.getBookings(userId);
+  // Local DB fallback: filter by userEmail, userPhone, or userId
+  let bookings = db.getBookings();
+  if (userEmail) {
+    bookings = bookings.filter((b) => b.userEmail === userEmail);
+  } else if (userPhone) {
+    const cleanPhone = userPhone.replace(/[^0-9]/g, '').slice(-10);
+    bookings = bookings.filter((b) => (b.userPhone || '').replace(/[^0-9]/g, '').includes(cleanPhone));
+  } else if (userId) {
+    bookings = bookings.filter((b) => b.userId === userId);
+  }
   return res.json({ bookings, count: bookings.length });
 });
 
@@ -544,7 +560,7 @@ apiRouter.post('/bookings', async (req, res) => {
 
     const newBooking = {
       id: bookingId,
-      user_id: userId || null,
+      user_id: null, // FK references Supabase auth.users; local user IDs are not in that table
       user_name: userName || 'EV Driver',
       user_email: userEmail || '',
       user_phone: userPhone || '',
@@ -842,3 +858,74 @@ apiRouter.get('/analytics', async (req, res) => {
     pieData,
   });
 });
+
+// ─── Charger Listings (Rent My Charger / Host Applications) ──────────────────
+
+apiRouter.post('/charger-listings', async (req, res) => {
+  try {
+    const body = req.body || {};
+    const id = `HOST-${Date.now()}`;
+    const newListing = {
+      id,
+      status: 'pending_review',
+      submittedAt: new Date().toISOString(),
+      userId: body.userId || null,
+      fullName: body.fullName,
+      email: body.email,
+      phone: body.phone,
+      address: body.address,
+      city: body.city,
+      pincode: body.pincode,
+      chargerBrand: body.chargerBrand,
+      connectorType: body.connectorType,
+      powerLevel: body.powerLevel,
+      pricePerUnit: body.pricePerUnit,
+      maxSessions: body.maxSessions,
+      chargerDescription: body.chargerDescription,
+      selectedDays: body.selectedDays,
+      timeFrom: body.timeFrom,
+      timeTo: body.timeTo,
+      minBookingHours: body.minBookingHours,
+      advanceNoticeHours: body.advanceNoticeHours,
+      idType: body.idType,
+      idNumber: body.idNumber,
+    };
+
+    // Save to in-memory DB
+    if (db.addChargerListing) {
+      db.addChargerListing(newListing);
+    }
+
+    // Create a corresponding alert so it surfaces in Incident Feed
+    const listingAlert = {
+      id: `alt_${Date.now()}`,
+      type: 'host_application',
+      severity: 'low',
+      station: `New Host Application — ${body.city || 'Unknown City'}`,
+      city: body.city || 'India',
+      msg: `${body.fullName || 'A user'} submitted a charger listing for ${body.address || 'an address'} in ${body.city || 'an unknown city'}. Connector: ${body.connectorType || '—'} · Power: ${body.powerLevel || '—'} · ₹${body.pricePerUnit || '—'}/kWh. Ref: ${id}.`,
+      time: 'Just now',
+      resolved: false,
+      timestamp: Date.now(),
+    };
+    if (db.addAlert) db.addAlert(listingAlert);
+
+    return res.status(201).json({ message: 'Charger listing application submitted', listing: newListing });
+  } catch (err) {
+    console.error('POST /charger-listings error:', err);
+    return res.status(500).json({ error: 'Failed to save charger listing' });
+  }
+});
+
+apiRouter.get('/charger-listings', async (req, res) => {
+  try {
+    const { userId } = req.query;
+    let listings = db.getChargerListings ? db.getChargerListings() : [];
+    if (userId) listings = listings.filter((l) => l.userId === userId);
+    return res.json({ listings, count: listings.length });
+  } catch (err) {
+    console.error('GET /charger-listings error:', err);
+    return res.status(500).json({ error: 'Failed to fetch charger listings' });
+  }
+});
+

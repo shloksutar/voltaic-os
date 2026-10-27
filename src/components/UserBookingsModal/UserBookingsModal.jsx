@@ -13,9 +13,10 @@ export default function UserBookingsModal({ isOpen, onClose, onRefreshStations }
   const [cancellingId, setCancellingId] = useState(null);
 
   const fetchBookings = useCallback(async () => {
+    if (!user?.id) return;
     setLoading(true);
     try {
-      const res = await bookingsApi.getAll(user?.id);
+      const res = await bookingsApi.getAll(user);
       setBookings(res.bookings || []);
     } catch (err) {
       console.error('Failed to load bookings:', err);
@@ -30,7 +31,7 @@ export default function UserBookingsModal({ isOpen, onClose, onRefreshStations }
     }
   }, [isOpen, fetchBookings]);
 
-  if (!isOpen) return null;
+  if (!isOpen || !user) return null;
 
   const handleCancel = async (bookingId) => {
     if (!window.confirm('Are you sure you want to cancel this slot reservation?')) return;
