@@ -12,9 +12,40 @@
     <meta property="og:description" content="Live charger availability, guaranteed slot reservations, and real-time charging network intelligence." />
     <meta property="og:type" content="website" />
     <meta name="format-detection" content="telephone=no" />
+    <style>
+      @keyframes init-shimmer {
+        0% { background-position: 200% 0; }
+        100% { background-position: -100% 0; }
+      }
+      .init-bone {
+        background: linear-gradient(90deg, #E4E8F0 0%, #F3F5F9 50%, #E4E8F0 100%);
+        background-size: 200% 100%;
+        animation: init-shimmer 1.6s ease-in-out infinite;
+      }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <div style="min-height: 100vh; background: #F7F8FA; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; display: flex; flex-direction: column;">
+        <div style="height: 64px; background: rgba(255,255,255,0.95); border-bottom: 1px solid #E2E6EE; display: flex; align-items: center; justify-content: space-between; padding: 0 24px;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="width: 34px; height: 34px; background: #3730A3; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+            </div>
+            <div class="init-bone" style="width: 100px; height: 18px; border-radius: 99px;"></div>
+          </div>
+          <div class="init-bone" style="width: 90px; height: 34px; border-radius: 99px;"></div>
+        </div>
+        <div style="max-width: 1100px; width: 100%; margin: 0 auto; padding: 40px 24px; box-sizing: border-box; display: flex; flex-direction: column; gap: 36px;">
+          <div style="background: #FFFFFF; border: 1px solid #E2E6EE; border-radius: 24px; padding: 48px; display: flex; flex-direction: column; gap: 16px;">
+            <div class="init-bone" style="width: 200px; height: 20px; border-radius: 99px;"></div>
+            <div class="init-bone" style="width: 60%; height: 38px; border-radius: 8px;"></div>
+            <div class="init-bone" style="width: 42%; height: 38px; border-radius: 8px;"></div>
+            <div class="init-bone" style="width: 80%; height: 16px; border-radius: 6px; margin-top: 6px;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

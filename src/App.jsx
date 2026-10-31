@@ -1,9 +1,10 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ToastProvider } from './context/ToastContext';
 import { AuthProvider } from './context/AuthContext';
 import Navbar from './components/Navbar/Navbar';
 import AuthModal from './components/AuthModal/AuthModal';
+import SkeletonLoader from './components/SkeletonLoader/SkeletonLoader';
 import './index.css';
 
 // Lazy-loaded page chunks — each page is only fetched when first visited
@@ -15,10 +16,30 @@ const RentCharger = lazy(() => import('./pages/RentCharger/RentCharger'));
 const Admin       = lazy(() => import('./pages/Admin/Admin'));
 
 export default function App() {
+  const [showSkeleton, setShowSkeleton] = useState(true);
+  const [isFadingOut, setIsFadingOut] = useState(false);
+
+  useEffect(() => {
+    // Show skeleton screen loader for around 1.5 seconds when opening the website
+    const fadeTimer = setTimeout(() => {
+      setIsFadingOut(true);
+    }, 1500);
+
+    const removeTimer = setTimeout(() => {
+      setShowSkeleton(false);
+    }, 1850); // 1500ms + 350ms smooth fade transition
+
+    return () => {
+      clearTimeout(fadeTimer);
+      clearTimeout(removeTimer);
+    };
+  }, []);
+
   return (
     <ToastProvider>
       <AuthProvider>
         <BrowserRouter>
+          {showSkeleton && <SkeletonLoader isFadingOut={isFadingOut} />}
           <Navbar />
           <Suspense fallback={null}>
             <Routes>
