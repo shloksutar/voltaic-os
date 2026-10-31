@@ -123,6 +123,21 @@
   margin-bottom: 16px;
 }
 
+.auth-notice-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+  font-size: 12.5px;
+  line-height: 1.45;
+  padding: 10px 12px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  animation: fadeIn 0.2s ease-out;
+}
+
 /* Google Section */
 .auth-hint-text {
   font-size: 13px;

@@ -161,34 +161,16 @@ apiRouter.post('/auth/login', async (req, res) => {
       .maybeSingle();
 
     if (!row) {
-      // Auto-create for demo onboarding
-      const newUser = {
-        id: `usr_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
-        name: email.split('@')[0],
-        email: email.toLowerCase(),
-        auth_provider: 'email',
-        avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(email)}`,
-        vehicle_model: 'Tata Nexon EV Max',
-        license_plate: 'MH 02 EV 1001',
-      };
-      const { data: created } = await supabaseServer.from('users').insert([newUser]).select().single();
-      row = created;
+      return res.status(404).json({ error: 'User not found. Please create an account.', notFound: true });
     }
 
     const user = mapUser(row);
     return res.json({ message: 'Logged in successfully', user, token: `token_${user.id}` });
   }
 
-  let user = db.getUserByEmail(email);
+  const user = db.getUserByEmail(email);
   if (!user) {
-    user = db.createUser({
-      name: email.split('@')[0],
-      email,
-      authProvider: 'email',
-      avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(email)}`,
-      vehicleModel: 'Tata Nexon EV Max',
-      licensePlate: 'MH 02 EV 1001',
-    });
+    return res.status(404).json({ error: 'User not found. Please create an account.', notFound: true });
   }
   return res.json({ message: 'Logged in successfully', user, token: `token_${user.id}` });
 });

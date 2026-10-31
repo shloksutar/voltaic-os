@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import {
   Shield,
   RefreshCw,
@@ -21,7 +22,6 @@ import {
   Lock,
   ShieldAlert,
   LogIn,
-  Send,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { chargerListingsApi } from '../../api/client';
@@ -252,7 +252,6 @@ export default function Admin() {
   const [fetching, setFetching] = useState(false);
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
-  const [requestSent, setRequestSent] = useState(false);
 
   const isAdmin = isAuthenticated && user && ADMIN_EMAILS.includes(user.email?.toLowerCase());
 
@@ -304,12 +303,6 @@ export default function Admin() {
 
   // ── Logged in but not an admin ─────────────────────────
   if (!isAdmin) {
-    const subject = encodeURIComponent('Admin Access Request — VoltaicOS');
-    const body = encodeURIComponent(
-      `Hi,\n\nI'd like to request admin access to the VoltaicOS Admin Panel.\n\nMy account email: ${user.email || ''}\nName: ${user.name || ''}\n\nPlease grant me access.\n\nThank you.`
-    );
-    const mailtoHref = `mailto:shlokvsutar@gmail.com?subject=${subject}&body=${body}`;
-
     return (
       <>
         <PageMeta title="Access Denied | VoltaicOS" description="Admin-only area" />
@@ -320,7 +313,7 @@ export default function Admin() {
             </div>
             <h1 className="access-denied-title font-display">Access Denied</h1>
             <p className="access-denied-sub">
-              Hey <strong>{user.name || user.email}</strong>, you don't have admin privileges yet.
+              Hey <strong>{user.name || user.email}</strong>, you don't have admin privileges.
               <br />
               This area is restricted to authorised VoltaicOS administrators only.
             </p>
@@ -328,20 +321,9 @@ export default function Admin() {
               <User size={13} />
               {user.email || user.phone || 'Unknown account'}
             </div>
-            {requestSent ? (
-              <div className="access-denied-sent">
-                <CheckCircle size={18} />
-                Access request sent! An admin will review it shortly.
-              </div>
-            ) : (
-              <a
-                href={mailtoHref}
-                className="btn btn-primary"
-                onClick={() => setRequestSent(true)}
-              >
-                <Send size={14} /> Request Admin Access
-              </a>
-            )}
+            <Link to="/" className="btn btn-primary">
+              Return to Overview
+            </Link>
             <p className="access-denied-note">
               If you believe this is a mistake, contact the site owner directly.
             </p>

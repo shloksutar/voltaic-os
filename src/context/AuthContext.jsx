@@ -90,8 +90,13 @@ export function AuthProvider({ children }) {
     return res.user;
   };
 
-  const openAuthModal = (callback = null) => {
-    if (callback) setAuthCallback(() => callback);
+  const [authModalMode, setAuthModalMode] = useState('signin');
+
+  const openAuthModal = (callback = null, mode = 'signin') => {
+    if (callback && typeof callback === 'function') {
+      setAuthCallback(() => callback);
+    }
+    setAuthModalMode(mode);
     setIsAuthModalOpen(true);
   };
 
@@ -114,6 +119,7 @@ export function AuthProvider({ children }) {
         logout,
         updateProfile,
         isAuthModalOpen,
+        authModalMode,
         openAuthModal,
         closeAuthModal,
       }}

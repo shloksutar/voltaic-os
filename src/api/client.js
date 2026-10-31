@@ -304,7 +304,28 @@ async function handleFallback(endpoint, options = {}) {
   }
 
   // 5. Auth
-  if (pathOnly === '/auth/login' || pathOnly === '/auth/register' || pathOnly === '/auth/google') {
+  if (pathOnly === '/auth/login') {
+    const existing = getStorageItem('voltaic_user', null);
+    const mockUsers = getStorageItem('voltaic_mock_users', []);
+    const cleanEmail = (body.email || '').toLowerCase().trim();
+    const found = mockUsers.find((u) => u.email?.toLowerCase() === cleanEmail) ||
+      (existing && existing.email?.toLowerCase() === cleanEmail ? existing : null);
+
+    if (!found) {
+      const err = new Error('No account found with this email. Please create an account.');
+      err.notFound = true;
+      err.status = 404;
+      throw err;
+    }
+
+    try {
+      localStorage.setItem('voltaic_token', `token_${found.id}`);
+      localStorage.setItem('voltaic_user', JSON.stringify(found));
+    } catch {}
+    return { message: 'Authentication successful', user: found, token: `token_${found.id}` };
+  }
+
+  if (pathOnly === '/auth/register' || pathOnly === '/auth/google') {
     const chosenUsername = body.username || (body.name && !body.name.includes('@') ? body.name : null);
     const chosenName = chosenUsername || (body.name && !body.name.includes('@') ? body.name : 'EV Driver');
     const user = {
@@ -320,6 +341,8 @@ async function handleFallback(endpoint, options = {}) {
     try {
       localStorage.setItem('voltaic_token', `token_${user.id}`);
       localStorage.setItem('voltaic_user', JSON.stringify(user));
+      const mockUsers = getStorageItem('voltaic_mock_users', []);
+      setStorageItem('voltaic_mock_users', [...mockUsers.filter((u) => u.email !== user.email), user]);
     } catch {}
     return { message: 'Authentication successful', user, token: `token_${user.id}` };
   }

@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { X, Mail, Phone, Lock, User, AtSign, AlertCircle, CheckCircle2, KeyRound } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { X, Mail, Phone, Lock, User, AtSign, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { supabase, isSupabaseConfigured } from '../../lib/supabaseClient';
 import './AuthModal.css';
@@ -7,6 +7,7 @@ import './AuthModal.css';
 export default function AuthModal() {
   const {
     isAuthModalOpen,
+    authModalMode,
     closeAuthModal,
     loginWithEmail,
     registerWithEmail,
@@ -16,8 +17,9 @@ export default function AuthModal() {
   } = useAuth();
 
   const [activeTab, setActiveTab] = useState('email'); // 'email' | 'phone'
-  const [isRegister, setIsRegister] = useState(true); // for email mode
+  const [isRegister, setIsRegister] = useState(false); // default to Sign In
   const [error, setError] = useState('');
+  const [notice, setNotice] = useState('');
   const [loading, setLoading] = useState(false);
 
   // Email state
@@ -25,10 +27,6 @@ export default function AuthModal() {
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
   const [name, setName] = useState('');
-
-  // Email OTP state (Supabase Auth flow)
-  const [emailOtpSent, setEmailOtpSent] = useState(false);
-  const [emailOtp, setEmailOtp] = useState('');
 
   // Phone state
   const [phone, setPhone] = useState('');
@@ -40,24 +38,43 @@ export default function AuthModal() {
   const [vehicleModel, setVehicleModel] = useState('');
   const [licensePlate, setLicensePlate] = useState('');
 
+  // Reset modal to requested mode (default: signin) whenever opened
+  useEffect(() => {
+    if (isAuthModalOpen) {
+      setIsRegister(authModalMode === 'register');
+      setError('');
+      setNotice('');
+    }
+  }, [isAuthModalOpen, authModalMode]);
+
   if (!isAuthModalOpen) return null;
 
-  // Email: sign up or sign in with email + password via Supabase Auth
+  // Email: sign in or sign up with email + password via Supabase Auth or fallback backend
   const handleEmailSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setNotice('');
     setLoading(true);
+
+    const cleanEmail = email.trim().toLowerCase();
+
     try {
       const chosenUsername = username.trim();
-      if (isRegister && !chosenUsername) {
-        throw new Error('Please choose a username for your account');
+      const trimmedName = name.trim();
+      if (isRegister) {
+        if (!chosenUsername) {
+          throw new Error('Please choose a username for your account');
+        }
+        if (!trimmedName) {
+          throw new Error('Please enter your full name');
+        }
       }
-      const displayName = chosenUsername || name.trim() || 'EV Driver';
+      const displayName = trimmedName || chosenUsername || 'EV Driver';
 
       if (isSupabaseConfigured && supabase) {
         if (isRegister) {
           const { data, error: signUpErr } = await supabase.auth.signUp({
-            email,
+            email: cleanEmail,
             password,
             options: {
               data: {
@@ -67,9 +84,24 @@ export default function AuthModal() {
             },
           });
           if (signUpErr) throw new Error(signUpErr.message);
-          // Supabase sends a confirmation email automatically
+
           const sbUser = data?.user;
           if (sbUser) {
+            // Also save profile to public.users table
+            try {
+              await supabase.from('users').upsert({
+                id: sbUser.id,
+                name: displayName,
+                email: cleanEmail,
+                auth_provider: 'email',
+                avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(displayName)}`,
+                vehicle_model: 'Tata Nexon EV Max',
+                license_plate: 'MH 02 EV 1001',
+              });
+            } catch (uErr) {
+              console.warn('Could not upsert into public.users:', uErr);
+            }
+
             const userData = {
               id: sbUser.id,
               username: chosenUsername,
@@ -82,8 +114,47 @@ export default function AuthModal() {
             handleAuthSuccess(userData, `token_${sbUser.id}`);
           }
         } else {
-          const { data, error: signInErr } = await supabase.auth.signInWithPassword({ email, password });
-          if (signInErr) throw new Error(signInErr.message);
+          // Attempt sign in
+          const { data, error: signInErr } = await supabase.auth.signInWithPassword({
+            email: cleanEmail,
+            password,
+          });
+
+          if (signInErr) {
+            // Check if user exists in public.users table
+            let userFound = false;
+            try {
+              const { data: userRow } = await supabase
+                .from('users')
+                .select('id, email')
+                .eq('email', cleanEmail)
+                .maybeSingle();
+
+              if (userRow) {
+                userFound = true;
+              }
+            } catch (checkErr) {
+              console.warn('Could not check user existence:', checkErr);
+            }
+
+            // If user's data is not found, redirect them to the create account section
+            if (!userFound) {
+              setIsRegister(true);
+              if (!username) {
+                setUsername(cleanEmail.split('@')[0] || '');
+              }
+              setNotice(`No account found for "${cleanEmail}". Please create an account first.`);
+              return;
+            }
+
+            // User exists, but credentials/password was invalid
+            throw new Error(
+              signInErr.message?.toLowerCase().includes('invalid login credentials')
+                ? 'Incorrect password. Please check your password and try again.'
+                : signInErr.message
+            );
+          }
+
           const sbUser = data?.user;
           if (sbUser) {
             const userDisplay = sbUser.user_metadata?.username || sbUser.user_metadata?.name || 'EV Driver';
@@ -103,13 +174,31 @@ export default function AuthModal() {
         // Fallback: custom backend
         if (isRegister) {
           await registerWithEmail({
-            email,
+            email: cleanEmail,
             password,
             username: chosenUsername,
             name: displayName,
           });
         } else {
-          await loginWithEmail(email, password);
+          try {
+            await loginWithEmail(cleanEmail, password);
+          } catch (loginErr) {
+            const isNotFound =
+              loginErr?.notFound ||
+              loginErr?.status === 404 ||
+              loginErr?.message?.toLowerCase().includes('not found') ||
+              loginErr?.message?.toLowerCase().includes('no account');
+
+            if (isNotFound) {
+              setIsRegister(true);
+              if (!username) {
+                setUsername(cleanEmail.split('@')[0] || '');
+              }
+              setNotice(`No account found for "${cleanEmail}". Please create an account first.`);
+              return;
+            }
+            throw loginErr;
+          }
         }
       }
     } catch (err) {
@@ -126,6 +215,7 @@ export default function AuthModal() {
       return;
     }
     setError('');
+    setNotice('');
     setLoading(true);
     try {
       const res = await sendPhoneOtp(phone);
@@ -145,6 +235,7 @@ export default function AuthModal() {
       return;
     }
     setError('');
+    setNotice('');
     setLoading(true);
     try {
       const chosenUsername = username.trim();
@@ -164,14 +255,6 @@ export default function AuthModal() {
     }
   };
 
-  const resetModal = () => {
-    setEmailOtpSent(false);
-    setEmailOtp('');
-    setOtpSent(false);
-    setOtp('');
-    setError('');
-  };
-
   return (
     <div className="auth-modal-overlay" onClick={closeAuthModal}>
       <div className="auth-modal-card card" onClick={(e) => e.stopPropagation()}>
@@ -189,7 +272,11 @@ export default function AuthModal() {
               : 'Welcome Back'}
           </h2>
           <p className="auth-sub">
-            Reserve EV charging slots, manage live reservations, and access smart routing.
+            {activeTab === 'phone'
+              ? 'Verify your mobile number to book charging bays and sync reservations.'
+              : isRegister
+              ? 'Create an account to reserve charging bays, manage passes, and track costs.'
+              : 'Sign in to access your slot reservations, verified vehicles, and charging passes.'}
           </p>
         </div>
 
@@ -200,6 +287,7 @@ export default function AuthModal() {
             onClick={() => {
               setActiveTab('email');
               setError('');
+              setNotice('');
             }}
           >
             <Mail size={15} />
@@ -210,12 +298,20 @@ export default function AuthModal() {
             onClick={() => {
               setActiveTab('phone');
               setError('');
+              setNotice('');
             }}
           >
             <Phone size={15} />
             Phone
           </button>
         </div>
+
+        {notice && (
+          <div className="auth-notice-banner">
+            <AlertCircle size={15} />
+            <span>{notice}</span>
+          </div>
+        )}
 
         {error && (
           <div className="auth-error-banner">
@@ -230,17 +326,17 @@ export default function AuthModal() {
             <div className="auth-sub-toggle">
               <button
                 type="button"
-                className={`auth-sub-btn ${isRegister ? 'auth-sub-btn--active' : ''}`}
-                onClick={() => { setIsRegister(true); setError(''); }}
+                className={`auth-sub-btn ${!isRegister ? 'auth-sub-btn--active' : ''}`}
+                onClick={() => { setIsRegister(false); setError(''); setNotice(''); }}
               >
-                Create Account
+                Sign In
               </button>
               <button
                 type="button"
-                className={`auth-sub-btn ${!isRegister ? 'auth-sub-btn--active' : ''}`}
-                onClick={() => { setIsRegister(false); setError(''); }}
+                className={`auth-sub-btn ${isRegister ? 'auth-sub-btn--active' : ''}`}
+                onClick={() => { setIsRegister(true); setError(''); setNotice(''); }}
               >
-                Sign In
+                Create Account
               </button>
             </div>
 
@@ -262,7 +358,7 @@ export default function AuthModal() {
                 </div>
 
                 <div className="auth-field">
-                  <label>Full Name (optional)</label>
+                  <label>Full Name</label>
                   <div className="auth-input-wrap">
                     <User size={15} />
                     <input
@@ -270,6 +366,7 @@ export default function AuthModal() {
                       placeholder="Enter your full name"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
+                      required
                     />
                   </div>
                 </div>
@@ -348,7 +445,7 @@ export default function AuthModal() {
                 </div>
 
                 <div className="auth-field">
-                  <label>Full Name (optional)</label>
+                  <label>Full Name</label>
                   <div className="auth-input-wrap">
                     <User size={15} />
                     <input
@@ -356,6 +453,7 @@ export default function AuthModal() {
                       placeholder="Your full name"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
+                      required
                     />
                   </div>
                 </div>
