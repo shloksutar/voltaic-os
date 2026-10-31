@@ -65,7 +65,12 @@ function getLocalStations() {
 }
 
 function getLocalBookings() {
-  return getStorageItem('voltaic_mock_bookings', INITIAL_BOOKINGS);
+  const bookings = getStorageItem('voltaic_mock_bookings', INITIAL_BOOKINGS);
+  const nonCancelled = bookings.filter((b) => b.status !== 'cancelled');
+  if (nonCancelled.length !== bookings.length) {
+    setStorageItem('voltaic_mock_bookings', nonCancelled);
+  }
+  return nonCancelled;
 }
 
 function getLocalAlerts() {
@@ -197,14 +202,14 @@ async function handleFallback(endpoint, options = {}) {
   const cancelMatch = pathOnly.match(/^\/bookings\/([^/]+)\/cancel$/);
   if (cancelMatch && method === 'PATCH') {
     const id = cancelMatch[1];
-    const bookings = getLocalBookings();
+    const bookings = getStorageItem('voltaic_mock_bookings', INITIAL_BOOKINGS);
     let updatedBooking = null;
-    const nextBookings = bookings.map((b) => {
+    const nextBookings = bookings.filter((b) => {
       if (b.id === id) {
         updatedBooking = { ...b, status: 'cancelled' };
-        return updatedBooking;
+        return false;
       }
-      return b;
+      return true;
     });
     setStorageItem('voltaic_mock_bookings', nextBookings);
     return { message: 'Reservation cancelled successfully', booking: updatedBooking };
@@ -300,12 +305,15 @@ async function handleFallback(endpoint, options = {}) {
 
   // 5. Auth
   if (pathOnly === '/auth/login' || pathOnly === '/auth/register' || pathOnly === '/auth/google') {
+    const chosenUsername = body.username || (body.name && !body.name.includes('@') ? body.name : null);
+    const chosenName = chosenUsername || (body.name && !body.name.includes('@') ? body.name : 'EV Driver');
     const user = {
       id: body.id || `usr_${Date.now()}`,
-      name: body.name || (body.email ? body.email.split('@')[0] : 'EV Driver'),
+      username: chosenUsername,
+      name: chosenName,
       email: body.email || null,
       phone: body.phone || null,
-      avatar: body.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(body.name || body.email || 'EV')}`,
+      avatar: body.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(chosenName)}`,
       vehicleModel: body.vehicleModel || 'Tata Nexon EV Max',
       licensePlate: body.licensePlate || 'MH 02 EV 1001',
     };
@@ -321,12 +329,15 @@ async function handleFallback(endpoint, options = {}) {
   }
 
   if (pathOnly === '/auth/phone/verify-otp') {
+    const chosenUsername = body.username || (body.name && !body.name.includes('@') ? body.name : null);
+    const chosenName = chosenUsername || (body.name && !body.name.includes('@') ? body.name : 'EV Driver');
     const user = {
       id: `usr_${Date.now()}`,
-      name: body.name || (body.phone ? `Driver (${body.phone.slice(-4)})` : 'EV Driver'),
+      username: chosenUsername,
+      name: chosenName,
       email: null,
       phone: body.phone || null,
-      avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(body.phone || 'Driver')}`,
+      avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(chosenName)}`,
       vehicleModel: body.vehicleModel || 'Tata Nexon EV Max',
       licensePlate: body.licensePlate || 'MH 02 EV 1001',
     };

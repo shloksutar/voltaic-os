@@ -12,6 +12,7 @@ const LiveMap     = lazy(() => import('./pages/LiveMap/LiveMap'));
 const Chargers    = lazy(() => import('./pages/Chargers/Chargers'));
 const NotFound    = lazy(() => import('./pages/NotFound/NotFound'));
 const RentCharger = lazy(() => import('./pages/RentCharger/RentCharger'));
+const Admin       = lazy(() => import('./pages/Admin/Admin'));
 
 export default function App() {
   return (
@@ -32,6 +33,7 @@ export default function App() {
               <Route path="/dashboard" element={<Navigate to="/" replace />} />
               <Route path="/incidents" element={<Navigate to="/" replace />} />
               <Route path="/rent-charger" element={<RentCharger />} />
+              <Route path="/admin" element={<Admin />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>

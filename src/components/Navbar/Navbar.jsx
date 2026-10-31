@@ -12,9 +12,11 @@ import {
   Menu,
   X,
   Plug,
+  Shield,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
+import { ADMIN_EMAILS } from '../../constants/admin';
 import UserBookingsModal from '../UserBookingsModal/UserBookingsModal';
 import './Navbar.css';
 
@@ -33,6 +35,8 @@ export default function Navbar() {
   const [showBookingsModal, setShowBookingsModal] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const menuRef = useRef(null);
+
+  const isAdmin = isAuthenticated && user && ADMIN_EMAILS.includes(user.email?.toLowerCase());
 
   // Close dropdown on click outside
   useEffect(() => {
@@ -116,6 +120,17 @@ export default function Navbar() {
               </NavLink>
             </li>
           ))}
+          {isAdmin && (
+            <li>
+              <NavLink
+                to="/admin"
+                className={({ isActive }) => `nav-link nav-link--admin ${isActive ? 'nav-link-active' : ''}`}
+              >
+                <Shield size={16} strokeWidth={1.8} />
+                <span>Admin</span>
+              </NavLink>
+            </li>
+          )}
         </ul>
 
         {/* Actions */}
@@ -193,6 +208,19 @@ export default function Navbar() {
                     <Calendar size={15} />
                     <span>My Reservations</span>
                   </button>
+                  {isAdmin && (
+                    <>
+                      <div className="dropdown-divider" />
+                      <NavLink
+                        to="/admin"
+                        className="dropdown-item dropdown-item--admin"
+                        onClick={() => setShowUserMenu(false)}
+                      >
+                        <Shield size={15} />
+                        <span>Admin Panel</span>
+                      </NavLink>
+                    </>
+                  )}
                   <div className="dropdown-divider" />
                   <button type="button" className="dropdown-item dropdown-item--danger" onClick={handleLogout}>
                     <LogOut size={15} />
@@ -302,6 +330,18 @@ export default function Navbar() {
                   </NavLink>
                 </li>
               ))}
+              {isAdmin && (
+                <li>
+                  <NavLink
+                    to="/admin"
+                    className={({ isActive }) => `nav-link nav-link--mobile nav-link--admin ${isActive ? 'nav-link-active' : ''}`}
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    <Shield size={18} strokeWidth={1.8} />
+                    <span>Admin Panel</span>
+                  </NavLink>
+                </li>
+              )}
             </ul>
 
             {/* Quick Actions */}

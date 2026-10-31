@@ -1366,35 +1366,20 @@
       "userName": "Shlok Sutar",
       "userEmail": "shlokvsutar@gmail.com",
       "userPhone": ""
-    },
-    {
-      "id": "VOLT-9839",
-      "status": "cancelled",
-      "qrCodeData": "VOLT-9839-DEL-ST-01-BAY1",
-      "createdAt": "2026-10-10T16:01:43.197Z",
-      "stationId": "DEL-ST-01",
-      "stationName": "Statiq Supercharging Hub — Connaught Place Outer Circle",
-      "city": "Delhi",
-      "address": "Block P, Outer Circle, Connaught Place, New Delhi, Delhi 110001",
-      "bayNumber": 1,
-      "portType": "CCS2 DC Fast",
-      "date": "2026-10-10",
-      "startTime": "09:31 pm",
-      "durationMinutes": 30,
-      "estimatedKwh": 53,
-      "tariffPerKwh": 19,
-      "reservationFee": 50,
-      "estimatedCost": 1057,
-      "vehicleNumber": "DL 01 AB 9999",
-      "vehicleModel": "MG ZS EV",
-      "userId": "test_user",
-      "userName": "Test Driver",
-      "userEmail": "",
-      "userPhone": "",
-      "cancelledAt": "2026-10-10T16:02:16.500Z"
     }
   ],
   "alerts": [
+    {
+      "id": "alt_1793372355372",
+      "time": "Just now",
+      "resolved": false,
+      "timestamp": 1793372355372,
+      "type": "host_application",
+      "severity": "low",
+      "station": "New Host Application — kolhapur",
+      "city": "kolhapur",
+      "msg": "Shlok Sutar submitted a charger listing for HVJP+CGG in kolhapur. Connector: CHAdeMO · Power: 7.2 kW (Moderate) · ₹19/kWh. Ref: HOST-1793372355370."
+    },
     {
       "id": "alt_1791741316307_1h8c",
       "time": "Just now",
@@ -1462,5 +1447,35 @@
       "timestamp": 1791645941196
     }
   ],
-  "otps": {}
+  "otps": {},
+  "charger_listings": [
+    {
+      "submittedAt": "2026-10-30T14:59:15.370Z",
+      "status": "pending_review",
+      "id": "HOST-1793372355370",
+      "userId": "60236587-ec47-4aec-8a79-b469c7fff8bc",
+      "fullName": "Shlok Sutar",
+      "email": "shlokvsutar@gmail.com",
+      "phone": "9011090680",
+      "address": "HVJP+CGG",
+      "city": "kolhapur",
+      "pincode": "416118",
+      "chargerBrand": "Tata Power EV charger",
+      "connectorType": "CHAdeMO",
+      "powerLevel": "7.2 kW (Moderate)",
+      "pricePerUnit": "19",
+      "maxSessions": "2",
+      "chargerDescription": "fefve",
+      "selectedDays": [
+        "Wed",
+        "Sun"
+      ],
+      "timeFrom": "11:00",
+      "timeTo": "11:59",
+      "minBookingHours": "33",
+      "advanceNoticeHours": "22",
+      "idType": "Driving Licence",
+      "idNumber": "23456789"
+    }
+  ]
 }

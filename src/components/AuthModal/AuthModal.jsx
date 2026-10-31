@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, Mail, Phone, Lock, User, AlertCircle, CheckCircle2, KeyRound } from 'lucide-react';
+import { X, Mail, Phone, Lock, User, AtSign, AlertCircle, CheckCircle2, KeyRound } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { supabase, isSupabaseConfigured } from '../../lib/supabaseClient';
 import './AuthModal.css';
@@ -23,6 +23,7 @@ export default function AuthModal() {
   // Email state
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [username, setUsername] = useState('');
   const [name, setName] = useState('');
 
   // Email OTP state (Supabase Auth flow)
@@ -47,12 +48,23 @@ export default function AuthModal() {
     setError('');
     setLoading(true);
     try {
+      const chosenUsername = username.trim();
+      if (isRegister && !chosenUsername) {
+        throw new Error('Please choose a username for your account');
+      }
+      const displayName = chosenUsername || name.trim() || 'EV Driver';
+
       if (isSupabaseConfigured && supabase) {
         if (isRegister) {
           const { data, error: signUpErr } = await supabase.auth.signUp({
             email,
             password,
-            options: { data: { name: name || email.split('@')[0] } },
+            options: {
+              data: {
+                username: chosenUsername,
+                name: displayName,
+              },
+            },
           });
           if (signUpErr) throw new Error(signUpErr.message);
           // Supabase sends a confirmation email automatically
@@ -60,9 +72,10 @@ export default function AuthModal() {
           if (sbUser) {
             const userData = {
               id: sbUser.id,
-              name: sbUser.user_metadata?.name || name || email.split('@')[0],
+              username: chosenUsername,
+              name: displayName,
               email: sbUser.email,
-              avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name || email)}`,
+              avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(displayName)}`,
               vehicleModel: 'Tata Nexon EV Max',
               licensePlate: 'MH 02 EV 1001',
             };
@@ -73,11 +86,13 @@ export default function AuthModal() {
           if (signInErr) throw new Error(signInErr.message);
           const sbUser = data?.user;
           if (sbUser) {
+            const userDisplay = sbUser.user_metadata?.username || sbUser.user_metadata?.name || 'EV Driver';
             const userData = {
               id: sbUser.id,
-              name: sbUser.user_metadata?.name || email.split('@')[0],
+              username: sbUser.user_metadata?.username || null,
+              name: userDisplay,
               email: sbUser.email,
-              avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(email)}`,
+              avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(userDisplay)}`,
               vehicleModel: 'Tata Nexon EV Max',
               licensePlate: 'MH 02 EV 1001',
             };
@@ -87,7 +102,12 @@ export default function AuthModal() {
       } else {
         // Fallback: custom backend
         if (isRegister) {
-          await registerWithEmail({ email, password, name });
+          await registerWithEmail({
+            email,
+            password,
+            username: chosenUsername,
+            name: displayName,
+          });
         } else {
           await loginWithEmail(email, password);
         }
@@ -127,10 +147,13 @@ export default function AuthModal() {
     setError('');
     setLoading(true);
     try {
+      const chosenUsername = username.trim();
+      const displayName = chosenUsername || name.trim() || 'EV Driver';
       await verifyPhoneOtp({
         phone,
         otp,
-        name: name || `Driver (${phone.slice(-4)})`,
+        username: chosenUsername || null,
+        name: displayName,
         vehicleModel,
         licensePlate,
       });
@@ -222,19 +245,35 @@ export default function AuthModal() {
             </div>
 
             {isRegister && (
-              <div className="auth-field">
-                <label>Full Name</label>
-                <div className="auth-input-wrap">
-                  <User size={15} />
-                  <input
-                    type="text"
-                    placeholder="Enter your full name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    required
-                  />
+              <>
+                <div className="auth-field">
+                  <label>Username</label>
+                  <div className="auth-input-wrap">
+                    <AtSign size={15} />
+                    <input
+                      type="text"
+                      placeholder="Choose a username (e.g. speed_demon)"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      autoComplete="username"
+                      required
+                    />
+                  </div>
                 </div>
-              </div>
+
+                <div className="auth-field">
+                  <label>Full Name (optional)</label>
+                  <div className="auth-input-wrap">
+                    <User size={15} />
+                    <input
+                      type="text"
+                      placeholder="Enter your full name"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                    />
+                  </div>
+                </div>
+              </>
             )}
 
             <div className="auth-field">
@@ -296,7 +335,20 @@ export default function AuthModal() {
                 </div>
 
                 <div className="auth-field">
-                  <label>Your Name (optional)</label>
+                  <label>Username (optional)</label>
+                  <div className="auth-input-wrap">
+                    <AtSign size={15} />
+                    <input
+                      type="text"
+                      placeholder="Choose a username (e.g. volt_driver)"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <div className="auth-field">
+                  <label>Full Name (optional)</label>
                   <div className="auth-input-wrap">
                     <User size={15} />
                     <input

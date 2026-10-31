@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { X, Calendar, Clock, MapPin, Ban, CheckCircle, ExternalLink, RefreshCw } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
@@ -8,6 +9,7 @@ import './UserBookingsModal.css';
 export default function UserBookingsModal({ isOpen, onClose, onRefreshStations }) {
   const { user } = useAuth();
   const toast = useToast();
+  const navigate = useNavigate();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(false);
   const [cancellingId, setCancellingId] = useState(null);
@@ -48,8 +50,9 @@ export default function UserBookingsModal({ isOpen, onClose, onRefreshStations }
     }
   };
 
-  const activeBookings = bookings.filter((b) => b.status === 'active');
-  const pastBookings = bookings.filter((b) => b.status !== 'active');
+  const validBookings = bookings.filter((b) => b.status !== 'cancelled');
+  const activeBookings = validBookings.filter((b) => b.status === 'active');
+  const pastBookings = validBookings.filter((b) => b.status !== 'active');
 
   return (
     <div className="ubm-overlay" onClick={onClose}>
@@ -62,7 +65,7 @@ export default function UserBookingsModal({ isOpen, onClose, onRefreshStations }
           <div className="ubm-badge">⚡ Driver Dashboard</div>
           <h2 className="ubm-title font-display">My Slot Reservations</h2>
           <p className="ubm-sub">
-            {bookings.length} reservations linked to {user?.name || user?.email || 'your device'}
+            {validBookings.length} {validBookings.length === 1 ? 'reservation' : 'reservations'} linked to {user?.name || user?.email || 'your device'}
           </p>
         </div>
 
@@ -71,12 +74,15 @@ export default function UserBookingsModal({ isOpen, onClose, onRefreshStations }
             <RefreshCw size={24} className="spin-icon" />
             <span>Loading reservations...</span>
           </div>
-        ) : bookings.length === 0 ? (
+        ) : validBookings.length === 0 ? (
           <div className="ubm-empty">
             <Calendar size={36} strokeWidth={1.2} />
             <div>You have no reservations yet.</div>
             <p>Select any charging station from the Live Map or Chargers list to book a slot.</p>
-            <button className="btn btn-primary btn-sm" onClick={onClose}>
+            <button
+              className="btn btn-primary btn-sm"
+              onClick={() => { onClose(); navigate('/map'); }}
+            >
               Browse Stations
             </button>
           </div>
@@ -140,10 +146,10 @@ export default function UserBookingsModal({ isOpen, onClose, onRefreshStations }
               </div>
             )}
 
-            {/* Past / Cancelled Bookings */}
+            {/* Past Completed Bookings */}
             {pastBookings.length > 0 && (
               <div className="ubm-section">
-                <div className="ubm-section-title">Past / Cancelled History ({pastBookings.length})</div>
+                <div className="ubm-section-title">Past History ({pastBookings.length})</div>
                 <div className="ubm-list">
                   {pastBookings.map((b) => (
                     <div key={b.id} className="ubm-item ubm-item--past">
@@ -153,7 +159,7 @@ export default function UserBookingsModal({ isOpen, onClose, onRefreshStations }
                           <div className="ubm-item-station">{b.stationName}</div>
                         </div>
                         <span className="badge badge-offline">
-                          {b.status === 'cancelled' ? 'Cancelled' : 'Completed'}
+                          Completed
                         </span>
                       </div>
                       <div className="ubm-item-meta">
