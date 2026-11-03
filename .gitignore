@@ -25,3 +25,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Runtime database (contains user PII) - do not commit
+server/data/database.json
+server/data/*.bak
+backups/

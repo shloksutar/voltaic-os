@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { authApi } from '../api/client';
 import { useToast } from './ToastContext';
+import { supabase } from '../lib/supabaseClient';
 
 const AuthContext = createContext(null);
 
@@ -47,8 +48,8 @@ export function AuthProvider({ children }) {
     }
   }, [authCallback, toast]);
 
-  const loginWithEmail = async (email, password) => {
-    const res = await authApi.login({ email, password });
+  const loginWithEmail = async (email, password, options = {}) => {
+    const res = await authApi.login({ email, password, ...options });
     handleAuthSuccess(res.user, res.token);
     return res.user;
   };
@@ -73,6 +74,7 @@ export function AuthProvider({ children }) {
   const logout = async () => {
     try {
       await authApi.logout();
+      if (supabase) await supabase.auth.signOut();
     } catch {
       // ignore
     }
@@ -83,7 +85,8 @@ export function AuthProvider({ children }) {
 
   const updateProfile = async (updates) => {
     if (!user) return null;
-    const res = await authApi.updateProfile({ userId: user.id, ...updates });
+    // Identity comes from the verified Bearer token on the server — never the body
+    const res = await authApi.updateProfile(updates);
     if (res?.user) {
       setUser(res.user);
     }

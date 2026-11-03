@@ -91,3 +91,116 @@
   .rc-form-nav .btn{width:100%;justify-content:center;}
   .rc-stepper-label{display:none;}
 }
+
+/* Label row with live character counter */
+.rc-label-row { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.rc-char-count { font-size:.72rem; color:var(--color-text-4); font-variant-numeric:tabular-nums; }
+
+/* Quick-set time range presets */
+.rc-preset-row { display:flex; gap:10px; flex-wrap:wrap; }
+.rc-preset-chip { display:flex; flex-direction:column; align-items:center; gap:2px; min-width:104px; padding:10px 14px; border-radius:var(--radius-md); border:1.5px solid var(--color-border); background:var(--color-surface); color:var(--color-text-2); cursor:pointer; transition:all var(--fast); }
+.rc-preset-chip svg { color:var(--color-primary-mid); }
+.rc-preset-chip:hover { border-color:var(--color-primary-light); background:var(--color-primary-pale); }
+.rc-preset-chip--active { border-color:var(--color-primary-mid); background:var(--color-primary-mid); color:#fff; }
+.rc-preset-chip--active svg { color:#fff; }
+.rc-preset-label { font-size:.82rem; font-weight:600; }
+.rc-preset-sub { font-size:.68rem; opacity:.85; }
+
+/* 24h availability timeline */
+.rc-timeline-block { margin:2px 0 4px; }
+.rc-timeline-track { position:relative; height:10px; border-radius:99px; background:var(--color-surface-2); border:1px solid var(--color-border-soft); overflow:hidden; }
+.rc-timeline-fill { position:absolute; top:0; bottom:0; background:linear-gradient(90deg, var(--color-primary-light, #6366f1), var(--color-primary-mid)); border-radius:99px; transition:left .25s ease, width .25s ease; }
+.rc-timeline-marks { display:flex; justify-content:space-between; font-size:.66rem; color:var(--color-text-4); margin-top:5px; }
+.rc-timeline-caption { font-size:.8rem; color:var(--color-text-3); margin-top:6px; }
+
+/* Friendly choice chips (duration / advance notice) */
+.rc-chip-row { display:flex; gap:8px; flex-wrap:wrap; }
+.rc-choice-chip { padding:8px 16px; border-radius:99px; border:1.5px solid var(--color-border); background:var(--color-surface); font-size:.82rem; font-weight:500; color:var(--color-text-2); cursor:pointer; transition:all var(--fast); }
+.rc-choice-chip:hover { border-color:var(--color-primary-light); color:var(--color-primary-mid); background:var(--color-primary-pale); }
+.rc-choice-chip--active { border-color:var(--color-primary-mid); background:var(--color-primary-pale); color:var(--color-primary-mid); font-weight:600; }
+
+/* KYC badge on Live Photo label */
+.rc-field-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: .65rem;
+  font-weight: 700;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  color: #0070f3;
+  background: #e8f1ff;
+  border: 1px solid #b3d0ff;
+  border-radius: 99px;
+  padding: 2px 7px;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+/* 2-Wheeler Policy Notice Banner */
+.rc-tw-notice-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(99, 102, 241, 0.08);
+  border: 1.5px solid rgba(99, 102, 241, 0.25);
+  border-radius: var(--radius-md);
+  padding: 14px 18px;
+  font-size: .84rem;
+  color: var(--color-primary-mid);
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+.rc-tw-notice-banner svg {
+  flex-shrink: 0;
+  color: var(--color-primary-mid);
+}
+
+/* Compatible 2W Models selector */
+.rc-select-all-models-btn {
+  font-size: .78rem;
+  color: var(--color-primary-mid);
+  font-weight: 600;
+  text-decoration: underline;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+.rc-models-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+.rc-model-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 13px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--color-border);
+  background: var(--color-surface);
+  font-size: .78rem;
+  font-weight: 500;
+  color: var(--color-text-2);
+  cursor: pointer;
+  transition: all var(--fast);
+}
+.rc-model-chip:hover {
+  border-color: var(--color-primary-light);
+  color: var(--color-primary-mid);
+  background: var(--color-primary-pale);
+}
+.rc-model-chip--active {
+  border-color: var(--color-primary-mid);
+  background: var(--color-primary-pale);
+  color: var(--color-primary-mid);
+  font-weight: 600;
+}
+.rc-model-chip svg {
+  flex-shrink: 0;
+}
+
+@media (max-width: 600px) {
+  .rc-preset-chip { min-width:calc(50% - 5px); flex:1; }
+}

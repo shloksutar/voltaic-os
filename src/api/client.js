@@ -439,6 +439,12 @@ async function request(endpoint, options = {}) {
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
     ...options.headers,
   };
+  const method = (options.method || 'GET').toUpperCase();
+  const protectedEndpoint = endpoint.startsWith('/auth') ||
+    endpoint.startsWith('/bookings') ||
+    endpoint.startsWith('/charger-listings') ||
+    endpoint.startsWith('/stations/') && endpoint.includes('/report') ||
+    endpoint.startsWith('/alerts') && method !== 'GET';
 
   try {
     const response = await fetch(`${API_BASE}${endpoint}`, {
@@ -446,8 +452,10 @@ async function request(endpoint, options = {}) {
       headers,
     });
 
-    // If endpoint returned 404 (route missing on static host / CDN), fallback seamlessly
+    // Never emulate authentication, ownership, admin actions, or writes in the browser.
+    // A localStorage fallback would be a security bypass and could expose stale PII.
     if (response.status === 404) {
+      if (protectedEndpoint) throw new Error('This service is temporarily unavailable. Please try again.');
       return await handleFallback(endpoint, options);
     }
 
@@ -460,8 +468,9 @@ async function request(endpoint, options = {}) {
 
     return data;
   } catch (err) {
-    // If backend is unreachable (network error or offline), execute client-side fallback
+    // Only public, read-only presentation data may use the static fallback.
     if (err.name === 'TypeError' || err.message?.includes('fetch') || err.message?.includes('404')) {
+      if (protectedEndpoint) throw new Error('The secure service is unavailable. Please try again shortly.');
       return await handleFallback(endpoint, options);
     }
     throw err;
@@ -577,6 +586,11 @@ export const chargerListingsApi = {
     const qs = userId ? `?userId=${encodeURIComponent(userId)}` : '';
     return request(`/charger-listings${qs}`);
   },
+  updateStatus: (id, status, reviewedBy) =>
+    request(`/charger-listings/${encodeURIComponent(id)}/status`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status, reviewedBy }),
+    }),
 };
 
 // Analytics API

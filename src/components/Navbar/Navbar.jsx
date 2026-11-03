@@ -16,7 +16,6 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
-import { ADMIN_EMAILS } from '../../constants/admin';
 import UserBookingsModal from '../UserBookingsModal/UserBookingsModal';
 import './Navbar.css';
 
@@ -36,7 +35,7 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const menuRef = useRef(null);
 
-  const isAdmin = isAuthenticated && user && ADMIN_EMAILS.includes(user.email?.toLowerCase());
+  const isAdmin = isAuthenticated && user && user.isAdmin === true;
 
   // Close dropdown on click outside
   useEffect(() => {

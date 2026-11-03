@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { X, Mail, Phone, Lock, User, AtSign, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { X, Mail, Phone, Lock, User, AtSign, AlertCircle, CheckCircle2, ShieldCheck } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { supabase, isSupabaseConfigured } from '../../lib/supabaseClient';
 import './AuthModal.css';
@@ -16,7 +17,9 @@ export default function AuthModal() {
     handleAuthSuccess,
   } = useAuth();
 
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('email'); // 'email' | 'phone'
+  const [loginRole, setLoginRole] = useState('user'); // 'user' | 'admin' — User is the default
   const [isRegister, setIsRegister] = useState(false); // default to Sign In
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
@@ -42,10 +45,23 @@ export default function AuthModal() {
   useEffect(() => {
     if (isAuthModalOpen) {
       setIsRegister(authModalMode === 'register');
+      setLoginRole('user');
+      setActiveTab('email');
       setError('');
       setNotice('');
     }
   }, [isAuthModalOpen, authModalMode]);
+
+  const switchRole = (role) => {
+    setLoginRole(role);
+    setError('');
+    setNotice('');
+    if (role === 'admin') {
+      // Admin access is sign-in only — no self-registration, no phone OTP
+      setIsRegister(false);
+      setActiveTab('email');
+    }
+  };
 
   if (!isAuthModalOpen) return null;
 
@@ -58,10 +74,26 @@ export default function AuthModal() {
 
     const cleanEmail = email.trim().toLowerCase();
 
+    // --- Admin sign-in: server-side password verification + whitelist ---
+    if (loginRole === 'admin') {
+      try {
+        await loginWithEmail(cleanEmail, password, { role: 'admin' });
+        navigate('/admin');
+      } catch (err) {
+        setError(err.message || 'Admin sign-in failed. Check your credentials and authorization.');
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
+
     try {
       const chosenUsername = username.trim();
       const trimmedName = name.trim();
       if (isRegister) {
+        if (password.length < 8) {
+          throw new Error('Password must be at least 8 characters.');
+        }
         if (!chosenUsername) {
           throw new Error('Please choose a username for your account');
         }
@@ -86,6 +118,13 @@ export default function AuthModal() {
           if (signUpErr) throw new Error(signUpErr.message);
 
           const sbUser = data?.user;
+          const accessToken = data?.session?.access_token;
+          if (sbUser && !accessToken) {
+            // Email confirmation required — no session yet, so don't sign in
+            setNotice('Account created! Please check your email to confirm, then sign in.');
+            setIsRegister(false);
+            return;
+          }
           if (sbUser) {
             // Also save profile to public.users table
             try {
@@ -111,7 +150,7 @@ export default function AuthModal() {
               vehicleModel: 'Tata Nexon EV Max',
               licensePlate: 'MH 02 EV 1001',
             };
-            handleAuthSuccess(userData, `token_${sbUser.id}`);
+            handleAuthSuccess(userData, data?.session?.access_token);
           }
         } else {
           // Attempt sign in
@@ -121,36 +160,11 @@ export default function AuthModal() {
           });
 
           if (signInErr) {
-            // Check if user exists in public.users table
-            let userFound = false;
-            try {
-              const { data: userRow } = await supabase
-                .from('users')
-                .select('id, email')
-                .eq('email', cleanEmail)
-                .maybeSingle();
-
-              if (userRow) {
-                userFound = true;
-              }
-            } catch (checkErr) {
-              console.warn('Could not check user existence:', checkErr);
-            }
-
-            // If user's data is not found, redirect them to the create account section
-            if (!userFound) {
-              setIsRegister(true);
-              if (!username) {
-                setUsername(cleanEmail.split('@')[0] || '');
-              }
-              setNotice(`No account found for "${cleanEmail}". Please create an account first.`);
-              return;
-            }
-
-            // User exists, but credentials/password was invalid
+            // Do not probe public.users here — it would both violate RLS and
+            // leak whether an account exists. Generic message only.
             throw new Error(
               signInErr.message?.toLowerCase().includes('invalid login credentials')
-                ? 'Incorrect password. Please check your password and try again.'
+                ? 'Incorrect email or password. Please check your credentials and try again.'
                 : signInErr.message
             );
           }
@@ -167,7 +181,7 @@ export default function AuthModal() {
               vehicleModel: 'Tata Nexon EV Max',
               licensePlate: 'MH 02 EV 1001',
             };
-            handleAuthSuccess(userData, `token_${sbUser.id}`);
+            handleAuthSuccess(userData, data?.session?.access_token);
           }
         }
       } else {
@@ -220,7 +234,7 @@ export default function AuthModal() {
     try {
       const res = await sendPhoneOtp(phone);
       setOtpSent(true);
-      setTestOtpHint(res.testOtp || '654321');
+      setTestOtpHint(res.testOtp || '');
     } catch (err) {
       setError(err.message || 'Failed to send OTP');
     } finally {
@@ -265,14 +279,18 @@ export default function AuthModal() {
         <div className="auth-modal-header">
           <div className="auth-brand-badge">⚡ VoltaicOS Account</div>
           <h2 className="auth-title font-display">
-            {activeTab === 'phone'
+            {loginRole === 'admin'
+              ? 'Admin Console'
+              : activeTab === 'phone'
               ? 'Phone Verification'
               : isRegister
               ? 'Create VoltaicOS Account'
               : 'Welcome Back'}
           </h2>
           <p className="auth-sub">
-            {activeTab === 'phone'
+            {loginRole === 'admin'
+              ? 'Authorized personnel only. Sign-in is restricted to whitelisted admin accounts.'
+              : activeTab === 'phone'
               ? 'Verify your mobile number to book charging bays and sync reservations.'
               : isRegister
               ? 'Create an account to reserve charging bays, manage passes, and track costs.'
@@ -280,31 +298,33 @@ export default function AuthModal() {
           </p>
         </div>
 
-        {/* Method selector tabs */}
-        <div className="auth-tabs">
-          <button
-            className={`auth-tab ${activeTab === 'email' ? 'auth-tab--active' : ''}`}
-            onClick={() => {
-              setActiveTab('email');
-              setError('');
-              setNotice('');
-            }}
-          >
-            <Mail size={15} />
-            Email
-          </button>
-          <button
-            className={`auth-tab ${activeTab === 'phone' ? 'auth-tab--active' : ''}`}
-            onClick={() => {
-              setActiveTab('phone');
-              setError('');
-              setNotice('');
-            }}
-          >
-            <Phone size={15} />
-            Phone
-          </button>
-        </div>
+        {/* Method selector tabs (hidden for admin sign-in) */}
+        {loginRole !== 'admin' && (
+          <div className="auth-tabs">
+            <button
+              className={`auth-tab ${activeTab === 'email' ? 'auth-tab--active' : ''}`}
+              onClick={() => {
+                setActiveTab('email');
+                setError('');
+                setNotice('');
+              }}
+            >
+              <Mail size={15} />
+              Email
+            </button>
+            <button
+              className={`auth-tab ${activeTab === 'phone' ? 'auth-tab--active' : ''}`}
+              onClick={() => {
+                setActiveTab('phone');
+                setError('');
+                setNotice('');
+              }}
+            >
+              <Phone size={15} />
+              Phone
+            </button>
+          </div>
+        )}
 
         {notice && (
           <div className="auth-notice-banner">
@@ -323,22 +343,55 @@ export default function AuthModal() {
         {/* 1. EMAIL SIGN UP / SIGN IN TAB */}
         {activeTab === 'email' && (
           <form className="auth-tab-content" onSubmit={handleEmailSubmit}>
-            <div className="auth-sub-toggle">
+            {/* Role selector: User (default) or Admin */}
+            <div className="auth-role-toggle" role="tablist" aria-label="Login type">
               <button
                 type="button"
-                className={`auth-sub-btn ${!isRegister ? 'auth-sub-btn--active' : ''}`}
-                onClick={() => { setIsRegister(false); setError(''); setNotice(''); }}
+                role="tab"
+                aria-selected={loginRole === 'user'}
+                className={`auth-role-btn ${loginRole === 'user' ? 'auth-role-btn--active' : ''}`}
+                onClick={() => switchRole('user')}
               >
-                Sign In
+                <User size={14} />
+                User
               </button>
               <button
                 type="button"
-                className={`auth-sub-btn ${isRegister ? 'auth-sub-btn--active' : ''}`}
-                onClick={() => { setIsRegister(true); setError(''); setNotice(''); }}
+                role="tab"
+                aria-selected={loginRole === 'admin'}
+                className={`auth-role-btn auth-role-btn--admin ${loginRole === 'admin' ? 'auth-role-btn--active' : ''}`}
+                onClick={() => switchRole('admin')}
               >
-                Create Account
+                <ShieldCheck size={14} />
+                Admin
               </button>
             </div>
+
+            {loginRole === 'admin' && (
+              <div className="auth-admin-note">
+                <ShieldCheck size={14} />
+                <span>Authorized personnel only. Your email must be on the admin whitelist.</span>
+              </div>
+            )}
+
+            {loginRole !== 'admin' && (
+              <div className="auth-sub-toggle">
+                <button
+                  type="button"
+                  className={`auth-sub-btn ${!isRegister ? 'auth-sub-btn--active' : ''}`}
+                  onClick={() => { setIsRegister(false); setError(''); setNotice(''); }}
+                >
+                  Sign In
+                </button>
+                <button
+                  type="button"
+                  className={`auth-sub-btn ${isRegister ? 'auth-sub-btn--active' : ''}`}
+                  onClick={() => { setIsRegister(true); setError(''); setNotice(''); }}
+                >
+                  Create Account
+                </button>
+              </div>
+            )}
 
             {isRegister && (
               <>
@@ -393,10 +446,10 @@ export default function AuthModal() {
                 <Lock size={15} />
                 <input
                   type="password"
-                  placeholder={isRegister ? 'Create a password (min. 6 characters)' : 'Enter your password'}
+                  placeholder={isRegister ? 'Create a password (min. 8 characters)' : 'Enter your password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  minLength={6}
+                  minLength={8}
                   required
                 />
               </div>
@@ -405,6 +458,8 @@ export default function AuthModal() {
             <button type="submit" className="btn btn-primary auth-submit-btn" disabled={loading}>
               {loading
                 ? 'Processing...'
+                : loginRole === 'admin'
+                ? 'Sign In to Admin Console'
                 : isRegister
                 ? 'Create EV Driver Account'
                 : 'Sign In to Account'}

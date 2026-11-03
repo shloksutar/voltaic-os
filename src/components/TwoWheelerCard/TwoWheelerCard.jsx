@@ -1,4 +1,4 @@
-﻿import {
+import {
   MapPin,
   Clock,
   ShieldCheck,
@@ -7,7 +7,6 @@
   Zap,
   Star,
   Check,
-  AlertCircle,
 } from 'lucide-react';
 import './TwoWheelerCard.css';
 
@@ -19,7 +18,6 @@ export default function TwoWheelerCard({ charger, onBook, selected, onSelect }) 
     title,
     city,
     area,
-    address,
     landmark,
     socketType,
     powerOutput,

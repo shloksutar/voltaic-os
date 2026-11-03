@@ -369,3 +369,61 @@
   from { transform: scale(0.95); opacity: 0; }
   to { transform: scale(1); opacity: 1; }
 }
+
+/* Role selector (User / Admin) */
+.auth-role-toggle {
+  display: flex;
+  gap: 4px;
+  background: var(--color-surface-2, #f0f2f6);
+  padding: 4px;
+  border-radius: var(--radius-md, 10px);
+  margin-bottom: 14px;
+}
+
+.auth-role-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 9px 12px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: var(--color-text-3, #6b7280);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.auth-role-btn:hover {
+  color: var(--color-text, #111827);
+}
+
+.auth-role-btn--active {
+  background: #ffffff;
+  color: var(--color-primary-mid, #4338ca);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.auth-role-btn--admin.auth-role-btn--active {
+  background: #111827;
+  color: #fbbf24;
+  box-shadow: 0 2px 8px rgba(17, 24, 39, 0.35);
+}
+
+.auth-admin-note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  color: #92400e;
+  font-size: 12px;
+  line-height: 1.4;
+  padding: 9px 11px;
+  border-radius: 8px;
+  margin-bottom: 14px;
+  animation: fadeIn 0.2s ease-out;
+}

@@ -1,15 +1,17 @@
 import fs from 'fs';
 import path from 'path';
+import { randomUUID } from 'node:crypto';
 import { fileURLToPath } from 'url';
 import { REAL_STATIONS } from './data/realStations.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const DB_FILE = path.join(__dirname, 'data', 'database.json');
+const DATA_DIR = path.resolve(process.env.DATA_DIR || path.join(__dirname, 'data'));
+const DB_FILE = path.join(DATA_DIR, 'database.json');
 
 // Ensure directory exists
 try {
-  const dir = path.dirname(DB_FILE);
+  const dir = DATA_DIR;
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
   }
@@ -23,6 +25,7 @@ function getInitialData() {
     users: [],
     bookings: [],
     charger_listings: [], // Host applications submitted via Rent My Charger
+    sessions: {}, // opaque token -> { userId, expiresAt }
     alerts: [
       {
         id: 'alt_001',
@@ -84,10 +87,26 @@ class Database {
   write(data = this.data) {
     try {
       this.data = data;
-      fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2), 'utf-8');
+      const tempFile = `${DB_FILE}.${process.pid}.tmp`;
+      fs.writeFileSync(tempFile, JSON.stringify(data, null, 2), { encoding: 'utf8', mode: 0o600 });
+      fs.renameSync(tempFile, DB_FILE);
+      // Best effort on Windows; enforced on POSIX deployments.
+      try { fs.chmodSync(DB_FILE, 0o600); } catch { /* filesystem may not support modes */ }
     } catch (err) {
       console.error('Error writing db.json:', err);
     }
+  }
+
+  getFilePath() {
+    return DB_FILE;
+  }
+
+  backupTo(destination) {
+    const target = path.resolve(destination);
+    fs.mkdirSync(path.dirname(target), { recursive: true });
+    fs.copyFileSync(DB_FILE, target);
+    try { fs.chmodSync(target, 0o600); } catch { /* best effort on Windows */ }
+    return target;
   }
 
   getStations() {
@@ -131,7 +150,7 @@ class Database {
 
   createUser(user) {
     const newUser = {
-      id: `usr_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+      id: randomUUID(),
       createdAt: new Date().toISOString(),
       ...user,
     };
@@ -276,7 +295,7 @@ class Database {
     return null;
   }
 
-  // OTP store
+  // OTP store — codes are stored server-side only and expire after 5 minutes
   saveOtp(phone, code) {
     if (!this.data.otps) this.data.otps = {};
     this.data.otps[phone] = {
@@ -287,22 +306,44 @@ class Database {
   }
 
   verifyOtp(phone, code) {
-    if (!this.data.otps || !this.data.otps[phone]) {
-      // Allow test code 123456 or 654321
-      return code === '123456' || code === '654321';
-    }
+    if (!this.data.otps || !this.data.otps[phone]) return false;
     const entry = this.data.otps[phone];
     if (Date.now() > entry.expiresAt) {
       delete this.data.otps[phone];
       this.write();
       return false;
     }
-    const isValid = entry.code === code || code === '123456';
+    const isValid = typeof code === 'string' && entry.code === code;
     if (isValid) {
       delete this.data.otps[phone];
       this.write();
     }
     return isValid;
+  }
+
+  // Sessions (opaque token auth) — stores a minimal user snapshot
+  createSession(token, user, expiresAt) {
+    if (!this.data.sessions) this.data.sessions = {};
+    // Opportunistically purge expired sessions
+    const now = Date.now();
+    for (const [t, s] of Object.entries(this.data.sessions)) {
+      if (s.expiresAt <= now) delete this.data.sessions[t];
+    }
+    this.data.sessions[token] = { user, expiresAt };
+    this.write();
+  }
+
+  getSession(token) {
+    return (this.data.sessions || {})[token] || null;
+  }
+
+  deleteSession(token) {
+    if (this.data.sessions && this.data.sessions[token]) {
+      delete this.data.sessions[token];
+      this.write();
+      return true;
+    }
+    return false;
   }
 
   // Charger Listings (host applications)
@@ -323,10 +364,16 @@ class Database {
     return newListing;
   }
 
-  updateChargerListingStatus(id, status) {
+  updateChargerListingStatus(id, status, meta = {}) {
     const listing = (this.data.charger_listings || []).find((l) => l.id === id);
     if (listing) {
       listing.status = status;
+      listing.reviewedAt = new Date().toISOString();
+      if (meta.reviewedBy) listing.reviewedBy = meta.reviewedBy;
+      listing.statusHistory = [
+        ...(listing.statusHistory || []),
+        { status, at: listing.reviewedAt, by: meta.reviewedBy || 'admin' },
+      ];
       this.write();
       return listing;
     }
@@ -335,4 +382,3 @@ class Database {
 }
 
 export const db = new Database();
-

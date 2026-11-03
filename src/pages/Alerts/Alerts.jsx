@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { WifiOff, Car, Clock, CheckCircle, RefreshCw, ShieldCheck } from 'lucide-react';
 import { alertsApi } from '../../api/client';
 import { useToast } from '../../context/ToastContext';
+import { useAuth } from '../../context/AuthContext';
 import PageMeta from '../../components/PageMeta/PageMeta';
 import SiteFooter from '../../components/SiteFooter/SiteFooter';
 import './Alerts.css';
@@ -20,6 +21,8 @@ export default function Alerts() {
   const [loading, setLoading] = useState(false);
   const [filter, setFilter] = useState('all');
   const [showResolved, setShowResolved] = useState(false);
+  const { user } = useAuth();
+  const isAdmin = Boolean(user && user.isAdmin === true);
   const toast = useToast();
 
   const fetchAlerts = useCallback(async () => {
@@ -162,7 +165,7 @@ export default function Alerts() {
                   <div className="al-time">{alert.time}</div>
                 </div>
 
-                {!alert.resolved && (
+                {!alert.resolved && isAdmin && (
                   <div className="al-actions">
                     <button
                       className="btn btn-ghost btn-sm"

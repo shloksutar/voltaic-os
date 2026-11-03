@@ -1,14 +1,14 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import express from 'express';
-import cors from 'cors';
 import { apiRouter } from './server/apiRouter.js';
+import { configureHttpSecurity, installErrorHandler } from './server/httpSecurity.js';
 
 function apiBackendPlugin() {
   const app = express();
-  app.use(cors());
-  app.use(express.json());
+  configureHttpSecurity(app);
   app.use('/api', apiRouter);
+  installErrorHandler(app);
 
   return {
     name: 'api-backend-plugin',

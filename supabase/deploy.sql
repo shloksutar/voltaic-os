@@ -188,8 +188,16 @@ create table if not exists public.host_chargers (
 -- ============================================================
 -- ROW LEVEL SECURITY (RLS) POLICIES
 -- ============================================================
+-- Threat model: the browser anon key is public knowledge. It may only:
+--   * read stations (public network registry, no PII)
+--   * read alerts (network ops feed, no PII)
+--   * insert / read / update ONLY the caller's own row in public.users
+--   * read ONLY the caller's own bookings
+-- All other reads/writes (booking mutations, alert writes, host
+-- applications, two-wheeler PII) happen server-side via the service role
+-- key, which bypasses RLS. The API (server/apiRouter.js) additionally
+-- enforces per-user authorization on every request.
 
--- Enable RLS on all tables
 alter table public.stations enable row level security;
 alter table public.users enable row level security;
 alter table public.bookings enable row level security;
@@ -198,57 +206,53 @@ alter table public.two_wheeler_chargers enable row level security;
 alter table public.two_wheeler_bookings enable row level security;
 alter table public.host_chargers enable row level security;
 
--- Public read access for stations, alerts, and 2-wheeler chargers
-create policy "Allow public read on stations" on public.stations
+-- Drop any legacy permissive policies (idempotent — safe to re-run)
+drop policy if exists "Allow public read on stations" on public.stations;
+drop policy if exists "Allow public read on alerts" on public.alerts;
+drop policy if exists "Allow public read on two_wheeler_chargers" on public.two_wheeler_chargers;
+drop policy if exists "Allow public insert on bookings" on public.bookings;
+drop policy if exists "Allow public read on bookings" on public.bookings;
+drop policy if exists "Allow public update on bookings" on public.bookings;
+drop policy if exists "Allow public insert on two_wheeler_bookings" on public.two_wheeler_bookings;
+drop policy if exists "Allow public read on two_wheeler_bookings" on public.two_wheeler_bookings;
+drop policy if exists "Allow public insert on host_chargers" on public.host_chargers;
+drop policy if exists "Allow public read on host_chargers" on public.host_chargers;
+drop policy if exists "Allow public insert on users" on public.users;
+drop policy if exists "Allow public read on users" on public.users;
+drop policy if exists "Allow public update on users" on public.users;
+drop policy if exists "Allow public resolve / dismiss on alerts" on public.alerts;
+drop policy if exists "Allow public update on alerts" on public.alerts;
+drop policy if exists "Allow public insert on alerts" on public.alerts;
+
+-- Stations: public read (no PII). Writes only via service role.
+create policy "stations_public_read" on public.stations
   for select using (true);
 
-create policy "Allow public read on alerts" on public.alerts
+-- Alerts: public read of the network incident feed. NO public writes.
+create policy "alerts_public_read" on public.alerts
   for select using (true);
 
-create policy "Allow public read on two_wheeler_chargers" on public.two_wheeler_chargers
-  for select using (true);
+-- two_wheeler_chargers: host PII (names, phones, emails) — no anon access.
+-- two_wheeler_bookings: rider PII — no anon access.
+-- host_chargers: applicant PII incl. ID numbers — no anon access.
+-- Data is served exclusively through the API with the service role.
 
--- Allow public insert/read on bookings (drivers can book and read their reservations)
-create policy "Allow public insert on bookings" on public.bookings
-  for insert with check (true);
+-- Users: each signed-in user can read/insert/update ONLY their own row.
+create policy "users_insert_own" on public.users
+  for insert with check (id = auth.uid()::text);
+create policy "users_read_own" on public.users
+  for select using (id = auth.uid()::text);
+create policy "users_update_own" on public.users
+  for update using (id = auth.uid()::text) with check (id = auth.uid()::text);
 
-create policy "Allow public read on bookings" on public.bookings
-  for select using (true);
-
-create policy "Allow public update on bookings" on public.bookings
-  for update using (true);
-
--- Allow public insert/read on 2W bookings
-create policy "Allow public insert on two_wheeler_bookings" on public.two_wheeler_bookings
-  for insert with check (true);
-
-create policy "Allow public read on two_wheeler_bookings" on public.two_wheeler_bookings
-  for select using (true);
-
--- Allow public insert on host applications
-create policy "Allow public insert on host_chargers" on public.host_chargers
-  for insert with check (true);
-
-create policy "Allow public read on host_chargers" on public.host_chargers
-  for select using (true);
-
--- Users policies
-create policy "Allow public insert on users" on public.users
-  for insert with check (true);
-
-create policy "Allow public read on users" on public.users
-  for select using (true);
-
-create policy "Allow public update on users" on public.users
-  for update using (true);
-
--- Allow public resolve / dismiss on alerts
-create policy "Allow public update on alerts" on public.alerts
-  for update using (true);
-
-create policy "Allow public insert on alerts" on public.alerts
-  for insert with check (true);
-
+-- Bookings: a signed-in user may read ONLY their own reservations.
+create policy "bookings_read_own" on public.bookings
+  for select using (
+    user_id = auth.uid()::text
+    or lower(coalesce(user_email, '')) = lower(coalesce(auth.jwt() ->> 'email', ''))
+  );
+-- No anonymous insert/update/delete policies on bookings:
+-- reservations are created and cancelled through the API only.
 
 -- ============================================================
 -- VoltaicOS Supabase Initial Seed Data
