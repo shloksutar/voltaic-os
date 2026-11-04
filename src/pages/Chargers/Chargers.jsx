@@ -22,6 +22,7 @@ import ReservationModal from '../../components/ReservationModal/ReservationModal
 import ReportIssueModal from '../../components/ReportIssueModal/ReportIssueModal';
 import PageMeta from '../../components/PageMeta/PageMeta';
 import SiteFooter from '../../components/SiteFooter/SiteFooter';
+import { cartoVoyagerUrl } from '../../lib/mapTiles';
 import { getTwoWheelerChargers } from '../../data/twoWheelerChargers';
 import TwoWheelerCard from '../../components/TwoWheelerCard/TwoWheelerCard';
 import TwoWheelerRentModal from '../../components/TwoWheelerRentModal/TwoWheelerRentModal';
@@ -821,9 +822,9 @@ export default function Chargers() {
                 style={{ height: '100%', width: '100%' }}
               >
                 <TileLayer
-                  url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
-                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> contributors'
-                  maxZoom={19}
+                  url={cartoVoyagerUrl}
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener noreferrer">CARTO</a>'
+                  maxZoom={20}
                 />
 
                 {mapStations.map((c) => {
@@ -954,9 +955,9 @@ export default function Chargers() {
               style={{ height: '100%', width: '100%' }}
             >
               <TileLayer
-                url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> contributors'
-                maxZoom={19}
+                url={cartoVoyagerUrl}
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener noreferrer">CARTO</a>'
+                maxZoom={20}
               />
 
               {mapStations.map((c) => {

@@ -13,7 +13,7 @@ const tooManyRequests = (message) => (req, res) => {
 
 export const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  limit: Number(process.env.RATE_LIMIT_API_MAX) || 300,
+  limit: Number(process.env.RATE_LIMIT_API_MAX) || 100,
   standardHeaders: true,
   legacyHeaders: false,
   handler: tooManyRequests('Too many requests — please slow down and try again later.'),
