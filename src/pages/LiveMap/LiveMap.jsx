@@ -26,7 +26,7 @@ import ReservationModal from '../../components/ReservationModal/ReservationModal
 import ReportIssueModal from '../../components/ReportIssueModal/ReportIssueModal';
 import PageMeta from '../../components/PageMeta/PageMeta';
 import { useToast } from '../../context/ToastContext';
-import { cartoVoyagerUrl } from '../../lib/mapTiles';
+import { defaultMapTile } from '../../lib/mapTiles';
 import './LiveMap.css';
 
 // Fix Leaflet default icon paths in Vite
@@ -56,14 +56,10 @@ function calculateDistanceKm(lat1, lon1, lat2, lon2) {
 // Production-grade, reliable tile providers with NO API key required and NO rate-limit blocking
 const MAP_TILES = {
   voyager: {
+    ...defaultMapTile,
     id: 'voyager',
     name: 'CARTO Voyager',
     label: 'Street',
-    url: cartoVoyagerUrl,
-    subdomains: 'abcd',
-    attribution:
-      '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener noreferrer">CARTO</a>',
-    maxZoom: 20,
   },
   esriStreet: {
     id: 'esriStreet',
