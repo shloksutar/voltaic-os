@@ -8,6 +8,7 @@ import {
   CheckCircle,
   Clock,
   XCircle,
+  PauseCircle,
   MapPin,
   Plug,
   Zap,
@@ -22,11 +23,8 @@ import {
   Lock,
   ShieldAlert,
   LogIn,
-  PauseCircle,
-  Undo2,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { useToast } from '../../context/ToastContext';
 import { chargerListingsApi } from '../../api/client';
 import PageMeta from '../../components/PageMeta/PageMeta';
 import SiteFooter from '../../components/SiteFooter/SiteFooter';
@@ -61,22 +59,10 @@ const STATUS_CONFIG = {
   },
 };
 
-function ListingCard({ listing, onReview }) {
+function ListingCard({ listing }) {
   const [expanded, setExpanded] = useState(false);
-  const [acting, setActing] = useState(null); // 'approved' | 'on_hold' | 'denied' | null
   const cfg = STATUS_CONFIG[listing.status] || STATUS_CONFIG.pending_review;
   const StatusIcon = cfg.icon;
-  const isEffective = (s) => (listing.status || '') === s || (s === 'denied' && listing.status === 'rejected');
-
-  const handleReview = async (targetStatus) => {
-    if (!onReview || acting) return;
-    setActing(targetStatus);
-    try {
-      await onReview(listing.id, targetStatus);
-    } finally {
-      setActing(null);
-    }
-  };
 
   const submittedDate = listing.submittedAt
     ? new Date(listing.submittedAt).toLocaleString('en-IN', {
@@ -273,7 +259,7 @@ function ListingCard({ listing, onReview }) {
         </div>
       )}
 
-      {/* Admin review actions: approve / hold / deny */}
+      {/* Requests are published immediately; Admin is informational only. */}
       <div className="admin-actions">
         <div className="admin-actions-meta">
           {listing.reviewedAt ? (
@@ -282,48 +268,7 @@ function ListingCard({ listing, onReview }) {
               {listing.reviewedBy ? ` by ${listing.reviewedBy}` : ''}
             </>
           ) : (
-            'Not reviewed yet'
-          )}
-        </div>
-        <div className="admin-action-btns">
-          <button
-            type="button"
-            className={`admin-action-btn admin-action-btn--approve ${isEffective('approved') ? 'is-active' : ''}`}
-            disabled={!!acting || isEffective('approved')}
-            onClick={() => handleReview('approved')}
-          >
-            {acting === 'approved' ? <RefreshCw size={13} className="spin-icon" /> : <CheckCircle size={13} />}
-            Approve
-          </button>
-          <button
-            type="button"
-            className={`admin-action-btn admin-action-btn--hold ${isEffective('on_hold') ? 'is-active' : ''}`}
-            disabled={!!acting || isEffective('on_hold')}
-            onClick={() => handleReview('on_hold')}
-          >
-            {acting === 'on_hold' ? <RefreshCw size={13} className="spin-icon" /> : <PauseCircle size={13} />}
-            Hold
-          </button>
-          <button
-            type="button"
-            className={`admin-action-btn admin-action-btn--deny ${isEffective('denied') ? 'is-active' : ''}`}
-            disabled={!!acting || isEffective('denied')}
-            onClick={() => handleReview('denied')}
-          >
-            {acting === 'denied' ? <RefreshCw size={13} className="spin-icon" /> : <XCircle size={13} />}
-            Deny
-          </button>
-          {listing.status && listing.status !== 'pending_review' && (
-            <button
-              type="button"
-              className="admin-action-btn admin-action-btn--reset"
-              disabled={!!acting}
-              onClick={() => handleReview('pending_review')}
-              title="Reset back to Pending Review"
-            >
-              {acting === 'pending_review' ? <RefreshCw size={13} className="spin-icon" /> : <Undo2 size={13} />}
-              Reset
-            </button>
+            listing.status === 'approved' ? 'Published automatically when submitted' : 'Request received'
           )}
         </div>
       </div>
@@ -333,8 +278,6 @@ function ListingCard({ listing, onReview }) {
 
 export default function Admin() {
   const { user, isAuthenticated, loading, openAuthModal } = useAuth();
-  const toast = useToast();
-
   const [listings, setListings] = useState([]);
   const [fetching, setFetching] = useState(false);
   const [search, setSearch] = useState('');
@@ -357,31 +300,6 @@ export default function Admin() {
   useEffect(() => {
     if (isAdmin) fetchListings();
   }, [isAdmin, fetchListings]);
-
-  // Admin decision: approve / hold / deny (or reset) a charger application
-  const handleReview = useCallback(
-    async (id, status) => {
-      try {
-        const res = await chargerListingsApi.updateStatus(id, status, user?.email || 'admin');
-        const updated = res?.listing || { status };
-        setListings((prev) => prev.map((l) => (l.id === id ? { ...l, ...updated } : l)));
-        const message =
-          status === 'approved'
-            ? `Host listing ${id} approved.`
-            : status === 'on_hold'
-            ? `Host listing ${id} put on hold.`
-            : status === 'denied'
-            ? `Host listing ${id} denied.`
-            : `Host listing ${id} moved back to pending review.`;
-        toast.success(message);
-      } catch (err) {
-        console.error('Failed to update listing status:', err);
-        toast.error(err?.message || 'Failed to update the application status. Please try again.');
-        throw err;
-      }
-    },
-    [toast, user]
-  );
 
   if (loading) return null;
 
@@ -586,7 +504,7 @@ export default function Admin() {
                 Showing {visible.length} of {listings.length} request{listings.length !== 1 ? 's' : ''}
               </div>
               {visible.map((listing) => (
-                <ListingCard key={listing.id} listing={listing} onReview={handleReview} />
+                <ListingCard key={listing.id} listing={listing} />
               ))}
             </div>
           )}

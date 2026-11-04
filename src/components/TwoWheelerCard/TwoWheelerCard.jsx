@@ -4,6 +4,7 @@ import {
   ShieldCheck,
   Phone,
   MessageCircle,
+  Mail,
   Zap,
   Star,
   Check,
@@ -14,6 +15,7 @@ export default function TwoWheelerCard({ charger, onBook, selected, onSelect }) 
   const {
     hostName,
     hostPhone,
+    hostEmail,
     idType,
     title,
     city,
@@ -30,9 +32,11 @@ export default function TwoWheelerCard({ charger, onBook, selected, onSelect }) 
     rating = 4.9,
     reviewsCount = 18,
     totalSessionsCompleted = 45,
+    listingStatus,
   } = charger;
 
   const isAvailableNow = availabilityStatus === 'available_now';
+  const isPending = listingStatus === 'pending_review';
 
   const cleanPhone = (hostPhone || '').replace(/\D/g, '');
   const waLink = `https://wa.me/91${cleanPhone}?text=${encodeURIComponent(
@@ -53,7 +57,7 @@ export default function TwoWheelerCard({ charger, onBook, selected, onSelect }) 
 
         <div className={`tw-status-tag ${isAvailableNow ? 'tw-status-tag--avail' : 'tw-status-tag--sched'}`}>
           <span className={`tw-status-dot ${isAvailableNow ? 'tw-dot-pulse' : ''}`} />
-          <span>{isAvailableNow ? 'Available Now' : 'Scheduled Hours'}</span>
+          <span>{isPending ? 'Under Review' : isAvailableNow ? 'Available Now' : 'Scheduled Hours'}</span>
         </div>
       </div>
 
@@ -85,9 +89,9 @@ export default function TwoWheelerCard({ charger, onBook, selected, onSelect }) 
           <div>
             <div className="tw-host-name">
               <span>Host: {hostName}</span>
-              <span className="tw-verified-badge" title="Government ID Verified Host">
+              <span className="tw-verified-badge" title={isPending ? 'Awaiting admin verification' : 'Government ID Verified Host'}>
                 <ShieldCheck size={12} />
-                <span>Verified</span>
+                <span>{isPending ? 'Review Pending' : 'Verified'}</span>
               </span>
             </div>
             <div className="tw-host-stats">
@@ -97,6 +101,16 @@ export default function TwoWheelerCard({ charger, onBook, selected, onSelect }) 
               <span className="tw-stat-sep">·</span>
               <span>{totalSessionsCompleted} riders served</span>
             </div>
+            {hostEmail && (
+              <a
+                href={`mailto:${hostEmail}`}
+                className="tw-host-email"
+                onClick={(e) => e.stopPropagation()}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', marginTop: '3px', fontSize: '10px', color: 'var(--color-primary)' }}
+              >
+                <Mail size={10} /> {hostEmail}
+              </a>
+            )}
           </div>
         </div>
 
@@ -159,39 +173,48 @@ export default function TwoWheelerCard({ charger, onBook, selected, onSelect }) 
 
       {/* Action Buttons: Contact Host & Book */}
       <div className="tw-card-actions">
-        <a
-          href={`tel:+91${cleanPhone}`}
-          className="btn btn-ghost btn-sm tw-btn-call"
-          title={`Call ${hostName} directly`}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <Phone size={13} />
-          <span>Call Host</span>
-        </a>
+        {isPending ? (
+          <div className="btn btn-ghost btn-sm" style={{ width: '100%', justifyContent: 'center' }}>
+            <Clock size={13} />
+            <span>Request received — awaiting admin approval</span>
+          </div>
+        ) : (
+          <>
+            <a
+              href={`tel:+91${cleanPhone}`}
+              className="btn btn-ghost btn-sm tw-btn-call"
+              title={`Call ${hostName} directly`}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Phone size={13} />
+              <span>Call Host</span>
+            </a>
 
-        <a
-          href={waLink}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="btn btn-secondary btn-sm tw-btn-wa"
-          title="Chat with host on WhatsApp"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <MessageCircle size={13} />
-          <span>WhatsApp</span>
-        </a>
+            <a
+              href={waLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn btn-secondary btn-sm tw-btn-wa"
+              title="Chat with host on WhatsApp"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <MessageCircle size={13} />
+              <span>WhatsApp</span>
+            </a>
 
-        <button
-          type="button"
-          className="btn btn-primary btn-sm tw-btn-book"
-          onClick={(e) => {
-            e.stopPropagation();
-            if (onBook) onBook(charger);
-          }}
-        >
-          <Zap size={13} />
-          <span>Request Slot</span>
-        </button>
+            <button
+              type="button"
+              className="btn btn-primary btn-sm tw-btn-book"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (onBook) onBook(charger);
+              }}
+            >
+              <Zap size={13} />
+              <span>Request Slot</span>
+            </button>
+          </>
+        )}
       </div>
     </div>
   );

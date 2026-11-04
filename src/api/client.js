@@ -422,6 +422,12 @@ async function handleFallback(endpoint, options = {}) {
     return { message: 'Charger listing application submitted', listing: newListing };
   }
 
+  if (pathOnly === '/charger-listings/public' && method === 'GET') {
+    // Public host applications must not fall back to exposing the local PII
+    // application store. Chargers.jsx still renders its safe local cache.
+    return { listings: [], count: 0 };
+  }
+
   if (pathOnly === '/charger-listings' && method === 'GET') {
     const listings = getLocalChargerListings();
     const userId = params.get('userId');
@@ -442,7 +448,7 @@ async function request(endpoint, options = {}) {
   const method = (options.method || 'GET').toUpperCase();
   const protectedEndpoint = endpoint.startsWith('/auth') ||
     endpoint.startsWith('/bookings') ||
-    endpoint.startsWith('/charger-listings') ||
+    (endpoint.startsWith('/charger-listings') && !endpoint.startsWith('/charger-listings/public')) ||
     endpoint.startsWith('/stations/') && endpoint.includes('/report') ||
     endpoint.startsWith('/alerts') && method !== 'GET';
 
@@ -586,6 +592,7 @@ export const chargerListingsApi = {
     const qs = userId ? `?userId=${encodeURIComponent(userId)}` : '';
     return request(`/charger-listings${qs}`);
   },
+  getPublic: () => request('/charger-listings/public'),
   updateStatus: (id, status, reviewedBy) =>
     request(`/charger-listings/${encodeURIComponent(id)}/status`, {
       method: 'PATCH',

@@ -1078,6 +1078,97 @@ apiRouter.get('/analytics', async (req, res) => {
 
 const CAR_KEYWORDS_RE = /\b(nexon|tiago|tigor|curvv|punch\s*ev|zs\s*ev|mg\s*zs|comet|windsor|ioniq|kona|creta\s*ev|byd|atto|seal|tesla|model\s*[3ysx]|xuv\s*400|xuv400|bmw\s*i[x347]|audi\s*e-?tron|taycan|polestar|mercedes\s*eq|volvo\s*xc40|c40|kia\s*ev[69]|four\s*wheeler|4\s*wheeler|4w|car|sedan|suv|hatchback|ccs2|ccs-2|chademo)\b/i;
 
+function mapHostChargerRow(row) {
+  return {
+    id: row.id,
+    userId: row.user_id,
+    status: row.status === 'rejected' ? 'denied' : row.status || 'pending_review',
+    submittedAt: row.created_at,
+    fullName: row.full_name,
+    phone: row.phone,
+    email: row.email,
+    address: row.address,
+    city: row.city,
+    pincode: row.pincode,
+    chargerBrand: row.charger_brand,
+    powerLevel: row.power_level,
+    connectorType: row.connector_type,
+    pricePerUnit: row.price_per_unit,
+    maxSessions: row.max_sessions,
+    chargerDescription: row.description,
+    supportedVehicles: row.supported_vehicles || [],
+    selectedDays: row.available_days || [],
+    timeFrom: row.time_from,
+    timeTo: row.time_to,
+    minBookingHours: row.min_booking_hours,
+    advanceNoticeHours: row.advance_notice_hours,
+    idType: row.id_type,
+    idNumber: row.id_number,
+  };
+}
+
+function mapPublicHostChargerRow(row) {
+  const isApproved = row.status !== 'rejected';
+  const city = row.city || 'India';
+  const rate = Number(row.price_per_unit);
+  return {
+    id: `host_public_${row.id}`,
+    requestId: row.id,
+    isCommunity2W: true,
+    listingStatus: isApproved ? 'approved' : 'denied',
+    hostName: row.full_name || 'Community charger host',
+    hostPhone: isApproved ? row.phone : '',
+    hostEmail: isApproved ? row.email : '',
+    hostVerified: isApproved,
+    idType: isApproved ? row.id_type : 'Verification Pending',
+    title: isApproved ? `${city} — Community 2W Charger` : `New 2W Charger Request — ${city}`,
+    city,
+    area: city,
+    landmark: isApproved ? (row.address || 'Verified community charging host') : 'Application submitted — pending admin review',
+    socketType: row.connector_type || '2W charger / 16A socket',
+    powerOutput: row.power_level || '3.3 kW AC',
+    supportedVehicles: [],
+    rateDisplay: Number.isFinite(rate) ? `₹${rate}/hr` : 'Rate under review',
+    rateAmount: Number.isFinite(rate) ? rate : 0,
+    availabilityStatus: isApproved ? 'available_now' : 'scheduled',
+    availableTiming: isApproved ? `${row.time_from || '07:00'} – ${row.time_to || '22:00'}` : 'Available after approval',
+    days: row.available_days || [],
+    amenities: isApproved ? ['Verified Host'] : ['Admin Review Pending'],
+    notes: isApproved
+      ? (row.description || 'Two-wheeler charging spot available.')
+      : 'This charger rental request is visible while it is reviewed by the VoltaicOS team.',
+    rating: isApproved ? 5 : 0,
+    reviewsCount: 0,
+    totalSessionsCompleted: 0,
+  };
+}
+
+apiRouter.get('/charger-listings/public', async (req, res) => {
+  try {
+    let listings = db.getChargerListings ? db.getChargerListings() : [];
+    if (isSupabaseServerConfigured) {
+      const { data, error } = await supabaseServer
+        .from('host_chargers')
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (!error && Array.isArray(data)) {
+        const remoteIds = new Set(data.map((row) => row.id));
+        const remoteListings = data.map(mapPublicHostChargerRow);
+        const localOnly = listings
+          .filter((listing) => !remoteIds.has(listing.id))
+          .map((listing) => ({ ...listing, listingStatus: listing.listingStatus || 'pending_review' }));
+        listings = [...remoteListings, ...localOnly];
+      }
+    } else {
+      listings = listings.map((listing) => ({ ...listing, listingStatus: listing.listingStatus || 'pending_review' }));
+    }
+    return res.json({ listings, count: listings.length });
+  } catch (err) {
+    console.error('GET /charger-listings/public error:', err);
+    return res.status(500).json({ error: 'Failed to fetch public charger listings' });
+  }
+});
+
 apiRouter.post('/charger-listings', writeLimiter, requireAuth, async (req, res) => {
   try {
     const body = req.body || {};
@@ -1107,7 +1198,7 @@ apiRouter.post('/charger-listings', writeLimiter, requireAuth, async (req, res) 
 
     const newListing = {
       id,
-      status: 'pending_review',
+      status: 'approved',
       submittedAt: new Date().toISOString(),
       userId: listingUserId, // from verified token — never trust the client-supplied id
       fullName: str(body.fullName, 60),
@@ -1161,7 +1252,7 @@ apiRouter.post('/charger-listings', writeLimiter, requireAuth, async (req, res) 
           advance_notice_hours: parseInt(newListing.advanceNoticeHours, 10) || 0,
           id_type: newListing.idType,
           id_number: newListing.idNumber,
-          status: 'pending_review',
+           status: 'approved',
         }]);
       } catch (sbErr) {
         console.warn('Could not mirror host listing to Supabase host_chargers:', sbErr);
@@ -1194,6 +1285,21 @@ apiRouter.get('/charger-listings', requireAuth, async (req, res) => {
     const caller = req.user;
     const admin = isAdminUser(caller);
     let listings = db.getChargerListings ? db.getChargerListings() : [];
+
+    // The file-backed store is ephemeral on serverless deployments. Read the
+    // persistent Supabase copy as well so every new host request is visible in
+    // Admin, regardless of which function instance handles the request.
+    if (isSupabaseServerConfigured) {
+      const { data, error } = await supabaseServer
+        .from('host_chargers')
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (!error && Array.isArray(data)) {
+        const remoteIds = new Set(data.map((row) => row.id));
+        listings = [...data.map(mapHostChargerRow), ...listings.filter((listing) => !remoteIds.has(listing.id))];
+      }
+    }
+
     if (!admin) {
       // Host applications contain PII — users may only see their own
       listings = listings.filter((l) => l.userId && l.userId === caller.id);
@@ -1232,11 +1338,24 @@ apiRouter.patch('/charger-listings/:id/status', writeLimiter, requireAdmin, asyn
     });
 
     if (!listing) {
-      return res.status(404).json({ error: 'Charger listing not found' });
+      if (!isSupabaseServerConfigured) {
+        return res.status(404).json({ error: 'Charger listing not found' });
+      }
+    }
+
+    if (isSupabaseServerConfigured) {
+      const supabaseStatus = cleanStatus === 'denied' ? 'rejected' : cleanStatus;
+      const { error } = await supabaseServer
+        .from('host_chargers')
+        .update({ status: supabaseStatus })
+        .eq('id', req.params.id);
+      if (error && !listing) {
+        return res.status(404).json({ error: 'Charger listing not found' });
+      }
     }
 
     // Surface the decision in the Incident Feed / alerts
-    if (cleanStatus !== 'pending_review') {
+    if (cleanStatus !== 'pending_review' && listing) {
       const actionLabel = REVIEW_LABELS[cleanStatus];
       const alertType = cleanStatus === 'approved' ? 'host_approved' : cleanStatus === 'denied' ? 'host_denied' : 'host_hold';
       const severity = cleanStatus === 'denied' ? 'medium' : 'low';

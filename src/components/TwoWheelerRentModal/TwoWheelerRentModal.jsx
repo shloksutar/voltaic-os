@@ -17,6 +17,8 @@ import {
   POPULAR_EV_SCOOTERS,
 } from '../../data/twoWheelerChargers';
 import { CITIES } from '../../data/chargers';
+import { chargerListingsApi } from '../../api/client';
+import { useAuth } from '../../context/AuthContext';
 import './TwoWheelerRentModal.css';
 
 const ID_TYPES = [
@@ -29,6 +31,7 @@ const ID_TYPES = [
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 export default function TwoWheelerRentModal({ isOpen, onClose, onChargerPosted }) {
+  const { isAuthenticated, openAuthModal } = useAuth();
   const [hostName, setHostName] = useState('');
   const [hostPhone, setHostPhone] = useState('');
   const [hostEmail, setHostEmail] = useState('');
@@ -68,9 +71,15 @@ export default function TwoWheelerRentModal({ isOpen, onClose, onChargerPosted }
     );
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+
+    if (!isAuthenticated) {
+      setError('Please sign in before submitting a charger rental request.');
+      openAuthModal();
+      return;
+    }
 
     if (!hostName.trim()) {
       setError('Please enter your full name.');
@@ -150,7 +159,40 @@ export default function TwoWheelerRentModal({ isOpen, onClose, onChargerPosted }
       coveredParking,
     };
 
-    const saved = saveTwoWheelerCharger(newListing);
+    // Submit the owner request to the protected backend first so it appears
+    // in Admin for review. Only publish it to public rentals after the request
+    // has been accepted by the server.
+    let requestId = null;
+    try {
+      const response = await chargerListingsApi.create({
+        fullName: hostName.trim(),
+        email: hostEmail.trim().toLowerCase(),
+        phone: hostPhone.replace(/\D/g, '').slice(-10),
+        address: address.trim(),
+        city,
+        pincode: '',
+        chargerBrand: socketType,
+        connectorType: socketType,
+        powerLevel: '3.3 kW AC',
+        pricePerUnit: String(rateAmount),
+        maxSessions: '4',
+        chargerDescription: notes.trim() || 'Two-wheeler charging spot ready.',
+        supportedVehicles: selectedVehicles,
+        selectedDays,
+        timeFrom,
+        timeTo,
+        minBookingHours: '1',
+        advanceNoticeHours: '0',
+        idType,
+        idNumber: idNumber.trim(),
+      });
+      requestId = response?.listing?.id || null;
+    } catch (err) {
+      setError(err?.message || 'Failed to submit the charger rental request. Please try again.');
+      return;
+    }
+
+    const saved = saveTwoWheelerCharger({ ...newListing, requestId });
     if (saved) {
       setCreatedCharger(saved);
       setIsSuccess(true);

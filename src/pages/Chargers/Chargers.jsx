@@ -15,7 +15,7 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { CITIES, OPERATORS, CHARGERS } from '../../data/chargers';
-import { stationsApi } from '../../api/client';
+import { chargerListingsApi, stationsApi } from '../../api/client';
 import { useToast } from '../../context/ToastContext';
 import ChargerCard from '../../components/ChargerCard/ChargerCard';
 import ReservationModal from '../../components/ReservationModal/ReservationModal';
@@ -204,6 +204,31 @@ export default function Chargers() {
   useEffect(() => {
     fetchStations();
   }, [fetchStations]);
+
+  useEffect(() => {
+    let active = true;
+    chargerListingsApi.getPublic().then((res) => {
+      if (!active || !Array.isArray(res?.listings)) return;
+      setTwoWheelerChargers((current) => {
+        const merged = [...res.listings];
+        current.forEach((localListing) => {
+          const alreadyPresent = merged.some(
+            (remoteListing) =>
+              remoteListing.requestId === localListing.requestId ||
+              (remoteListing.hostEmail && localListing.hostEmail && remoteListing.hostEmail === localListing.hostEmail)
+          );
+          if (!alreadyPresent) merged.push(localListing);
+        });
+        return merged;
+      });
+    }).catch(() => {
+      // The local listing cache remains available when the public endpoint is offline.
+    });
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const filtered = useMemo(() => {
     return stations.filter((c) => {

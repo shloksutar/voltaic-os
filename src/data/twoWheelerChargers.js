@@ -221,20 +221,22 @@ export const DEFAULT_2W_CHARGERS = [
   },
 ];
 
-const STORAGE_KEY = 'voltaic_2w_community_chargers';
+// v2 intentionally starts empty so legacy owner-submitted/demo listings are
+// not restored into the public community rentals section.
+const STORAGE_KEY = 'voltaic_2w_community_chargers_v2';
 const BOOKINGS_KEY = 'voltaic_2w_rental_bookings';
 
 export function getTwoWheelerChargers() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_2W_CHARGERS));
-      return DEFAULT_2W_CHARGERS;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify([]));
+      return [];
     }
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) && parsed.length > 0 ? parsed : DEFAULT_2W_CHARGERS;
+    return Array.isArray(parsed) ? parsed : [];
   } catch {
-    return DEFAULT_2W_CHARGERS;
+    return [];
   }
 }
 
