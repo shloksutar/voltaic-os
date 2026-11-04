@@ -6,7 +6,7 @@ import { REAL_STATIONS } from './data/realStations.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const DATA_DIR = path.resolve(process.env.DATA_DIR || path.join(__dirname, 'data'));
+const DATA_DIR = path.resolve(process.env.DATA_DIR || (process.env.VERCEL ? '/tmp/voltaic' : path.join(__dirname, 'data')));
 const DB_FILE = path.join(DATA_DIR, 'database.json');
 
 // Ensure directory exists

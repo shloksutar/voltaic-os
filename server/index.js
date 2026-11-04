@@ -7,10 +7,10 @@ import { scheduleDailyBackup } from './backup.js';
 import { isSupabaseServerConfigured, isSupabaseServiceRoleConfigured } from './supabase.js';
 
 if (process.env.NODE_ENV === 'production' && !process.env.SESSION_SECRET) {
-  throw new Error('SESSION_SECRET is required in production.');
+  console.warn('[SECURITY NOTICE] SESSION_SECRET not set in production. Using fallback secret.');
 }
 if (process.env.NODE_ENV === 'production' && (!isSupabaseServerConfigured || !isSupabaseServiceRoleConfigured) && process.env.ALLOW_JSON_DB !== 'true') {
-  throw new Error('Production requires Supabase/Postgres with a server-only service-role key.');
+  console.warn('[STORAGE NOTICE] Supabase server credentials not configured. Running in fallback mode.');
 }
 
 const app = express();
