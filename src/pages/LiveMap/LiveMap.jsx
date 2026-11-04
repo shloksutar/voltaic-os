@@ -52,16 +52,17 @@ function calculateDistanceKm(lat1, lon1, lat2, lon2) {
   return Math.round(R * c * 10) / 10;
 }
 
-// 100% Free, reliable tile providers with NO API key required and NO watermarks
+// Production-grade, reliable tile providers with NO API key required and NO rate-limit blocking
 const MAP_TILES = {
-  osm: {
-    id: 'osm',
-    name: 'OpenStreetMap',
+  voyager: {
+    id: 'voyager',
+    name: 'CARTO Voyager',
     label: 'Street',
-    url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+    url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+    subdomains: 'abcd',
     attribution:
-      '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> contributors',
-    maxZoom: 19,
+      '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener noreferrer">CARTO</a>',
+    maxZoom: 20,
   },
   esriStreet: {
     id: 'esriStreet',
@@ -300,7 +301,7 @@ export default function LiveMap() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterAvailableOnly, setFilterAvailableOnly] = useState(false);
   const [filterFastOnly, setFilterFastOnly] = useState(false);
-  const [activeTileLayer, setActiveTileLayer] = useState('osm');
+  const [activeTileLayer, setActiveTileLayer] = useState('voyager');
 
   const [selectedCharger, setSelectedCharger] = useState(null);
   const [showDrawerList, setShowDrawerList] = useState(false);
@@ -595,12 +596,13 @@ export default function LiveMap() {
           zoomControl={false}
           style={{ height: '100%', width: '100%' }}
         >
-          {/* 100% Free, reliable tile provider (NO API key watermark, crystal clear visibility) */}
+          {/* High performance, reliable CARTO/Esri tiles (crystal clear visibility, no watermarks) */}
           <TileLayer
             key={activeTileLayer}
             url={MAP_TILES[activeTileLayer].url}
             attribution={MAP_TILES[activeTileLayer].attribution}
             maxZoom={MAP_TILES[activeTileLayer].maxZoom}
+            subdomains={MAP_TILES[activeTileLayer].subdomains || 'abc'}
           />
 
           {/* User GPS location dot */}

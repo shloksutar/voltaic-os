@@ -56,7 +56,7 @@ export function configureHttpSecurity(app) {
     crossOriginEmbedderPolicy: false,
     frameguard: { action: 'deny' },
     hsts: process.env.NODE_ENV === 'production' ? { maxAge: 31536000, includeSubDomains: true, preload: true } : false,
-    referrerPolicy: { policy: 'no-referrer' },
+    referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
   }));
   app.use(cors(corsOptions()));
   app.use(express.json({ limit: '100kb', strict: true }));
