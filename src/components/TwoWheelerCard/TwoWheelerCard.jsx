@@ -35,12 +35,13 @@ export default function TwoWheelerCard({ charger, onBook, selected, onSelect }) 
     listingStatus,
   } = charger;
 
+  const safeHostName = hostName || 'Community charger host';
   const isAvailableNow = availabilityStatus === 'available_now';
   const isPending = listingStatus === 'pending_review';
 
   const cleanPhone = (hostPhone || '').replace(/\D/g, '');
   const waLink = `https://wa.me/91${cleanPhone}?text=${encodeURIComponent(
-    `Hello ${hostName}, I found your 2-wheeler EV charger on VoltaicOS (${area}, ${city}). Is it available right now for charging?`
+    `Hello ${safeHostName}, I found your 2-wheeler EV charger on VoltaicOS (${area || city}, ${city}). Is it available right now for charging?`
   )}`;
 
   return (
@@ -84,11 +85,11 @@ export default function TwoWheelerCard({ charger, onBook, selected, onSelect }) 
       <div className="tw-host-strip">
         <div className="tw-host-info">
           <div className="tw-host-avatar">
-            {hostName.charAt(0).toUpperCase()}
+            {safeHostName.charAt(0).toUpperCase()}
           </div>
           <div>
             <div className="tw-host-name">
-              <span>Host: {hostName}</span>
+              <span>Host: {safeHostName}</span>
               <span className="tw-verified-badge" title={isPending ? 'Awaiting admin verification' : 'Government ID Verified Host'}>
                 <ShieldCheck size={12} />
                 <span>{isPending ? 'Review Pending' : 'Verified'}</span>

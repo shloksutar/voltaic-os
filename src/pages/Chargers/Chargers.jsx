@@ -186,7 +186,7 @@ export default function Chargers() {
         status,
         search,
       });
-      if (res?.stations) {
+      if (Array.isArray(res?.stations)) {
         setStations(res.stations);
         setFetchError('');
         if (isManual) {
@@ -210,8 +210,9 @@ export default function Chargers() {
     chargerListingsApi.getPublic().then((res) => {
       if (!active || !Array.isArray(res?.listings)) return;
       setTwoWheelerChargers((current) => {
-        const merged = [...res.listings];
-        current.forEach((localListing) => {
+        const remoteListings = res.listings.filter((listing) => listing && typeof listing === 'object');
+        const merged = [...remoteListings];
+        current.filter((listing) => listing && typeof listing === 'object').forEach((localListing) => {
           const alreadyPresent = merged.some(
             (remoteListing) =>
               remoteListing.requestId === localListing.requestId ||
@@ -232,11 +233,15 @@ export default function Chargers() {
 
   const filtered = useMemo(() => {
     return stations.filter((c) => {
+      if (!c || typeof c !== 'object') return false;
+      const name = String(c.name || '');
+      const stationCity = String(c.city || '');
+      const address = String(c.address || '');
       if (
         search &&
-        !c.name.toLowerCase().includes(search.toLowerCase()) &&
-        !c.city.toLowerCase().includes(search.toLowerCase()) &&
-        !(c.address && c.address.toLowerCase().includes(search.toLowerCase()))
+        !name.toLowerCase().includes(search.toLowerCase()) &&
+        !stationCity.toLowerCase().includes(search.toLowerCase()) &&
+        !address.toLowerCase().includes(search.toLowerCase())
       )
         return false;
       if (city !== 'All Cities' && c.city !== city) return false;
@@ -249,7 +254,9 @@ export default function Chargers() {
   // Filter 2-Wheeler Community Rentals
   const filtered2W = useMemo(() => {
     return twoWheelerChargers.filter((c) => {
-      if (city !== 'All Cities' && c.city.toLowerCase() !== city.toLowerCase()) return false;
+      if (!c || typeof c !== 'object') return false;
+      const chargerCity = String(c.city || '');
+      if (city !== 'All Cities' && chargerCity.toLowerCase() !== city.toLowerCase()) return false;
       if (twoWheelerAvailOnly && c.availabilityStatus !== 'available_now') return false;
       if (selectedScooter !== 'All Scooters') {
         const q = selectedScooter.toLowerCase();
@@ -264,9 +271,9 @@ export default function Chargers() {
           c.hostName?.toLowerCase().includes(q) ||
           c.area?.toLowerCase().includes(q) ||
           c.city?.toLowerCase().includes(q) ||
-          (c.address && c.address.toLowerCase().includes(q)) ||
-          (c.landmark && c.landmark.toLowerCase().includes(q)) ||
-          (c.socketType && c.socketType.toLowerCase().includes(q)) ||
+          String(c.address || '').toLowerCase().includes(q) ||
+          String(c.landmark || '').toLowerCase().includes(q) ||
+          String(c.socketType || '').toLowerCase().includes(q) ||
           c.supportedVehicles?.some((v) => v.toLowerCase().includes(q));
         if (!matchesSearch) return false;
       }
