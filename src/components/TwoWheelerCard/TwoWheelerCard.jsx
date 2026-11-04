@@ -36,6 +36,8 @@ export default function TwoWheelerCard({ charger, onBook, selected, onSelect }) 
   } = charger;
 
   const safeHostName = hostName || 'Community charger host';
+  const safeSupportedVehicles = Array.isArray(supportedVehicles) ? supportedVehicles : [];
+  const safeAmenities = Array.isArray(amenities) ? amenities : [];
   const isAvailableNow = availabilityStatus === 'available_now';
   const isPending = listingStatus === 'pending_review';
 
@@ -140,26 +142,26 @@ export default function TwoWheelerCard({ charger, onBook, selected, onSelect }) 
       </div>
 
       {/* Supported 2-Wheelers */}
-      {supportedVehicles.length > 0 && (
+      {safeSupportedVehicles.length > 0 && (
         <div className="tw-vehicles-wrap">
           <div className="tw-vehicles-label">Compatible Scooters:</div>
           <div className="tw-vehicles-list">
-            {supportedVehicles.slice(0, 4).map((v) => (
+            {safeSupportedVehicles.slice(0, 4).map((v) => (
               <span key={v} className="tw-v-pill">
-                <Check size={10} /> {v.replace(' / ', '/')}
+                <Check size={10} /> {String(v).replace(' / ', '/')}
               </span>
             ))}
-            {supportedVehicles.length > 4 && (
-              <span className="tw-v-pill tw-v-more">+{supportedVehicles.length - 4} more</span>
+            {safeSupportedVehicles.length > 4 && (
+              <span className="tw-v-pill tw-v-more">+{safeSupportedVehicles.length - 4} more</span>
             )}
           </div>
         </div>
       )}
 
       {/* Amenities & Notes */}
-      {amenities.length > 0 && (
+      {safeAmenities.length > 0 && (
         <div className="tw-amenities-row">
-          {amenities.map((a) => (
+          {safeAmenities.map((a) => (
             <span key={a} className="tw-amenity-chip">✓ {a}</span>
           ))}
         </div>

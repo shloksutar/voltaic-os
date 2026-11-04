@@ -260,8 +260,9 @@ export default function Chargers() {
       if (twoWheelerAvailOnly && c.availabilityStatus !== 'available_now') return false;
       if (selectedScooter !== 'All Scooters') {
         const q = selectedScooter.toLowerCase();
-        const matchesVehicle = c.supportedVehicles?.some((v) => v.toLowerCase().includes(q));
-        const matchesSocket = c.socketType?.toLowerCase().includes(q);
+        const supportedVehicles = Array.isArray(c.supportedVehicles) ? c.supportedVehicles : [];
+        const matchesVehicle = supportedVehicles.some((v) => String(v).toLowerCase().includes(q));
+        const matchesSocket = String(c.socketType || '').toLowerCase().includes(q);
         if (!matchesVehicle && !matchesSocket) return false;
       }
       if (search) {
@@ -274,7 +275,7 @@ export default function Chargers() {
           String(c.address || '').toLowerCase().includes(q) ||
           String(c.landmark || '').toLowerCase().includes(q) ||
           String(c.socketType || '').toLowerCase().includes(q) ||
-          c.supportedVehicles?.some((v) => v.toLowerCase().includes(q));
+          (Array.isArray(c.supportedVehicles) ? c.supportedVehicles : []).some((v) => String(v).toLowerCase().includes(q));
         if (!matchesSearch) return false;
       }
       return true;
