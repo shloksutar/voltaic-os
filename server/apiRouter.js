@@ -1107,14 +1107,47 @@ function mapHostChargerRow(row) {
   };
 }
 
+const CITY_COORDINATES = {
+  Mumbai: [19.076, 72.8777],
+  Delhi: [28.6139, 77.209],
+  Bengaluru: [12.9716, 77.5946],
+  Hyderabad: [17.385, 78.4867],
+  Pune: [18.5204, 73.8567],
+  Chennai: [13.0827, 80.2707],
+};
+
+function getCityCoordinates(cityName, seed = '') {
+  const match = Object.keys(CITY_COORDINATES).find(
+    (c) => c.toLowerCase() === String(cityName || '').trim().toLowerCase()
+  );
+  const base = match ? CITY_COORDINATES[match] : [19.076, 72.8777];
+  let hash = 0;
+  const str = String(seed || '');
+  for (let i = 0; i < str.length; i++) {
+    hash = (hash << 5) - hash + str.charCodeAt(i);
+    hash |= 0;
+  }
+  const offsetLat = ((Math.abs(hash) % 100) / 100 - 0.5) * 0.05;
+  const offsetLng = ((Math.abs(hash >> 3) % 100) / 100 - 0.5) * 0.05;
+  return {
+    lat: Number((base[0] + offsetLat).toFixed(4)),
+    lng: Number((base[1] + offsetLng).toFixed(4)),
+  };
+}
+
 function mapPublicHostChargerRow(row) {
   const isApproved = row.status !== 'rejected';
   const city = row.city || 'India';
   const rate = Number(row.price_per_unit);
+  const coords = (Number.isFinite(Number(row.lat)) && Number.isFinite(Number(row.lng)))
+    ? { lat: Number(row.lat), lng: Number(row.lng) }
+    : getCityCoordinates(city, String(row.id || row.full_name || ''));
   return {
     id: `host_public_${row.id}`,
     requestId: row.id,
     isCommunity2W: true,
+    lat: coords.lat,
+    lng: coords.lng,
     listingStatus: isApproved ? 'approved' : 'denied',
     hostName: row.full_name || 'Community charger host',
     hostPhone: isApproved ? row.phone : '',
@@ -1156,11 +1189,31 @@ apiRouter.get('/charger-listings/public', async (req, res) => {
         const remoteListings = data.map(mapPublicHostChargerRow);
         const localOnly = listings
           .filter((listing) => !remoteIds.has(listing.id))
-          .map((listing) => ({ ...listing, listingStatus: listing.listingStatus || 'pending_review' }));
+          .map((listing) => {
+            const coords = (Number.isFinite(Number(listing.lat)) && Number.isFinite(Number(listing.lng)))
+              ? { lat: Number(listing.lat), lng: Number(listing.lng) }
+              : getCityCoordinates(listing.city, String(listing.id || ''));
+            return {
+              ...listing,
+              lat: coords.lat,
+              lng: coords.lng,
+              listingStatus: listing.listingStatus || 'pending_review',
+            };
+          });
         listings = [...remoteListings, ...localOnly];
       }
     } else {
-      listings = listings.map((listing) => ({ ...listing, listingStatus: listing.listingStatus || 'pending_review' }));
+      listings = listings.map((listing) => {
+        const coords = (Number.isFinite(Number(listing.lat)) && Number.isFinite(Number(listing.lng)))
+          ? { lat: Number(listing.lat), lng: Number(listing.lng) }
+          : getCityCoordinates(listing.city, String(listing.id || ''));
+        return {
+          ...listing,
+          lat: coords.lat,
+          lng: coords.lng,
+          listingStatus: listing.listingStatus || 'pending_review',
+        };
+      });
     }
     return res.json({ listings, count: listings.length });
   } catch (err) {
@@ -1196,11 +1249,17 @@ apiRouter.post('/charger-listings', writeLimiter, requireAuth, async (req, res) 
       });
     }
 
+    const coords = (Number.isFinite(Number(body.lat)) && Number.isFinite(Number(body.lng)))
+      ? { lat: Number(body.lat), lng: Number(body.lng) }
+      : getCityCoordinates(body.city, id);
+
     const newListing = {
       id,
       status: 'approved',
       submittedAt: new Date().toISOString(),
       userId: listingUserId, // from verified token — never trust the client-supplied id
+      lat: coords.lat,
+      lng: coords.lng,
       fullName: str(body.fullName, 60),
       email: cleanEmail,
       phone: cleanPhone,

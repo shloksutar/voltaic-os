@@ -128,17 +128,28 @@ function ChargersMapController({ selectedStation, stations }) {
   }, [map]);
 
   useEffect(() => {
-    if (selectedStation) {
-      map.flyTo([selectedStation.lat, selectedStation.lng], 14, { duration: 1.2 });
+    if (
+      selectedStation &&
+      Number.isFinite(Number(selectedStation.lat)) &&
+      Number.isFinite(Number(selectedStation.lng))
+    ) {
+      try {
+        map.flyTo([Number(selectedStation.lat), Number(selectedStation.lng)], 14, { duration: 1.2 });
+      } catch {}
     }
   }, [selectedStation, map]);
 
   useEffect(() => {
     if (stations && stations.length > 0) {
-      if (stations.length === 1) {
-        map.flyTo([stations[0].lat, stations[0].lng], 14, { duration: 1.2 });
-      } else {
-        const bounds = stations.map((s) => [s.lat, s.lng]);
+      const valid = stations.filter(
+        (s) => Number.isFinite(Number(s?.lat)) && Number.isFinite(Number(s?.lng))
+      );
+      if (valid.length === 1) {
+        try {
+          map.flyTo([Number(valid[0].lat), Number(valid[0].lng)], 14, { duration: 1.2 });
+        } catch {}
+      } else if (valid.length > 1) {
+        const bounds = valid.map((s) => [Number(s.lat), Number(s.lng)]);
         try {
           map.fitBounds(bounds, { padding: [50, 50], maxZoom: 13, duration: 1.2 });
         } catch {
@@ -861,7 +872,9 @@ export default function Chargers() {
                   subdomains={defaultMapTile.subdomains}
                 />
 
-                {mapStations.map((c) => {
+                {mapStations
+                  .filter((c) => Number.isFinite(Number(c?.lat)) && Number.isFinite(Number(c?.lng)))
+                  .map((c) => {
                   const isSelected = selected?.id === c.id;
 
                   // 1. 2-Wheeler Community Charger Pin
@@ -995,7 +1008,9 @@ export default function Chargers() {
                 subdomains={defaultMapTile.subdomains}
               />
 
-              {mapStations.map((c) => {
+              {mapStations
+                .filter((c) => Number.isFinite(Number(c?.lat)) && Number.isFinite(Number(c?.lng)))
+                .map((c) => {
                 const isSelected = selected?.id === c.id;
 
                 if (c.isCommunity2W) {

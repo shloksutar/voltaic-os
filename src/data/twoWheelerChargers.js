@@ -1,4 +1,4 @@
-﻿// 2-Wheeler Community EV Charger Network Data & Storage Helpers
+// 2-Wheeler Community EV Charger Network Data & Storage Helpers
 // Tailored specifically for electric two-wheelers (Ather, Ola, TVS iQube, Chetak, Vida, etc.)
 
 export const DEFAULT_2W_CHARGERS = [
@@ -226,6 +226,34 @@ export const DEFAULT_2W_CHARGERS = [
 const STORAGE_KEY = 'voltaic_2w_community_chargers_v2';
 const BOOKINGS_KEY = 'voltaic_2w_rental_bookings';
 
+export const CITY_COORDINATES = {
+  Mumbai: [19.076, 72.8777],
+  Delhi: [28.6139, 77.209],
+  Bengaluru: [12.9716, 77.5946],
+  Hyderabad: [17.385, 78.4867],
+  Pune: [18.5204, 73.8567],
+  Chennai: [13.0827, 80.2707],
+};
+
+export function getCityCoordinates(cityName, seed = '') {
+  const match = Object.keys(CITY_COORDINATES).find(
+    (c) => c.toLowerCase() === String(cityName || '').trim().toLowerCase()
+  );
+  const base = match ? CITY_COORDINATES[match] : [19.076, 72.8777];
+  let hash = 0;
+  const str = String(seed || '');
+  for (let i = 0; i < str.length; i++) {
+    hash = (hash << 5) - hash + str.charCodeAt(i);
+    hash |= 0;
+  }
+  const offsetLat = ((Math.abs(hash) % 100) / 100 - 0.5) * 0.05;
+  const offsetLng = ((Math.abs(hash >> 3) % 100) / 100 - 0.5) * 0.05;
+  return {
+    lat: Number((base[0] + offsetLat).toFixed(4)),
+    lng: Number((base[1] + offsetLng).toFixed(4)),
+  };
+}
+
 export function getTwoWheelerChargers() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -234,7 +262,14 @@ export function getTwoWheelerChargers() {
       return [];
     }
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
+    if (!Array.isArray(parsed)) return [];
+    return parsed.map((item) => {
+      if (!Number.isFinite(Number(item.lat)) || !Number.isFinite(Number(item.lng))) {
+        const coords = getCityCoordinates(item.city || 'Mumbai', String(item.id || item.hostName || ''));
+        return { ...item, lat: coords.lat, lng: coords.lng };
+      }
+      return item;
+    });
   } catch {
     return [];
   }
@@ -243,6 +278,11 @@ export function getTwoWheelerChargers() {
 export function saveTwoWheelerCharger(chargerData) {
   try {
     const current = getTwoWheelerChargers();
+    const city = chargerData.city || 'Mumbai';
+    const coords = (Number.isFinite(Number(chargerData.lat)) && Number.isFinite(Number(chargerData.lng)))
+      ? { lat: Number(chargerData.lat), lng: Number(chargerData.lng) }
+      : getCityCoordinates(city, String(Date.now()));
+
     const newCharger = {
       id: `2w_host_${Date.now()}`,
       isCommunity2W: true,
@@ -252,6 +292,8 @@ export function saveTwoWheelerCharger(chargerData) {
       totalSessionsCompleted: 0,
       createdAt: new Date().toISOString(),
       ...chargerData,
+      lat: coords.lat,
+      lng: coords.lng,
     };
     const updated = [newCharger, ...current];
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));

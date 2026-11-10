@@ -254,30 +254,45 @@ function MapController({ selectedCharger, userLocation, fitBoundsTrigger }) {
   }, [map]);
 
   useEffect(() => {
-    if (selectedCharger) {
-      map.flyTo([selectedCharger.lat, selectedCharger.lng], 15, {
-        duration: 1.2,
-        easeLinearity: 0.25,
-      });
+    if (
+      selectedCharger &&
+      Number.isFinite(Number(selectedCharger.lat)) &&
+      Number.isFinite(Number(selectedCharger.lng))
+    ) {
+      try {
+        map.flyTo([Number(selectedCharger.lat), Number(selectedCharger.lng)], 15, {
+          duration: 1.2,
+          easeLinearity: 0.25,
+        });
+      } catch {}
     }
   }, [selectedCharger, map]);
 
   useEffect(() => {
-    if (userLocation) {
-      map.flyTo([userLocation.lat, userLocation.lng], 14, {
-        duration: 1.4,
-        easeLinearity: 0.25,
-      });
+    if (
+      userLocation &&
+      Number.isFinite(Number(userLocation.lat)) &&
+      Number.isFinite(Number(userLocation.lng))
+    ) {
+      try {
+        map.flyTo([Number(userLocation.lat), Number(userLocation.lng)], 14, {
+          duration: 1.4,
+          easeLinearity: 0.25,
+        });
+      } catch {}
     }
   }, [userLocation, map]);
 
   useEffect(() => {
     if (fitBoundsTrigger && fitBoundsTrigger.length > 0) {
+      const validBounds = fitBoundsTrigger.filter(
+        (b) => Array.isArray(b) && Number.isFinite(Number(b[0])) && Number.isFinite(Number(b[1]))
+      );
       try {
-        if (fitBoundsTrigger.length === 1) {
-          map.flyTo(fitBoundsTrigger[0], 14, { duration: 1.2 });
-        } else {
-          map.fitBounds(fitBoundsTrigger, {
+        if (validBounds.length === 1) {
+          map.flyTo(validBounds[0], 14, { duration: 1.2 });
+        } else if (validBounds.length > 1) {
+          map.fitBounds(validBounds, {
             padding: [60, 60],
             maxZoom: 14,
             duration: 1.2,
@@ -603,8 +618,8 @@ export default function LiveMap() {
           />
 
           {/* User GPS location dot */}
-          {userLocation && (
-            <Marker position={[userLocation.lat, userLocation.lng]} icon={makeUserDotIcon()}>
+          {userLocation && Number.isFinite(Number(userLocation.lat)) && Number.isFinite(Number(userLocation.lng)) && (
+            <Marker position={[Number(userLocation.lat), Number(userLocation.lng)]} icon={makeUserDotIcon()}>
               <Popup>
                 <div style={{ fontSize: '12px', fontWeight: 600 }}>📍 Your Location</div>
               </Popup>
@@ -612,12 +627,14 @@ export default function LiveMap() {
           )}
 
           {/* Charging Station Pins */}
-          {filtered.map((c) => {
-            const isSelected = selectedCharger?.id === c.id;
-            return (
-              <Marker
-                key={c.id}
-                position={[c.lat, c.lng]}
+          {filtered
+            .filter((c) => Number.isFinite(Number(c?.lat)) && Number.isFinite(Number(c?.lng)))
+            .map((c) => {
+              const isSelected = selectedCharger?.id === c.id;
+              return (
+                <Marker
+                  key={c.id}
+                  position={[Number(c.lat), Number(c.lng)]}
                 icon={makeMarkerIcon(c, isSelected)}
                 eventHandlers={{
                   click: () => {
