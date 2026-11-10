@@ -119,61 +119,156 @@ export function isValidDescription(value) {
   return true;
 }
 
+// ─── Official & Professional Email Domain Enforcer ─────────────────────────
+export const OFFICIAL_EMAIL_DOMAINS = new Set([
+  'gmail.com',
+  'googlemail.com',
+  'yahoo.com',
+  'yahoo.co.in',
+  'yahoo.co.uk',
+  'yahoo.ca',
+  'ymail.com',
+  'myyahoo.com',
+  'hotmail.com',
+  'hotmail.co.uk',
+  'hotmail.fr',
+  'outlook.com',
+  'outlook.in',
+  'live.com',
+  'live.in',
+  'msn.com',
+  'icloud.com',
+  'me.com',
+  'mac.com',
+  'zoho.com',
+  'zohomail.com',
+  'zohomail.in',
+  'rediffmail.com',
+  'proton.me',
+  'protonmail.com',
+  'aol.com',
+  'gmx.com',
+  'gmx.net',
+  'fastmail.com',
+  'fastmail.fm',
+  'mail.com',
+]);
+
+export const DISPOSABLE_OR_BLOCKED_DOMAINS = new Set([
+  'mailinator.com',
+  'tempmail.com',
+  '10minutemail.com',
+  'guerrillamail.com',
+  'guerrillamail.net',
+  'guerrillamail.biz',
+  'guerrillamail.org',
+  'sharklasers.com',
+  'yopmail.com',
+  'yopmail.fr',
+  'yopmail.net',
+  'trashmail.com',
+  'trashmail.net',
+  'dispostable.com',
+  'dropmail.me',
+  'inboxkitten.com',
+  'getnada.com',
+  'mohmal.com',
+  'burnermail.io',
+  'temp-mail.org',
+  'generator.email',
+  'fakemailgenerator.com',
+  'throwawaymail.com',
+  'getairmail.com',
+  'fake.com',
+  'fake.net',
+  'fake.org',
+  'test.com',
+  'test.net',
+  'test.org',
+  'example.com',
+  'example.org',
+  'example.net',
+  'dummy.com',
+  'dummy.net',
+  'invalid.com',
+  'sample.com',
+  'asdf.com',
+  'asdf.net',
+  'qwerty.com',
+  'qwerty.net',
+  'ghjk.com',
+  'ghjk.net',
+]);
+
 /**
- * Email: pragmatic format + gibberish/fake-domain check.
- * Accepts all real providers — gmail.com, yahoo.com, ymail.com, outlook.com,
- * hotmail.com, icloud.com, rediffmail.com, company domains, etc.
+ * Checks if an email belongs to an official email service (@gmail.com, @yahoo.com,
+ * @hotmail.com, @ymail.com, @outlook.com, @icloud.com, @zohomail.com, etc.)
+ * or a valid corporate / institutional domain (company, university, gov, etc.).
  *
- * Also rejects:
- *   • keyboard-mash local parts (sdfghjkl@…, qwerty@…)
- *   • local parts with no vowels and no digits (pure consonant strings)
- *   • keyboard-mash domain labels (ghjk.com, asdf.net)
- *   • single-character domain labels (x.com is fine; x is the label before TLD
- *     and would only have 1 char — blocked)
+ * Strictly blocks:
+ *   • Disposable / burner domains (mailinator, 10minutemail, tempmail, yopmail, etc.)
+ *   • Obvious fake / test / keyboard-mash domains (ghjk.com, test.com, fake.net)
+ *   • Keyboard-mash local parts (sdfghjkl@…, asdf@…, qwerty@…)
+ *   • Local parts without vowels (bcdfgh@…)
  */
-export function isValidEmail(value) {
+export function isOfficialEmail(value) {
+  if (!value || typeof value !== 'string') return false;
   const v = value.trim().toLowerCase();
   if (v.length < 5 || v.length > 80) return false;
   if (!/^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/.test(v)) return false;
 
   const [local, domain] = v.split('@');
+  if (!local || !domain) return false;
 
   // ── Local part sanity ──────────────────────────────────────────────────────
   if (local.startsWith('.') || local.endsWith('.') || local.includes('..')) return false;
 
-  // Strip dots/underscores/dashes/digits to get the alphabetic core of the local part
   const localAlpha = local.replace(/[^a-z]/g, '');
   if (localAlpha.length > 3) {
-    // Reject if it has no vowels (pure consonant mash like "sdfghjkl")
-    if (!/[aeiou]/.test(localAlpha)) return false;
-    // Reject keyboard-mash sequences
+    if (!/[aeiou]/.test(localAlpha)) return false; // purely consonant mash
     if (KEYBOARD_MASKS.test(localAlpha)) return false;
-    // Reject 5+ consecutive consonants
     if (FIVE_CONSONANTS.test(localAlpha)) return false;
-    // Reject triple-repeat characters (aaaa, bbbb)
     if (TRIPLE_REPEAT.test(localAlpha)) return false;
   }
 
   // ── Domain sanity ─────────────────────────────────────────────────────────
   if (domain.startsWith('-') || domain.includes('..') || domain.includes('-.') || domain.includes('.-')) return false;
 
-  const tld = domain.slice(domain.lastIndexOf('.') + 1);
+  // Explicitly reject disposable/burner/fake test domains
+  if (DISPOSABLE_OR_BLOCKED_DOMAINS.has(domain)) return false;
+
+  // Recognized official consumer email domain — immediately valid
+  if (OFFICIAL_EMAIL_DOMAINS.has(domain)) return true;
+
+  // ── Corporate / Institutional domain validation ────────────────────────────
+  const lastDot = domain.lastIndexOf('.');
+  const tld = domain.slice(lastDot + 1);
   if (!/^[a-z]{2,24}$/.test(tld)) return false;
 
-  // Check each domain label (the parts between dots) for gibberish
-  const domainWithoutTld = domain.slice(0, domain.lastIndexOf('.'));
+  const domainWithoutTld = domain.slice(0, lastDot);
   const domainLabels = domainWithoutTld.split('.');
   for (const label of domainLabels) {
     if (label.length < 2) return false; // e.g. "a.com" — label too short
     const labelAlpha = label.replace(/[^a-z]/g, '');
     if (labelAlpha.length > 2) {
-      if (!/[aeiou]/.test(labelAlpha)) return false;   // ghjk, bcdf — no vowels
+      if (!/[aeiou]/.test(labelAlpha)) return false; // no vowels (e.g. ghjk)
       if (KEYBOARD_MASKS.test(labelAlpha)) return false;
       if (FIVE_CONSONANTS.test(labelAlpha)) return false;
+    }
+    // Block labels matching test/fake/mock/temp
+    if (/^(test|fake|dummy|mock|temp|burner|trash|spam|invalid|example|ghjk|asdf|qwerty)$/i.test(label)) {
+      return false;
     }
   }
 
   return true;
+}
+
+/**
+ * Standard email validator: requires an official or professional email domain.
+ */
+export function isValidEmail(value) {
+  return isOfficialEmail(value);
 }
 
 /** Indian mobile numbers: 10 digits, must start with 6, 7, 8 or 9. */

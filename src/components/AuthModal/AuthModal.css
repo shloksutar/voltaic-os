@@ -241,6 +241,13 @@
   color: var(--color-text-2, #374151);
 }
 
+.auth-field-hint {
+  font-size: 11px;
+  color: var(--color-text-3, #6b7280);
+  margin-top: 4px;
+  line-height: 1.4;
+}
+
 .auth-input-wrap {
   display: flex;
   align-items: center;

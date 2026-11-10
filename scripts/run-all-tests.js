@@ -52,30 +52,47 @@ async function runTests() {
   // ─────────────────────────────────────────────────────────────
   console.log('\x1b[36m[1/4] Testing Form Validation & Sanitization Engine...\x1b[0m');
 
-  const validEmails = [
+  const officialConsumerEmails = [
     'sutarshlok18@gmail.com',
+    'priya.sharma@yahoo.com',
+    'vikram.nair@hotmail.com',
+    'rahul.verma@ymail.com',
+    'ananya.patel@outlook.com',
+    'kavita.deshmukh@icloud.com',
+    'arjun.mehta@zohomail.com',
+    'deepak@rediffmail.com',
+  ];
+  for (const email of officialConsumerEmails) {
+    assert(isValidEmail(email), `Official consumer email accepted: ${email}`);
+  }
+
+  const officialCompanyEmails = [
     'founder@voltaicos.com',
     'investor.relations@sequoia.in',
-    'arjun.mehta@yahoo.com',
-    'vikram@rediffmail.com',
-    'fleet_ops@ev-network.org',
+    'fleet_ops@chargezone.co.in',
+    'director@iitb.ac.in',
+    'officer@nic.in',
   ];
-  for (const email of validEmails) {
-    assert(isValidEmail(email), `Valid email accepted: ${email}`);
+  for (const email of officialCompanyEmails) {
+    assert(isValidEmail(email), `Official company/institutional email accepted: ${email}`);
   }
 
   const blockedEmails = [
-    'sdfghjkl@ghjk.com', // Gibberish local & domain mash
-    'asdf@test.com',      // Keyboard mash
-    'qwerty@fake.net',    // Keyboard mash
-    'bcdfgh@test.com',    // No vowels in local part
-    'user@ghjk.com',      // No vowels in domain
-    'plainaddress',       // No @
-    '@missinglocal.com',  // Missing local
-    'missingtld@domain',  // Missing TLD
+    'sdfghjkl@ghjk.com',         // Gibberish local & domain mash
+    'asdf@test.com',              // Keyboard mash & test domain
+    'qwerty@fake.net',            // Keyboard mash & fake domain
+    'bcdfgh@test.com',            // No vowels in local part
+    'user@ghjk.com',              // No vowels in domain
+    'user@mailinator.com',        // Disposable burner domain
+    'temp.user@tempmail.com',     // Disposable email provider
+    'rider@10minutemail.com',     // Temporary disposable inbox
+    'fake.account@yopmail.com',   // Disposable domain
+    'plainaddress',               // Missing @
+    '@missinglocal.com',          // Missing local
+    'missingtld@domain',          // Missing TLD
   ];
   for (const email of blockedEmails) {
-    assert(!isValidEmail(email), `Gibberish/invalid email rejected: ${email}`);
+    assert(!isValidEmail(email), `Gibberish/disposable/fake email rejected: ${email}`);
   }
 
   // Name validation
@@ -253,7 +270,30 @@ async function runTests() {
     });
     assert(unauthCarListing.status === 401, 'POST /api/charger-listings enforces authentication (401 Unauthorized)');
 
-    // Test Auth Register
+    // Test Auth Register Rejects Non-Official / Fake Emails
+    const fakeReg1 = await apiPost('/api/auth/register', {
+      name: 'Fake User',
+      email: 'sdfghjkl@ghjk.com',
+      password: 'StrongPassword123!',
+      phone: '9820154321',
+    });
+    assert(
+      fakeReg1.status === 400 && fakeReg1.data.error.includes('official or professional email'),
+      'POST /api/auth/register rejects keyboard-mash/fake email (400 Bad Request)'
+    );
+
+    const fakeReg2 = await apiPost('/api/auth/register', {
+      name: 'Disposable User',
+      email: 'user@mailinator.com',
+      password: 'StrongPassword123!',
+      phone: '9820154321',
+    });
+    assert(
+      fakeReg2.status === 400 && fakeReg2.data.error.includes('official or professional email'),
+      'POST /api/auth/register rejects disposable/burner email (400 Bad Request)'
+    );
+
+    // Test Auth Register Accepts Official Email
     const uniqueEmail = `test.investor.${Date.now()}@voltaicos.in`;
     const regRes = await apiPost('/api/auth/register', {
       name: 'Investor Demo User',

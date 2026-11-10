@@ -4,6 +4,7 @@ import { db } from './db.js';
 import { supabaseServer, isSupabaseServerConfigured } from './supabase.js';
 import { loginLimiter, writeLimiter } from './rateLimit.js';
 import { createSession, deleteSession, hashPassword, verifyPassword, requireAuth, requireAdmin, getUserByToken, isAdminUser } from './auth.js';
+import { isOfficialEmail } from '../src/utils/formValidation.js';
 
 // ─── Sanitization & validation helpers ───────────────────────────────────────
 const cleanString = (value, max = 200) => String(value ?? '').trim().slice(0, max);
@@ -145,8 +146,10 @@ apiRouter.post('/auth/register', async (req, res) => {
     const vehicleModel = cleanString(req.body?.vehicleModel, 60);
     const licensePlate = cleanString(req.body?.licensePlate, 20).toUpperCase();
 
-    if (!email || !EMAIL_RE.test(email)) {
-      return res.status(400).json({ error: 'A valid email address is required' });
+    if (!email || !isOfficialEmail(email)) {
+      return res.status(400).json({
+        error: 'Please provide an official or professional email address (e.g. @gmail.com, @yahoo.com, @hotmail.com, @ymail.com, @outlook.com, @icloud.com, @zohomail.com, or your corporate/organization domain).'
+      });
     }
     if (password.length < 8 || password.length > 128) {
       return res.status(400).json({ error: 'Password must be between 8 and 128 characters' });
@@ -226,7 +229,7 @@ apiRouter.post('/auth/login', loginLimiter, async (req, res) => {
     const email = cleanEmail(req.body?.email);
     const password = String(req.body?.password ?? '');
     const requestedRole = req.body?.role === 'admin' ? 'admin' : 'user';
-    if (!email || !EMAIL_RE.test(email)) return res.status(400).json({ error: 'A valid email address is required' });
+    if (!email || !isOfficialEmail(email)) return res.status(400).json({ error: 'Please enter a valid official or professional email address.' });
     if (!password) return res.status(400).json({ error: 'Password is required' });
 
     if (isSupabaseServerConfigured) {
@@ -1234,8 +1237,8 @@ apiRouter.post('/charger-listings', writeLimiter, requireAuth, async (req, res) 
     if (cleanPhone && !/^[6-9]\d{9}$/.test(cleanPhone)) {
       return res.status(400).json({ error: 'Contact number must be a valid 10-digit Indian mobile number.' });
     }
-    if (cleanEmail && !/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(cleanEmail)) {
-      return res.status(400).json({ error: 'Please provide a valid email address.' });
+    if (cleanEmail && !isOfficialEmail(cleanEmail)) {
+      return res.status(400).json({ error: 'Please provide an official or professional email address (e.g. @gmail.com, @yahoo.com, @hotmail.com, @ymail.com, @outlook.com, @icloud.com, @zohomail.com, or your corporate/organization domain).' });
     }
 
     // Strict 2-Wheeler validation: reject car models, car chargers, and 4-wheeler references

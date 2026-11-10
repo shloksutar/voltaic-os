@@ -3,6 +3,7 @@ import { X, Mail, Phone, Lock, User, AtSign, AlertCircle, CheckCircle2, ShieldCh
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { supabase, isSupabaseConfigured } from '../../lib/supabaseClient';
+import { isOfficialEmail } from '../../utils/formValidation';
 import './AuthModal.css';
 
 export default function AuthModal() {
@@ -73,6 +74,20 @@ export default function AuthModal() {
     setLoading(true);
 
     const cleanEmail = email.trim().toLowerCase();
+
+    if (!cleanEmail) {
+      setError('Please enter your email address');
+      setLoading(false);
+      return;
+    }
+
+    if (!isOfficialEmail(cleanEmail)) {
+      setError(
+        'Please use an official or professional email address (e.g. @gmail.com, @yahoo.com, @hotmail.com, @ymail.com, @outlook.com, @icloud.com, @zohomail.com, or your corporate/organization domain).'
+      );
+      setLoading(false);
+      return;
+    }
 
     // --- Admin sign-in: server-side password verification + whitelist ---
     if (loginRole === 'admin') {
@@ -432,12 +447,17 @@ export default function AuthModal() {
                 <Mail size={15} />
                 <input
                   type="email"
-                  placeholder="name@example.com"
+                  placeholder={isRegister ? "name@gmail.com, name@company.com" : "name@gmail.com"}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
                 />
               </div>
+              {isRegister && (
+                <p className="auth-field-hint">
+                  Official emails accepted: Gmail, Yahoo, Hotmail, Ymail, Outlook, iCloud, Zoho, or company / institution work domains.
+                </p>
+              )}
             </div>
 
             <div className="auth-field">
